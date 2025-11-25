@@ -20,21 +20,33 @@ export default function Layout({ children, currentPageName }) {
 
   const loadUser = async () => {
     try {
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
+      // Verificar sessão do bibliotecário
+      const bibData = sessionStorage.getItem("bib_data");
+      if (bibData) {
+        const bib = JSON.parse(bibData);
+        setUser({ full_name: bib.nome, email: bib.login });
+        return;
+      }
       
-      // Buscar dados do irmão
-      const irmaos = await base44.entities.Irmao.filter({ email: currentUser.email });
-      if (irmaos.length > 0) {
-        setIrmao(irmaos[0]);
+      // Verificar sessão do irmão
+      const irmaoData = sessionStorage.getItem("irmao_data");
+      if (irmaoData) {
+        const ir = JSON.parse(irmaoData);
+        setUser({ full_name: ir.nome_completo, email: ir.email });
+        setIrmao(ir);
+        return;
       }
     } catch (e) {
-      console.log("Usuário não autenticado");
+      console.log("Erro ao carregar usuário");
     }
   };
 
   const handleLogout = () => {
-    base44.auth.logout();
+    sessionStorage.removeItem("bib_auth");
+    sessionStorage.removeItem("bib_data");
+    sessionStorage.removeItem("irmao_auth");
+    sessionStorage.removeItem("irmao_data");
+    window.location.href = createPageUrl("Home");
   };
 
   // Páginas sem layout (portal de seleção e logins)
