@@ -35,33 +35,27 @@ export default function IrmaoEmprestimos() {
 
       const irmaoSessao = JSON.parse(irmaoData);
       setUser({ email: irmaoSessao.email });
-
-      // Buscar irmão pelo email
-      const irmaos = await base44.entities.Irmao.filter({ email: irmaoSessao.email });
+      setIrmao(irmaoSessao);
+        
+      // Buscar empréstimos do irmão pelo ID
+      const emps = await base44.entities.Emprestimo.filter(
+        { irmao_id: irmaoSessao.id },
+        "-data_retirada",
+        100
+      );
       
-      if (irmaos.length > 0) {
-        setIrmao(irmaos[0]);
-        
-        // Buscar empréstimos do irmão
-        const emps = await base44.entities.Emprestimo.filter(
-          { irmao_email: currentUser.email },
-          "-data_retirada",
-          100
-        );
-        
-        // Verificar atrasos
-        const hoje = new Date();
-        const updated = emps.map(emp => {
-          if (emp.status === "Ativo" && emp.data_prevista_devolucao) {
-            if (isAfter(hoje, parseISO(emp.data_prevista_devolucao))) {
-              return { ...emp, status: "Atrasado" };
-            }
+      // Verificar atrasos
+      const hoje = new Date();
+      const updated = emps.map(emp => {
+        if (emp.status === "Ativo" && emp.data_prevista_devolucao) {
+          if (isAfter(hoje, parseISO(emp.data_prevista_devolucao))) {
+            return { ...emp, status: "Atrasado" };
           }
-          return emp;
-        });
-        
-        setEmprestimos(updated);
-      }
+        }
+        return emp;
+      });
+      
+      setEmprestimos(updated);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     }
