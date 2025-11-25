@@ -112,33 +112,28 @@ export default function IrmaoScan() {
   const startScanning = () => {
     setScanning(true);
     
-    scanIntervalRef.current = setInterval(() => {
-      if (videoRef.current && canvasRef.current) {
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        
-        // Usar BarcodeDetector se disponível
-        if ('BarcodeDetector' in window) {
-          const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
-          barcodeDetector.detect(imageData)
-            .then(barcodes => {
-              if (barcodes.length > 0) {
-                const codigo = barcodes[0].rawValue;
-                stopCamera();
-                processarCodigo(codigo);
-              }
-            })
-            .catch(err => console.log("Erro ao detectar:", err));
+    // Verificar se BarcodeDetector está disponível
+    if (!('BarcodeDetector' in window)) {
+      setCameraError("Seu navegador não suporta leitura de QR Code. Use o campo manual abaixo.");
+      return;
+    }
+    
+    const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+    
+    scanIntervalRef.current = setInterval(async () => {
+      if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
+        try {
+          const barcodes = await barcodeDetector.detect(videoRef.current);
+          if (barcodes.length > 0) {
+            const codigo = barcodes[0].rawValue;
+            stopCamera();
+            processarCodigo(codigo);
+          }
+        } catch (err) {
+          console.log("Erro ao detectar:", err);
         }
       }
-    }, 500);
+    }, 300);
   };
 
   const loadData = async () => {
