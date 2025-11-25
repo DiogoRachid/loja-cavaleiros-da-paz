@@ -111,8 +111,8 @@ export default function Layout({ children, currentPageName }) {
             {user && (
               <div className="hidden sm:flex items-center gap-3">
                 <div className="text-right">
-                  <p className="text-white text-sm font-medium">{irmao?.nome_completo || user.full_name}</p>
-                  <p className="text-slate-300 text-xs">{irmao?.numero_glp || user.email}</p>
+                  <p className="text-white text-sm font-medium">{user.full_name}</p>
+                  <p className="text-slate-300 text-xs">{irmao?.numero_glp ? `GLP: ${irmao.numero_glp}` : ""}</p>
                 </div>
               </div>
             )}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { BookOpen, Mail, ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
+import { BookOpen, Mail, Lock, ArrowLeft, Loader2, AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,8 @@ import { motion } from "framer-motion";
 
 export default function IrmaoLogin() {
   const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -26,6 +28,13 @@ export default function IrmaoLogin() {
       
       if (irmaos.length === 0) {
         setError("Email não encontrado. Verifique com o bibliotecário se seu cadastro está correto.");
+        setLoading(false);
+        return;
+      }
+
+      // Verificar senha (número GLP)
+      if (irmaos[0].numero_glp !== senha) {
+        setError("Senha incorreta. Use seu número de cadastro GLP.");
         setLoading(false);
         return;
       }
@@ -96,10 +105,33 @@ export default function IrmaoLogin() {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="senha">Senha (Número GLP)</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    id="senha"
+                    type={showPassword ? "text" : "password"}
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    placeholder="Seu número de cadastro GLP"
+                    className="pl-10 pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
               <Button 
                 type="submit" 
                 className="w-full bg-[#1B3A5F] hover:bg-[#15304d]"
-                disabled={loading || !email}
+                disabled={loading || !email || !senha}
               >
                 {loading ? (
                   <>
