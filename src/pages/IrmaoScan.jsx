@@ -60,17 +60,13 @@ export default function IrmaoScan() {
 
       const irmaoSessao = JSON.parse(irmaoData);
       setUser({ email: irmaoSessao.email });
-
-      const irmaos = await base44.entities.Irmao.filter({ email: irmaoSessao.email });
-      if (irmaos.length > 0) {
-        setIrmao(irmaos[0]);
+      setIrmao(irmaoSessao);
         
-        // Carregar empréstimos ativos
-        const emps = await base44.entities.Emprestimo.filter(
-          { irmao_email: currentUser.email, status: "Ativo" }
-        );
-        setEmprestimosAtivos(emps);
-      }
+      // Carregar empréstimos ativos
+      const emps = await base44.entities.Emprestimo.filter(
+        { irmao_id: irmaoSessao.id, status: "Ativo" }
+      );
+      setEmprestimosAtivos(emps);
     } catch (error) {
       console.error("Erro:", error);
     }
