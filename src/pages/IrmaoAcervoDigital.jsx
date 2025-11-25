@@ -66,7 +66,9 @@ export default function IrmaoAcervoDigital() {
       irmao_numero_glp: irmao.numero_glp,
       data_download: new Date().toISOString()
     });
-    window.open(doc.arquivo_url, '_blank');
+    // Abrir no leitor de PDF do Google Docs
+    const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.arquivo_url)}&embedded=true`;
+    window.open(viewerUrl, '_blank');
   };
 
   const filteredDocs = documentos.filter(doc => {
