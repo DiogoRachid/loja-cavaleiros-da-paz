@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { 
   Plus, Search, Edit, Trash2, Eye, Loader2, 
@@ -28,6 +30,7 @@ import IrmaoForm from "@/components/biblioteca/IrmaoForm";
 import IrmaoDetails from "@/components/biblioteca/IrmaoDetails";
 
 export default function BibIrmaos() {
+  const navigate = useNavigate();
   const [irmaos, setIrmaos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,6 +40,11 @@ export default function BibIrmaos() {
   const [selectedIrmao, setSelectedIrmao] = useState(null);
 
   useEffect(() => {
+    const bibAuth = sessionStorage.getItem("bib_auth");
+    if (bibAuth !== "true") {
+      navigate(createPageUrl("BibLogin"));
+      return;
+    }
     loadIrmaos();
   }, []);
 

@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { 
   Plus, Search, Filter, Loader2, BookMarked, 
@@ -32,6 +34,7 @@ import EmprestimoForm from "@/components/biblioteca/EmprestimoForm";
 import DevolucaoForm from "@/components/biblioteca/DevolucaoForm";
 
 export default function BibEmprestimos() {
+  const navigate = useNavigate();
   const [emprestimos, setEmprestimos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,6 +44,11 @@ export default function BibEmprestimos() {
   const [selectedEmprestimo, setSelectedEmprestimo] = useState(null);
 
   useEffect(() => {
+    const bibAuth = sessionStorage.getItem("bib_auth");
+    if (bibAuth !== "true") {
+      navigate(createPageUrl("BibLogin"));
+      return;
+    }
     loadEmprestimos();
   }, []);
 

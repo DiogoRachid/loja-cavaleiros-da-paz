@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { 
   Plus, Search, Filter, BookOpen, FileText, Newspaper, 
@@ -35,6 +37,7 @@ import ItemForm from "@/components/biblioteca/ItemForm";
 import ItemDetails from "@/components/biblioteca/ItemDetails";
 
 export default function BibAcervo() {
+  const navigate = useNavigate();
   const [itens, setItens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -45,6 +48,11 @@ export default function BibAcervo() {
   const [selectedItem, setSelectedItem] = useState(null);
 
   useEffect(() => {
+    const bibAuth = sessionStorage.getItem("bib_auth");
+    if (bibAuth !== "true") {
+      navigate(createPageUrl("BibLogin"));
+      return;
+    }
     loadItens();
   }, []);
 

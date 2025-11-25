@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { 
   Search, QrCode, Loader2, Download, Printer,
@@ -11,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import QRCodeDisplay from "@/components/biblioteca/QRCodeDisplay";
 
 export default function BibQRCodes() {
+  const navigate = useNavigate();
   const [itens, setItens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,6 +23,11 @@ export default function BibQRCodes() {
   const codigoDevolucao = "LCP25-DEVOLUCAO-BIBLIOTECA";
 
   useEffect(() => {
+    const bibAuth = sessionStorage.getItem("bib_auth");
+    if (bibAuth !== "true") {
+      navigate(createPageUrl("BibLogin"));
+      return;
+    }
     loadItens();
   }, []);
 
