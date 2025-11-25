@@ -5,6 +5,9 @@ import BibIrmaos from './pages/BibIrmaos';
 import BibEmprestimos from './pages/BibEmprestimos';
 import BibQRCodes from './pages/BibQRCodes';
 import IrmaoEmprestimos from './pages/IrmaoEmprestimos';
+import IrmaoScan from './pages/IrmaoScan';
+import ScanRetirada from './pages/ScanRetirada';
+import ScanDevolucao from './pages/ScanDevolucao';
 import __Layout from './Layout.jsx';
 
 
@@ -16,6 +19,9 @@ export const PAGES = {
     "BibEmprestimos": BibEmprestimos,
     "BibQRCodes": BibQRCodes,
     "IrmaoEmprestimos": IrmaoEmprestimos,
+    "IrmaoScan": IrmaoScan,
+    "ScanRetirada": ScanRetirada,
+    "ScanDevolucao": ScanDevolucao,
 }
 
 export const pagesConfig = {
