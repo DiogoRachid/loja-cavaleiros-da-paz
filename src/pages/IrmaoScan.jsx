@@ -21,6 +21,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { format, addDays } from "date-fns";
 
+const grauOrdem = { "Aprendiz": 1, "Companheiro": 2, "Mestre": 3 };
+
 export default function IrmaoScan() {
   const [user, setUser] = useState(null);
   const [irmao, setIrmao] = useState(null);
@@ -211,7 +213,16 @@ export default function IrmaoScan() {
         });
       } else {
         const item = itens[0];
-        if ((item.quantidade_disponivel || 0) <= 0) {
+        // Verificar grau mínimo
+        const grauItem = item.grau_minimo || "Aprendiz";
+        const grauIrmao = irmao?.grau || "Aprendiz";
+        
+        if (grauOrdem[grauIrmao] < grauOrdem[grauItem]) {
+          setResultado({
+            tipo: "erro",
+            mensagem: `"${item.nome}" é restrito para ${grauItem}s. Seu grau atual é ${grauIrmao}.`
+          });
+        } else if ((item.quantidade_disponivel || 0) <= 0) {
           setResultado({
             tipo: "erro",
             mensagem: `"${item.nome}" não está disponível no momento.`

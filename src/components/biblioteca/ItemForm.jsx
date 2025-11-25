@@ -19,6 +19,7 @@ export default function ItemForm({ item, onSave, onCancel }) {
     tipo: "Livro",
     autor: "",
     descricao: "",
+    grau_minimo: "Aprendiz",
     quantidade_total: 1,
     quantidade_disponivel: 1,
     quantidade_emprestada: 0,
@@ -34,6 +35,7 @@ export default function ItemForm({ item, onSave, onCancel }) {
         tipo: item.tipo || "Livro",
         autor: item.autor || "",
         descricao: item.descricao || "",
+        grau_minimo: item.grau_minimo || "Aprendiz",
         quantidade_total: item.quantidade_total || 1,
         quantidade_disponivel: item.quantidade_disponivel || 1,
         quantidade_emprestada: item.quantidade_emprestada || 0,
@@ -95,6 +97,20 @@ export default function ItemForm({ item, onSave, onCancel }) {
             onChange={(e) => handleChange("autor", e.target.value)}
             placeholder="Ex: José da Silva"
           />
+        </div>
+
+        <div>
+          <Label>Grau Mínimo</Label>
+          <Select value={formData.grau_minimo} onValueChange={(v) => handleChange("grau_minimo", v)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Aprendiz">Aprendiz</SelectItem>
+              <SelectItem value="Companheiro">Companheiro</SelectItem>
+              <SelectItem value="Mestre">Mestre</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
