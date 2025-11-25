@@ -8,6 +8,7 @@ import IrmaoEmprestimos from './pages/IrmaoEmprestimos';
 import IrmaoScan from './pages/IrmaoScan';
 import ScanRetirada from './pages/ScanRetirada';
 import ScanDevolucao from './pages/ScanDevolucao';
+import BibLogin from './pages/BibLogin';
 import __Layout from './Layout.jsx';
 
 
@@ -22,6 +23,7 @@ export const PAGES = {
     "IrmaoScan": IrmaoScan,
     "ScanRetirada": ScanRetirada,
     "ScanDevolucao": ScanDevolucao,
+    "BibLogin": BibLogin,
 }
 
 export const pagesConfig = {

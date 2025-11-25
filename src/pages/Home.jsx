@@ -116,7 +116,7 @@ export default function Home() {
 
               {/* Portal Bibliotecário - só aparece para admin */}
               {isAdmin && (
-                <Link to={createPageUrl("BibDashboard")}>
+                <Link to={createPageUrl("BibLogin")}>
                   <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/20 transition-all duration-300 cursor-pointer">
                     <div className="w-16 h-16 mb-6 rounded-xl bg-[#C9A227]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Shield className="w-8 h-8 text-[#C9A227]" />

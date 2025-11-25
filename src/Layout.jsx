@@ -38,7 +38,7 @@ export default function Layout({ children, currentPageName }) {
   };
 
   // Páginas sem layout (portal de seleção)
-  if (currentPageName === "Home" || currentPageName === "ScanRetirada" || currentPageName === "ScanDevolucao") {
+  if (currentPageName === "Home" || currentPageName === "ScanRetirada" || currentPageName === "ScanDevolucao" || currentPageName === "BibLogin") {
     return <>{children}</>;
   }
 
