@@ -111,7 +111,13 @@ export default function Layout({ children, currentPageName }) {
             <Button 
               variant="ghost" 
               size="icon" 
-              onClick={handleLogout}
+              onClick={() => {
+                if (isBibliotecario) {
+                  sessionStorage.removeItem("bib_auth");
+                  sessionStorage.removeItem("bib_auth_time");
+                }
+                handleLogout();
+              }}
               className="text-white hover:bg-white/10"
             >
               <LogOut className="w-5 h-5" />
