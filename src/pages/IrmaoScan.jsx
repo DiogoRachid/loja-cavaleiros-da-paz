@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
   QrCode, Camera, Loader2, BookOpen, ArrowLeft,
-  CheckCircle, AlertTriangle, Package
+  CheckCircle, AlertTriangle, Package, X, SwitchCamera
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,8 +26,17 @@ export default function IrmaoScan() {
   const [irmao, setIrmao] = useState(null);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
   const [codigoManual, setCodigoManual] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [cameraError, setCameraError] = useState("");
+  const [facingMode, setFacingMode] = useState("environment");
+  
+  // Refs para câmera
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
+  const scanIntervalRef = useRef(null);
   
   // Estados para retirada
   const [itemEncontrado, setItemEncontrado] = useState(null);
@@ -45,7 +54,92 @@ export default function IrmaoScan() {
 
   useEffect(() => {
     loadData();
+    return () => {
+      stopCamera();
+    };
   }, []);
+
+  const startCamera = async () => {
+    setCameraError("");
+    setCameraOpen(true);
+    
+    try {
+      const constraints = {
+        video: {
+          facingMode: facingMode,
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      };
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      streamRef.current = stream;
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+        
+        // Iniciar escaneamento
+        startScanning();
+      }
+    } catch (error) {
+      console.error("Erro ao acessar câmera:", error);
+      setCameraError("Não foi possível acessar a câmera. Verifique as permissões.");
+    }
+  };
+
+  const stopCamera = () => {
+    if (scanIntervalRef.current) {
+      clearInterval(scanIntervalRef.current);
+      scanIntervalRef.current = null;
+    }
+    
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    
+    setCameraOpen(false);
+    setScanning(false);
+  };
+
+  const switchCamera = async () => {
+    stopCamera();
+    setFacingMode(prev => prev === "environment" ? "user" : "environment");
+    setTimeout(() => startCamera(), 100);
+  };
+
+  const startScanning = () => {
+    setScanning(true);
+    
+    scanIntervalRef.current = setInterval(() => {
+      if (videoRef.current && canvasRef.current) {
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        
+        // Usar BarcodeDetector se disponível
+        if ('BarcodeDetector' in window) {
+          const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+          barcodeDetector.detect(imageData)
+            .then(barcodes => {
+              if (barcodes.length > 0) {
+                const codigo = barcodes[0].rawValue;
+                stopCamera();
+                processarCodigo(codigo);
+              }
+            })
+            .catch(err => console.log("Erro ao detectar:", err));
+        }
+      }
+    }, 500);
+  };
 
   const loadData = async () => {
     try {
@@ -265,6 +359,90 @@ export default function IrmaoScan() {
             <p className={resultado.tipo === "sucesso" ? "text-emerald-800" : "text-red-800"}>
               {resultado.mensagem}
             </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Câmera para Escanear */}
+      {cameraOpen ? (
+        <Card className="overflow-hidden">
+          <CardContent className="p-0 relative">
+            <video 
+              ref={videoRef} 
+              className="w-full aspect-square object-cover"
+              playsInline
+              muted
+            />
+            <canvas ref={canvasRef} className="hidden" />
+            
+            {/* Overlay com guia */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-48 h-48 border-2 border-white rounded-2xl shadow-lg">
+                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-[#C9A227] rounded-tl-xl" />
+                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-[#C9A227] rounded-tr-xl" />
+                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-[#C9A227] rounded-bl-xl" />
+                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-[#C9A227] rounded-br-xl" />
+              </div>
+            </div>
+            
+            {scanning && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Procurando QR Code...
+              </div>
+            )}
+            
+            {cameraError && (
+              <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-4">
+                <div className="text-center text-white">
+                  <AlertTriangle className="w-12 h-12 mx-auto mb-2 text-amber-400" />
+                  <p>{cameraError}</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Controles da câmera */}
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
+              <Button
+                variant="secondary"
+                size="icon"
+                className="rounded-full w-12 h-12 bg-white/90 hover:bg-white"
+                onClick={switchCamera}
+              >
+                <SwitchCamera className="w-5 h-5" />
+              </Button>
+              <Button
+                variant="destructive"
+                size="icon"
+                className="rounded-full w-12 h-12"
+                onClick={stopCamera}
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="bg-gradient-to-br from-[#1B3A5F] to-[#15304d] text-white">
+          <CardContent className="p-6">
+            <div className="text-center space-y-4">
+              <div className="w-20 h-20 mx-auto rounded-full bg-white/10 flex items-center justify-center">
+                <Camera className="w-10 h-10" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">Escanear QR Code</h3>
+                <p className="text-sm text-slate-300 mt-1">
+                  Aponte a câmera para o QR Code do item
+                </p>
+              </div>
+              <Button 
+                className="w-full bg-[#C9A227] hover:bg-[#b8922a] text-[#1B3A5F] font-semibold"
+                onClick={startCamera}
+              >
+                <Camera className="w-4 h-4 mr-2" />
+                Abrir Câmera
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
