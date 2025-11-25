@@ -197,14 +197,18 @@ export default function BibAcervo() {
             return (
               <Card key={item.id} className="hover:shadow-lg transition-shadow">
                 <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-xl ${tipoColors[item.tipo]}`}>
-                      <TipoIcon className="w-6 h-6" />
+                  <div className="flex gap-4">
+                    <div className="w-16 h-20 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      {item.imagem_capa ? (
+                        <img src={item.imagem_capa} alt="" className="w-full h-full object-cover rounded-lg" />
+                      ) : (
+                        <TipoIcon className="w-8 h-8 text-slate-400" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-slate-800 truncate">{item.nome}</h3>
                       <p className="text-sm text-slate-500 truncate">{item.autor || "Sem autor"}</p>
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
                         <Badge variant="outline" className="text-xs">
                           {item.tipo}
                         </Badge>
