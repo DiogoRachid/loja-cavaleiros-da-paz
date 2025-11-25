@@ -57,25 +57,29 @@ export default function IrmaoAcervoDigital() {
     return grauOrdem[irmao.grau] >= grauOrdem[doc.grau_minimo];
   };
 
-  const registrarDownload = async (doc) => {
-    await base44.entities.LogDownload.create({
+  const registrarDownload = (doc) => {
+    // Abrir imediatamente para evitar bloqueio de popup em mobile
+    const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.arquivo_url)}&embedded=true`;
+    window.open(viewerUrl, '_blank');
+
+    // Registrar log em segundo plano
+    base44.entities.LogDownload.create({
       documento_id: doc.id,
       documento_titulo: doc.titulo,
       irmao_id: irmao.id,
       irmao_nome: irmao.nome_completo,
       irmao_numero_glp: irmao.numero_glp,
       data_download: new Date().toISOString()
-    });
-    // Abrir no leitor de PDF do Google Docs
-    const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.arquivo_url)}&embedded=true`;
-    window.open(viewerUrl, '_blank');
+    }).catch(console.error);
   };
 
   const filteredDocs = documentos.filter(doc => {
     const matchSearch = doc.titulo?.toLowerCase().includes(search.toLowerCase()) ||
                        doc.autor?.toLowerCase().includes(search.toLowerCase());
     const matchTipo = filtroTipo === "todos" || doc.tipo === filtroTipo;
-    return matchSearch && matchTipo;
+    // Ocultar documentos que o irmão não tem permissão para ver
+    const matchAcesso = podeAcessar(doc);
+    return matchSearch && matchTipo && matchAcesso;
   });
 
   const grauColors = {
