@@ -58,6 +58,15 @@ export default function IrmaoLogin() {
         return;
       }
 
+      // Registrar log de acesso
+      await base44.entities.LogAcesso.create({
+        irmao_id: irmao.id,
+        irmao_nome: irmao.nome_completo,
+        irmao_numero_glp: irmao.numero_glp,
+        data_acesso: new Date().toISOString(),
+        tipo_acesso: "Login"
+      });
+
       // Login normal
       sessionStorage.setItem("irmao_auth", "true");
       sessionStorage.setItem("irmao_data", JSON.stringify(irmao));
@@ -90,6 +99,15 @@ export default function IrmaoLogin() {
       await base44.entities.Irmao.update(irmaoLogado.id, {
         senha: novaSenha,
         primeiro_acesso: false
+      });
+
+      // Registrar log de acesso
+      await base44.entities.LogAcesso.create({
+        irmao_id: irmaoLogado.id,
+        irmao_nome: irmaoLogado.nome_completo,
+        irmao_numero_glp: irmaoLogado.numero_glp,
+        data_acesso: new Date().toISOString(),
+        tipo_acesso: "Login"
       });
 
       const irmaoAtualizado = { ...irmaoLogado, senha: novaSenha, primeiro_acesso: false };
