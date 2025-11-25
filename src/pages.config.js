@@ -11,6 +11,8 @@ import ScanDevolucao from './pages/ScanDevolucao';
 import BibLogin from './pages/BibLogin';
 import IrmaoLogin from './pages/IrmaoLogin';
 import BibBibliotecarios from './pages/BibBibliotecarios';
+import BibAcervoDigital from './pages/BibAcervoDigital';
+import IrmaoAcervoDigital from './pages/IrmaoAcervoDigital';
 import __Layout from './Layout.jsx';
 
 
@@ -28,6 +30,8 @@ export const PAGES = {
     "BibLogin": BibLogin,
     "IrmaoLogin": IrmaoLogin,
     "BibBibliotecarios": BibBibliotecarios,
+    "BibAcervoDigital": BibAcervoDigital,
+    "IrmaoAcervoDigital": IrmaoAcervoDigital,
 }
 
 export const pagesConfig = {

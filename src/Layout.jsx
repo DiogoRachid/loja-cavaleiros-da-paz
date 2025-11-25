@@ -61,6 +61,7 @@ export default function Layout({ children, currentPageName }) {
   const bibliotecarioLinks = [
     { name: "Dashboard", page: "BibDashboard", icon: Home },
     { name: "Acervo", page: "BibAcervo", icon: Library },
+    { name: "Acervo Digital", page: "BibAcervoDigital", icon: BookOpen },
     { name: "Irmãos", page: "BibIrmaos", icon: Users },
     { name: "Empréstimos", page: "BibEmprestimos", icon: BookMarked },
     { name: "QR Codes", page: "BibQRCodes", icon: QrCode },
@@ -68,7 +69,8 @@ export default function Layout({ children, currentPageName }) {
   ];
 
   const irmaoLinks = [
-    { name: "Meus Empréstimos", page: "IrmaoEmprestimos", icon: BookOpen },
+    { name: "Meus Empréstimos", page: "IrmaoEmprestimos", icon: BookMarked },
+    { name: "Acervo Digital", page: "IrmaoAcervoDigital", icon: BookOpen },
     { name: "Escanear QR", page: "IrmaoScan", icon: QrCode },
   ];
 
