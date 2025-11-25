@@ -2,17 +2,15 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { Shield, Lock, User, Eye, EyeOff, Loader2, AlertTriangle, ArrowLeft } from "lucide-react";
+import { BookOpen, Mail, ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { motion } from "framer-motion";
 
-export default function BibLogin() {
-  const [login, setLogin] = useState("");
-  const [senha, setSenha] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+export default function IrmaoLogin() {
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -23,29 +21,25 @@ export default function BibLogin() {
     setError("");
 
     try {
-      // Buscar bibliotecário pelo login e senha
-      const bibliotecarios = await base44.entities.Bibliotecario.filter({ 
-        login: login.trim(), 
-        senha: senha,
-        ativo: true 
-      });
+      // Verificar se o irmão existe pelo email
+      const irmaos = await base44.entities.Irmao.filter({ email: email.toLowerCase().trim(), ativo: true });
       
-      if (bibliotecarios.length === 0) {
-        setError("Login ou senha incorretos.");
+      if (irmaos.length === 0) {
+        setError("Email não encontrado. Verifique com o bibliotecário se seu cadastro está correto.");
         setLoading(false);
         return;
       }
 
-      // Salvar autenticação na sessão
-      sessionStorage.setItem("bib_auth", "true");
-      sessionStorage.setItem("bib_data", JSON.stringify(bibliotecarios[0]));
+      // Salvar dados do irmão na sessão
+      sessionStorage.setItem("irmao_auth", "true");
+      sessionStorage.setItem("irmao_data", JSON.stringify(irmaos[0]));
       
-      navigate(createPageUrl("BibDashboard"));
+      navigate(createPageUrl("IrmaoEmprestimos"));
     } catch (err) {
       console.error("Erro:", err);
-      setError("Erro ao verificar credenciais. Tente novamente.");
+      setError("Erro ao verificar cadastro. Tente novamente.");
     }
-
+    
     setLoading(false);
   };
 
@@ -65,11 +59,11 @@ export default function BibLogin() {
         <Card className="border-0 shadow-2xl">
           <CardHeader className="text-center pb-2">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#C9A227] to-[#8B7019] flex items-center justify-center">
-              <Shield className="w-8 h-8 text-[#1B3A5F]" />
+              <BookOpen className="w-8 h-8 text-[#1B3A5F]" />
             </div>
-            <CardTitle className="text-2xl text-[#1B3A5F]">Portal Bibliotecário</CardTitle>
+            <CardTitle className="text-2xl text-[#1B3A5F]">Portal do Irmão</CardTitle>
             <CardDescription>
-              Digite suas credenciais de acesso
+              Digite seu email cadastrado para acessar
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -86,15 +80,15 @@ export default function BibLogin() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="login">Login</Label>
+                <Label htmlFor="email">Seu Email</Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <Input
-                    id="login"
-                    type="text"
-                    value={login}
-                    onChange={(e) => setLogin(e.target.value)}
-                    placeholder="Seu login"
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu.email@exemplo.com"
                     className="pl-10"
                     autoFocus
                     required
@@ -102,33 +96,10 @@ export default function BibLogin() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="senha">Senha</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input
-                    id="senha"
-                    type={showPassword ? "text" : "password"}
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
-                    placeholder="Sua senha"
-                    className="pl-10 pr-10"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
               <Button 
                 type="submit" 
                 className="w-full bg-[#1B3A5F] hover:bg-[#15304d]"
-                disabled={loading || !login || !senha}
+                disabled={loading || !email}
               >
                 {loading ? (
                   <>
@@ -136,7 +107,7 @@ export default function BibLogin() {
                     Verificando...
                   </>
                 ) : (
-                  "Acessar Portal"
+                  "Entrar"
                 )}
               </Button>
             </form>
@@ -154,7 +125,7 @@ export default function BibLogin() {
         </Card>
 
         <p className="text-center text-slate-400 text-xs mt-6">
-          Loja Cavaleiros da Paz nº25 • Acesso Restrito
+          Loja Cavaleiros da Paz nº25
         </p>
       </motion.div>
     </div>

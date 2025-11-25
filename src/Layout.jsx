@@ -37,8 +37,8 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.logout();
   };
 
-  // Páginas sem layout (portal de seleção)
-  if (currentPageName === "Home" || currentPageName === "ScanRetirada" || currentPageName === "ScanDevolucao" || currentPageName === "BibLogin") {
+  // Páginas sem layout (portal de seleção e logins)
+  if (currentPageName === "Home" || currentPageName === "ScanRetirada" || currentPageName === "ScanDevolucao" || currentPageName === "BibLogin" || currentPageName === "IrmaoLogin") {
     return <>{children}</>;
   }
 
@@ -52,6 +52,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "Irmãos", page: "BibIrmaos", icon: Users },
     { name: "Empréstimos", page: "BibEmprestimos", icon: BookMarked },
     { name: "QR Codes", page: "BibQRCodes", icon: QrCode },
+    { name: "Bibliotecários", page: "BibBibliotecarios", icon: Users },
   ];
 
   const irmaoLinks = [

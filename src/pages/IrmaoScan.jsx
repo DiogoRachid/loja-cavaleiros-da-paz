@@ -49,10 +49,19 @@ export default function IrmaoScan() {
 
   const loadData = async () => {
     try {
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
+      // Verificar se tem sessão do irmão
+      const irmaoAuth = sessionStorage.getItem("irmao_auth");
+      const irmaoData = sessionStorage.getItem("irmao_data");
+      
+      if (irmaoAuth !== "true" || !irmaoData) {
+        window.location.href = createPageUrl("IrmaoLogin");
+        return;
+      }
 
-      const irmaos = await base44.entities.Irmao.filter({ email: currentUser.email });
+      const irmaoSessao = JSON.parse(irmaoData);
+      setUser({ email: irmaoSessao.email });
+
+      const irmaos = await base44.entities.Irmao.filter({ email: irmaoSessao.email });
       if (irmaos.length > 0) {
         setIrmao(irmaos[0]);
         
