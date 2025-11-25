@@ -30,17 +30,21 @@ export default function BibRelatorios() {
 
   const loadData = async () => {
     try {
-      // Carregar dados em paralelo
-      const [acessos, downloads, emprestimos, irmaos, items, docs] = await Promise.all([
-        base44.entities.LogAcesso.list("-data_acesso", 1000),
-        base44.entities.LogDownload.list("-data_download", 1000),
-        base44.entities.Emprestimo.list("-data_retirada", 1000),
-        base44.entities.Irmao.list("nome_completo", 1000),
-        base44.entities.Item.list("nome", 1000),
-        base44.entities.AcervoDigital.list("titulo", 1000)
+      // Carregar dados com limite de 500 para evitar timeouts
+      const [acessos, downloads, emprestimos] = await Promise.all([
+        base44.entities.LogAcesso.list("-data_acesso", 500),
+        base44.entities.LogDownload.list("-data_download", 500),
+        base44.entities.Emprestimo.list("-data_retirada", 500)
       ]);
 
-      setData({ acessos, downloads, emprestimos, irmaos, items, docs });
+      setData({ 
+        acessos: acessos || [], 
+        downloads: downloads || [], 
+        emprestimos: emprestimos || [],
+        irmaos: [],
+        items: [],
+        docs: []
+      });
       setLoading(false);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
@@ -60,57 +64,24 @@ export default function BibRelatorios() {
     );
   }
 
+  const countBy = (list, keyFn) => {
+    if (!list) return [];
+    const counts = list.reduce((acc, item) => {
+      const key = keyFn(item) || "Desconhecido";
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(counts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 10);
+  };
+
   // Processamento dos dados
-  
-  // 1. Irmãos que mais acessaram (Login)
-  const topAcessos = Object.entries(
-    data.acessos.reduce((acc, log) => {
-      acc[log.irmao_nome] = (acc[log.irmao_nome] || 0) + 1;
-      return acc;
-    }, {})
-  )
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 10);
-
-  // 2. Irmãos que mais baixaram
-  const topDownloaders = Object.entries(
-    data.downloads.reduce((acc, log) => {
-      acc[log.irmao_nome] = (acc[log.irmao_nome] || 0) + 1;
-      return acc;
-    }, {})
-  )
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 10);
-
-  // 3. Irmãos que mais retiraram (Empréstimos)
-  const topBorrowers = Object.entries(
-    data.emprestimos.reduce((acc, emp) => {
-      acc[emp.irmao_nome] = (acc[emp.irmao_nome] || 0) + 1;
-      return acc;
-    }, {})
-  )
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 10);
-
-  // 4. Trabalhos mais baixados (Acervo Digital)
-  const topDownloadsDocs = Object.entries(
-    data.downloads.reduce((acc, log) => {
-      acc[log.documento_titulo] = (acc[log.documento_titulo] || 0) + 1;
-      return acc;
-    }, {})
-  )
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 10);
-
-  // 5. Livros mais retirados (Acervo Físico)
-  const topBorrowedItems = Object.entries(
-    data.emprestimos.reduce((acc, emp) => {
-      acc[emp.item_nome] = (acc[emp.item_nome] || 0) + 1;
-      return acc;
-    }, {})
-  )
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 10);
+  const topAcessos = countBy(data.acessos, log => log.irmao_nome);
+  const topDownloaders = countBy(data.downloads, log => log.irmao_nome);
+  const topBorrowers = countBy(data.emprestimos, emp => emp.irmao_nome);
+  const topDownloadsDocs = countBy(data.downloads, log => log.documento_titulo);
+  const topBorrowedItems = countBy(data.emprestimos, emp => emp.item_nome);
 
   return (
     <div className="space-y-8 print:space-y-6 print:p-0">
@@ -242,7 +213,7 @@ export default function BibRelatorios() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-medium flex items-center gap-2">
-                <BookMarked className="w-4 h-4 text-indigo-500" />
+                <BookOpen className="w-4 h-4 text-indigo-500" />
                 Livros Mais Retirados (Físico)
               </CardTitle>
             </CardHeader>
