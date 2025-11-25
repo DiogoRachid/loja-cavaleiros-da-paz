@@ -57,6 +57,18 @@ export default function IrmaoAcervoDigital() {
     return grauOrdem[irmao.grau] >= grauOrdem[doc.grau_minimo];
   };
 
+  const registrarDownload = async (doc) => {
+    await base44.entities.LogDownload.create({
+      documento_id: doc.id,
+      documento_titulo: doc.titulo,
+      irmao_id: irmao.id,
+      irmao_nome: irmao.nome_completo,
+      irmao_numero_glp: irmao.numero_glp,
+      data_download: new Date().toISOString()
+    });
+    window.open(doc.arquivo_url, '_blank');
+  };
+
   const filteredDocs = documentos.filter(doc => {
     const matchSearch = doc.titulo?.toLowerCase().includes(search.toLowerCase()) ||
                        doc.autor?.toLowerCase().includes(search.toLowerCase());
@@ -168,7 +180,7 @@ export default function IrmaoAcervoDigital() {
                       <Button
                         size="sm"
                         className="flex-1 bg-[#1B3A5F] hover:bg-[#15304d]"
-                        onClick={() => window.open(doc.arquivo_url, '_blank')}
+                        onClick={() => registrarDownload(doc)}
                       >
                         <BookOpen className="w-4 h-4 mr-1" />
                         Ler PDF
@@ -236,7 +248,7 @@ export default function IrmaoAcervoDigital() {
 
               <Button
                 className="w-full bg-[#1B3A5F] hover:bg-[#15304d]"
-                onClick={() => window.open(docSelecionado.arquivo_url, '_blank')}
+                onClick={() => registrarDownload(docSelecionado)}
               >
                 <BookOpen className="w-4 h-4 mr-2" />
                 Abrir PDF

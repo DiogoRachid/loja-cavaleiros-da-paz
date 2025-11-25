@@ -65,6 +65,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "Irmãos", page: "BibIrmaos", icon: Users },
     { name: "Empréstimos", page: "BibEmprestimos", icon: BookMarked },
     { name: "Log de Acessos", page: "BibLogAcessos", icon: History },
+    { name: "Log de Downloads", page: "BibLogDownloads", icon: History },
     { name: "QR Codes", page: "BibQRCodes", icon: QrCode },
     { name: "Bibliotecários", page: "BibBibliotecarios", icon: Users },
   ];
