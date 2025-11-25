@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
   BookOpen, Users, BookMarked, AlertTriangle,
@@ -12,6 +12,7 @@ import { format, isAfter, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export default function BibDashboard() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalItens: 0,
@@ -23,6 +24,12 @@ export default function BibDashboard() {
   const [atrasados, setAtrasados] = useState([]);
 
   useEffect(() => {
+    // Verificar autenticação do bibliotecário
+    const bibAuth = sessionStorage.getItem("bib_auth");
+    if (bibAuth !== "true") {
+      navigate(createPageUrl("BibLogin"));
+      return;
+    }
     loadData();
   }, []);
 
