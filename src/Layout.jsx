@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { 
   BookOpen, Users, History, QrCode, LogOut, 
-  Menu, X, Home, Library, BookMarked
+  Menu, X, Home, Library, BookMarked, PieChart
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
@@ -68,6 +68,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "Log de Downloads", page: "BibLogDownloads", icon: History },
     { name: "QR Codes", page: "BibQRCodes", icon: QrCode },
     { name: "Bibliotecários", page: "BibBibliotecarios", icon: Users },
+    { name: "Relatórios", page: "BibRelatorios", icon: PieChart },
   ];
 
   const irmaoLinks = [

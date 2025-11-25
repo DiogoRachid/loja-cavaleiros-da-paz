@@ -15,6 +15,7 @@ import BibAcervoDigital from './pages/BibAcervoDigital';
 import IrmaoAcervoDigital from './pages/IrmaoAcervoDigital';
 import BibLogAcessos from './pages/BibLogAcessos';
 import BibLogDownloads from './pages/BibLogDownloads';
+import BibRelatorios from './pages/BibRelatorios';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +37,7 @@ export const PAGES = {
     "IrmaoAcervoDigital": IrmaoAcervoDigital,
     "BibLogAcessos": BibLogAcessos,
     "BibLogDownloads": BibLogDownloads,
+    "BibRelatorios": BibRelatorios,
 }
 
 export const pagesConfig = {

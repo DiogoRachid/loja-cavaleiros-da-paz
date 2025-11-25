@@ -2,8 +2,15 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { 
-  Loader2, Search, Calendar, Download, Clock, FileText
+  Loader2, Search, Calendar, Download, Clock, FileText, Filter, User
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +21,9 @@ export default function BibLogDownloads() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [irmaos, setIrmaos] = useState([]);
+  const [filtroIrmao, setFiltroIrmao] = useState("todos");
+  const [filtroDoc, setFiltroDoc] = useState("todos");
 
   useEffect(() => {
     const bibAuth = sessionStorage.getItem("bib_auth");
@@ -25,16 +35,26 @@ export default function BibLogDownloads() {
   }, []);
 
   const loadLogs = async () => {
-    const data = await base44.entities.LogDownload.list("-data_download", 200);
+    const [data, listaIrmaos] = await Promise.all([
+      base44.entities.LogDownload.list("-data_download", 200),
+      base44.entities.Irmao.list("nome_completo", 1000)
+    ]);
     setLogs(data);
+    setIrmaos(listaIrmaos);
     setLoading(false);
   };
 
-  const filteredLogs = logs.filter(log => 
-    log.irmao_nome?.toLowerCase().includes(search.toLowerCase()) ||
-    log.documento_titulo?.toLowerCase().includes(search.toLowerCase()) ||
-    log.irmao_numero_glp?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredLogs = logs.filter(log => {
+    const matchSearch = log.irmao_nome?.toLowerCase().includes(search.toLowerCase()) ||
+                        log.documento_titulo?.toLowerCase().includes(search.toLowerCase()) ||
+                        log.irmao_numero_glp?.toLowerCase().includes(search.toLowerCase());
+    const matchIrmao = filtroIrmao === "todos" || log.irmao_id === filtroIrmao;
+    const matchDoc = filtroDoc === "todos" || log.documento_titulo === filtroDoc;
+    return matchSearch && matchIrmao && matchDoc;
+  });
+
+  // Extrair lista única de documentos dos logs para o filtro
+  const uniqueDocs = [...new Set(logs.map(log => log.documento_titulo))].sort();
 
   // Agrupar por data
   const groupedLogs = filteredLogs.reduce((acc, log) => {
@@ -59,14 +79,44 @@ export default function BibLogDownloads() {
         <p className="text-slate-500">{logs.length} download(s) registrado(s)</p>
       </div>
 
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <Input
-          placeholder="Buscar por nome, GLP ou documento..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
-        />
+      <div className="flex flex-col lg:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            placeholder="Buscar por nome, GLP ou documento..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={filtroIrmao} onValueChange={setFiltroIrmao}>
+          <SelectTrigger className="w-full lg:w-48">
+            <User className="w-4 h-4 mr-2" />
+            <SelectValue placeholder="Irmão" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos os Irmãos</SelectItem>
+            {irmaos.map((irmao) => (
+              <SelectItem key={irmao.id} value={irmao.id}>
+                {irmao.nome_completo}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={filtroDoc} onValueChange={setFiltroDoc}>
+          <SelectTrigger className="w-full lg:w-48">
+            <FileText className="w-4 h-4 mr-2" />
+            <SelectValue placeholder="Documento" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos os Docs</SelectItem>
+            {uniqueDocs.map((doc, idx) => (
+              <SelectItem key={idx} value={doc}>
+                {doc}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {Object.keys(groupedLogs).length === 0 ? (

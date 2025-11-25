@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { 
   Plus, Search, Filter, Loader2, BookMarked, 
-  ArrowLeftRight, CheckCircle, AlertTriangle
+  ArrowLeftRight, CheckCircle, AlertTriangle, User, Library
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,10 @@ export default function BibEmprestimos() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("todos");
+  const [filtroIrmao, setFiltroIrmao] = useState("todos");
+  const [filtroItem, setFiltroItem] = useState("todos");
+  const [irmaos, setIrmaos] = useState([]);
+  const [items, setItems] = useState([]);
   const [emprestimoFormOpen, setEmprestimoFormOpen] = useState(false);
   const [devolucaoFormOpen, setDevolucaoFormOpen] = useState(false);
   const [selectedEmprestimo, setSelectedEmprestimo] = useState(null);
@@ -54,8 +58,15 @@ export default function BibEmprestimos() {
 
   const loadEmprestimos = async () => {
     try {
-      const data = await base44.entities.Emprestimo.list("-data_retirada", 200);
+      const [data, listaIrmaos, listaItems] = await Promise.all([
+        base44.entities.Emprestimo.list("-data_retirada", 200),
+        base44.entities.Irmao.list("nome_completo", 1000),
+        base44.entities.Item.list("nome", 1000)
+      ]);
       
+      setIrmaos(listaIrmaos);
+      setItems(listaItems);
+
       // Verificar atrasos
       const hoje = new Date();
       const updated = data.map(emp => {
@@ -95,7 +106,9 @@ export default function BibEmprestimos() {
     const matchSearch = emp.item_nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                        emp.irmao_nome?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchStatus = statusFiltro === "todos" || emp.status === statusFiltro;
-    return matchSearch && matchStatus;
+    const matchIrmao = filtroIrmao === "todos" || emp.irmao_id === filtroIrmao;
+    const matchItem = filtroItem === "todos" || emp.item_id === filtroItem;
+    return matchSearch && matchStatus && matchIrmao && matchItem;
   });
 
   const statusColors = {
@@ -135,24 +148,52 @@ export default function BibEmprestimos() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="Buscar por item ou irmão..."
+            placeholder="Buscar..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
         </div>
-        <Select value={statusFiltro} onValueChange={setStatusFiltro}>
-          <SelectTrigger className="w-full sm:w-48">
-            <Filter className="w-4 h-4 mr-2" />
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todos</SelectItem>
-            <SelectItem value="Ativo">Ativos</SelectItem>
-            <SelectItem value="Atrasado">Atrasados</SelectItem>
-            <SelectItem value="Devolvido">Devolvidos</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 w-full md:w-auto">
+          <Select value={statusFiltro} onValueChange={setStatusFiltro}>
+            <SelectTrigger>
+              <Filter className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              <SelectItem value="Ativo">Ativos</SelectItem>
+              <SelectItem value="Atrasado">Atrasados</SelectItem>
+              <SelectItem value="Devolvido">Devolvidos</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filtroIrmao} onValueChange={setFiltroIrmao}>
+            <SelectTrigger>
+              <User className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Irmão" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos Irmãos</SelectItem>
+              {irmaos.map((irmao) => (
+                <SelectItem key={irmao.id} value={irmao.id}>{irmao.nome_completo}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={filtroItem} onValueChange={setFiltroItem}>
+            <SelectTrigger>
+              <Library className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Item" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos Itens</SelectItem>
+              {items.map((item) => (
+                <SelectItem key={item.id} value={item.id}>{item.nome}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Lista */}
