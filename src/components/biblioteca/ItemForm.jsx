@@ -10,10 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, Check, FileText } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 export default function ItemForm({ item, onSave, onCancel }) {
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
     tipo: "Livro",
@@ -51,6 +53,20 @@ export default function ItemForm({ item, onSave, onCancel }) {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      handleChange("imagem_capa", file_url);
+    } catch (error) {
+      console.error("Erro no upload:", error);
+    }
+    setUploading(false);
   };
 
   const handleSubmit = async (e) => {
@@ -151,13 +167,45 @@ export default function ItemForm({ item, onSave, onCancel }) {
         </div>
 
         <div className="sm:col-span-2">
-          <Label htmlFor="imagem_capa">URL da Imagem da Capa</Label>
-          <Input
-            id="imagem_capa"
-            value={formData.imagem_capa}
-            onChange={(e) => handleChange("imagem_capa", e.target.value)}
-            placeholder="https://..."
-          />
+          <Label>Imagem da Capa</Label>
+          <div className="mt-2">
+            {formData.imagem_capa ? (
+              <div className="flex items-center gap-3">
+                <img src={formData.imagem_capa} alt="" className="w-16 h-20 object-cover rounded" />
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-600" />
+                  <span className="text-sm text-emerald-700">Imagem carregada</span>
+                </div>
+                <label className="cursor-pointer text-sm text-[#1B3A5F] hover:underline ml-auto">
+                  Trocar
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                </label>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-[#1B3A5F] hover:bg-slate-50 transition-colors">
+                {uploading ? (
+                  <Loader2 className="w-8 h-8 animate-spin text-[#1B3A5F]" />
+                ) : (
+                  <>
+                    <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                    <span className="text-sm text-slate-500">Clique para fazer upload da capa</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                  disabled={uploading}
+                />
+              </label>
+            )}
+          </div>
         </div>
       </div>
 
