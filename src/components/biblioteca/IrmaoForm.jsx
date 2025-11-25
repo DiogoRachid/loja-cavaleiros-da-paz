@@ -20,7 +20,6 @@ export default function IrmaoForm({ irmao, onSave, onCancel }) {
     email: "",
     telefone: "",
     grau: "",
-    data_iniciacao: "",
     observacoes: "",
     ativo: true
   });
@@ -33,7 +32,6 @@ export default function IrmaoForm({ irmao, onSave, onCancel }) {
         email: irmao.email || "",
         telefone: irmao.telefone || "",
         grau: irmao.grau || "",
-        data_iniciacao: irmao.data_iniciacao || "",
         observacoes: irmao.observacoes || "",
         ativo: irmao.ativo !== false
       });
@@ -93,19 +91,18 @@ export default function IrmaoForm({ irmao, onSave, onCancel }) {
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="email">Email *</Label>
-        <Input
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={(e) => handleChange("email", e.target.value)}
-          placeholder="email@exemplo.com"
-          required
-        />
-      </div>
-
       <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => handleChange("email", e.target.value)}
+            placeholder="email@exemplo.com"
+          />
+        </div>
+
         <div>
           <Label htmlFor="telefone">Telefone</Label>
           <Input
@@ -113,16 +110,6 @@ export default function IrmaoForm({ irmao, onSave, onCancel }) {
             value={formData.telefone}
             onChange={(e) => handleChange("telefone", e.target.value)}
             placeholder="(41) 99999-9999"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="data_iniciacao">Data de Iniciação</Label>
-          <Input
-            id="data_iniciacao"
-            type="date"
-            value={formData.data_iniciacao}
-            onChange={(e) => handleChange("data_iniciacao", e.target.value)}
           />
         </div>
       </div>
