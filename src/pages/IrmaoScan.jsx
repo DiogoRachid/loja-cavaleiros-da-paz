@@ -109,31 +109,51 @@ export default function IrmaoScan() {
     setTimeout(() => startCamera(), 100);
   };
 
-  const startScanning = () => {
+  const loadJsQR = () => {
+    return new Promise((resolve, reject) => {
+      if (window.jsQR) {
+        resolve(window.jsQR);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+      script.onload = () => resolve(window.jsQR);
+      script.onerror = () => reject(new Error('Falha ao carregar leitor de QR'));
+      document.head.appendChild(script);
+    });
+  };
+
+  const startScanning = async () => {
     setScanning(true);
     
-    // Verificar se BarcodeDetector está disponível
-    if (!('BarcodeDetector' in window)) {
-      setCameraError("Seu navegador não suporta leitura de QR Code. Use o campo manual abaixo.");
+    try {
+      await loadJsQR();
+    } catch (err) {
+      setCameraError("Erro ao carregar leitor de QR Code.");
       return;
     }
     
-    const barcodeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
-    
-    scanIntervalRef.current = setInterval(async () => {
-      if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
-        try {
-          const barcodes = await barcodeDetector.detect(videoRef.current);
-          if (barcodes.length > 0) {
-            const codigo = barcodes[0].rawValue;
-            stopCamera();
-            processarCodigo(codigo);
-          }
-        } catch (err) {
-          console.log("Erro ao detectar:", err);
+    scanIntervalRef.current = setInterval(() => {
+      if (videoRef.current && canvasRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = window.jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+        
+        if (code && code.data) {
+          stopCamera();
+          processarCodigo(code.data);
         }
       }
-    }, 300);
+    }, 250);
   };
 
   const loadData = async () => {
