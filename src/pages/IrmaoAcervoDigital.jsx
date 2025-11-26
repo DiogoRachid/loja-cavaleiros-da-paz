@@ -214,6 +214,10 @@ export default function IrmaoAcervoDigital() {
         </Card>
       )}
 
+      <div className="text-center text-xs text-slate-400 mt-8 pb-4 border-t pt-4">
+        Conteúdo protegido por direitos autorais — uso permitido apenas para fins educacionais e sem autorização para reprodução ou distribuição
+      </div>
+
       {/* Dialog Detalhes */}
       <Dialog open={!!docSelecionado} onOpenChange={() => setDocSelecionado(null)}>
         <DialogContent className="max-w-lg">

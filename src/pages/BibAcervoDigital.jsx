@@ -212,6 +212,10 @@ export default function BibAcervoDigital() {
         </Card>
       )}
 
+      <div className="text-center text-xs text-slate-400 mt-8 pb-4 border-t pt-4">
+        Conteúdo protegido por direitos autorais — uso permitido apenas para fins educacionais e sem autorização para reprodução ou distribuição
+      </div>
+
       {/* Form Dialog */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
