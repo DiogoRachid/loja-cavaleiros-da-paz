@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import {
-  FileText, Search, Loader2, BookOpen, GraduationCap,
-  Filter, Download, Eye, Lock, Star, Calendar, MessageSquare
+  Book, Search, Loader2, Star, Calendar, MessageSquare, 
+  Filter, Eye, GraduationCap, MapPin, CheckCircle, XCircle
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,25 +24,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { format, parseISO } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 
-export default function IrmaoAcervoDigital() {
-  const [documentos, setDocumentos] = useState([]);
+export default function IrmaoAcervo() {
+  const [items, setItems] = useState([]);
   const [avaliacoes, setAvaliacoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [irmao, setIrmao] = useState(null);
   const [search, setSearch] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("todos");
-  const [filtroOrdem, setFiltroOrdem] = useState("titulo");
-  const [docSelecionado, setDocSelecionado] = useState(null);
+  const [filtroOrdem, setFiltroOrdem] = useState("nome");
+  const [itemSelecionado, setItemSelecionado] = useState(null);
   
   // Estado para avaliação
   const [nota, setNota] = useState(5);
   const [comentario, setComentario] = useState("");
   const [enviandoAvaliacao, setEnviandoAvaliacao] = useState(false);
-
-  const grauOrdem = { "Aprendiz": 1, "Companheiro": 2, "Mestre": 3 };
 
   useEffect(() => {
     const irmaoAuth = sessionStorage.getItem("irmao_auth");
@@ -58,49 +55,30 @@ export default function IrmaoAcervoDigital() {
   }, []);
 
   const loadData = async () => {
-    const [docs, avs] = await Promise.all([
-      base44.entities.AcervoDigital.filter({ ativo: true }, "-created_date"),
-      base44.entities.Avaliacao.filter({ documento_id: { "$ne": null } }, "-data_avaliacao")
+    const [itemsData, avs] = await Promise.all([
+      base44.entities.Item.filter({ ativo: true }, "nome"),
+      base44.entities.Avaliacao.filter({ item_id: { "$ne": null } }, "-data_avaliacao")
     ]);
-    setDocumentos(docs);
+    setItems(itemsData);
     setAvaliacoes(avs);
     setLoading(false);
   };
 
-  const getMediaAvaliacao = (docId) => {
-    const docAvaliacoes = avaliacoes.filter(av => av.documento_id === docId);
-    if (docAvaliacoes.length === 0) return 0;
-    const soma = docAvaliacoes.reduce((acc, curr) => acc + curr.nota, 0);
-    return soma / docAvaliacoes.length;
-  };
-
-  const podeAcessar = (doc) => {
-    if (!irmao?.grau) return false;
-    return grauOrdem[irmao.grau] >= grauOrdem[doc.grau_minimo];
-  };
-
-  const registrarDownload = (doc) => {
-    const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.arquivo_url)}&embedded=true`;
-    window.open(viewerUrl, '_blank');
-
-    base44.entities.LogDownload.create({
-      documento_id: doc.id,
-      documento_titulo: doc.titulo,
-      irmao_id: irmao.id,
-      irmao_nome: irmao.nome_completo,
-      irmao_numero_glp: irmao.numero_glp,
-      data_download: new Date().toISOString()
-    }).catch(console.error);
+  const getMediaAvaliacao = (itemId) => {
+    const itemAvaliacoes = avaliacoes.filter(av => av.item_id === itemId);
+    if (itemAvaliacoes.length === 0) return 0;
+    const soma = itemAvaliacoes.reduce((acc, curr) => acc + curr.nota, 0);
+    return soma / itemAvaliacoes.length;
   };
 
   const handleEnviarAvaliacao = async (e) => {
     e.preventDefault();
-    if (!docSelecionado) return;
+    if (!itemSelecionado) return;
 
     setEnviandoAvaliacao(true);
     try {
       await base44.entities.Avaliacao.create({
-        documento_id: docSelecionado.id,
+        item_id: itemSelecionado.id,
         irmao_id: irmao.id,
         irmao_nome: irmao.nome_completo,
         nota: nota,
@@ -111,7 +89,7 @@ export default function IrmaoAcervoDigital() {
       toast.success("Avaliação enviada com sucesso!");
       setNota(5);
       setComentario("");
-      loadData(); // Recarregar para atualizar média e lista
+      loadData();
     } catch (error) {
       console.error("Erro ao avaliar:", error);
       toast.error("Erro ao enviar avaliação");
@@ -119,21 +97,20 @@ export default function IrmaoAcervoDigital() {
     setEnviandoAvaliacao(false);
   };
 
-  const filteredDocs = documents => {
-    let filtered = documentos.filter(doc => {
-      const matchSearch = doc.titulo?.toLowerCase().includes(search.toLowerCase()) ||
-                         doc.autor?.toLowerCase().includes(search.toLowerCase());
-      const matchTipo = filtroTipo === "todos" || doc.tipo === filtroTipo;
-      const matchAcesso = podeAcessar(doc);
-      return matchSearch && matchTipo && matchAcesso;
+  const filteredItems = () => {
+    let filtered = items.filter(item => {
+      const matchSearch = item.nome?.toLowerCase().includes(search.toLowerCase()) ||
+                         item.autor?.toLowerCase().includes(search.toLowerCase());
+      const matchTipo = filtroTipo === "todos" || item.tipo === filtroTipo;
+      return matchSearch && matchTipo;
     });
 
     return filtered.sort((a, b) => {
-      if (filtroOrdem === "titulo") return a.titulo.localeCompare(b.titulo);
+      if (filtroOrdem === "nome") return a.nome.localeCompare(b.nome);
       if (filtroOrdem === "data") {
         const dateA = a.data_publicacao || a.created_date;
         const dateB = b.data_publicacao || b.created_date;
-        return new Date(dateB) - new Date(dateA); // Mais recente primeiro
+        return new Date(dateB) - new Date(dateA);
       }
       if (filtroOrdem === "nota") {
         return getMediaAvaliacao(b.id) - getMediaAvaliacao(a.id);
@@ -142,13 +119,7 @@ export default function IrmaoAcervoDigital() {
     });
   };
 
-  const docsFiltrados = filteredDocs();
-
-  const grauColors = {
-    "Aprendiz": "bg-blue-100 text-blue-700",
-    "Companheiro": "bg-amber-100 text-amber-700",
-    "Mestre": "bg-purple-100 text-purple-700"
-  };
+  const itemsFiltrados = filteredItems();
 
   const renderStars = (rating) => {
     return (
@@ -171,16 +142,16 @@ export default function IrmaoAcervoDigital() {
     );
   }
 
-  const docComments = docSelecionado 
-    ? avaliacoes.filter(av => av.documento_id === docSelecionado.id)
+  const itemComments = itemSelecionado 
+    ? avaliacoes.filter(av => av.item_id === itemSelecionado.id)
     : [];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Acervo Digital</h1>
+        <h1 className="text-2xl font-bold text-slate-800">Acervo Físico</h1>
         <p className="text-slate-500">
-          Livros e trabalhos disponíveis para leitura • Seu grau: {irmao?.grau || "—"}
+          Catálogo de livros e itens físicos disponíveis na biblioteca
         </p>
       </div>
 
@@ -189,7 +160,7 @@ export default function IrmaoAcervoDigital() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="Buscar por título ou autor..."
+            placeholder="Buscar por nome ou autor..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -204,10 +175,8 @@ export default function IrmaoAcervoDigital() {
             <SelectContent>
               <SelectItem value="todos">Todos Tipos</SelectItem>
               <SelectItem value="Livro">Livro</SelectItem>
-              <SelectItem value="Trabalho">Trabalho</SelectItem>
-              <SelectItem value="Artigo">Artigo</SelectItem>
-              <SelectItem value="Instrução">Instrução</SelectItem>
-              <SelectItem value="Ritual">Ritual</SelectItem>
+              <SelectItem value="Revista">Revista</SelectItem>
+              <SelectItem value="Periódico">Periódico</SelectItem>
               <SelectItem value="Outro">Outro</SelectItem>
             </SelectContent>
           </Select>
@@ -218,7 +187,7 @@ export default function IrmaoAcervoDigital() {
               <SelectValue placeholder="Ordenar" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="titulo">A-Z</SelectItem>
+              <SelectItem value="nome">A-Z</SelectItem>
               <SelectItem value="data">Mais Recentes</SelectItem>
               <SelectItem value="nota">Melhor Avaliados</SelectItem>
             </SelectContent>
@@ -226,82 +195,43 @@ export default function IrmaoAcervoDigital() {
         </div>
       </div>
 
-      {/* Lista de Documentos */}
+      {/* Lista de Itens */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {docsFiltrados.map((doc) => {
-          const temAcesso = podeAcessar(doc);
-          const media = getMediaAvaliacao(doc.id);
+        {itemsFiltrados.map((item) => {
+          const media = getMediaAvaliacao(item.id);
+          const disponivel = item.quantidade_disponivel > 0;
           
           return (
             <Card 
-              key={doc.id} 
-              className={`hover:shadow-lg transition-shadow ${!temAcesso ? 'opacity-60' : ''}`}
+              key={item.id} 
+              className="hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => setItemSelecionado(item)}
             >
               <CardContent className="p-4">
                 <div className="flex gap-4">
-                  <div className="w-16 h-20 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0 relative">
-                    {doc.capa_url ? (
-                      <img src={doc.capa_url} alt="" className="w-full h-full object-cover rounded-lg" />
+                  <div className="w-16 h-20 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    {item.imagem_capa ? (
+                      <img src={item.imagem_capa} alt="" className="w-full h-full object-cover rounded-lg" />
                     ) : (
-                      <FileText className="w-8 h-8 text-slate-400" />
-                    )}
-                    {!temAcesso && (
-                      <div className="absolute inset-0 bg-slate-900/50 rounded-lg flex items-center justify-center">
-                        <Lock className="w-5 h-5 text-white" />
-                      </div>
+                      <Book className="w-8 h-8 text-slate-400" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-slate-800 truncate">{doc.titulo}</h3>
-                    {doc.autor && (
-                      <p className="text-sm text-slate-500 truncate">{doc.autor}</p>
+                    <h3 className="font-semibold text-slate-800 truncate">{item.nome}</h3>
+                    {item.autor && (
+                      <p className="text-sm text-slate-500 truncate">{item.autor}</p>
                     )}
                     <div className="flex items-center gap-2 mt-1">
                       {renderStars(media)}
                       <span className="text-xs text-slate-400">({media > 0 ? media.toFixed(1) : "Sem nota"})</span>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      <Badge variant="outline" className="text-xs">{doc.tipo}</Badge>
-                      <Badge className={`${grauColors[doc.grau_minimo]} text-xs`}>
-                        {doc.grau_minimo}
+                      <Badge variant="outline" className="text-xs">{item.tipo}</Badge>
+                      <Badge className={disponivel ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}>
+                        {disponivel ? "Disponível" : "Indisponível"}
                       </Badge>
                     </div>
                   </div>
-                </div>
-                
-                <div className="mt-4 pt-4 border-t flex items-center justify-between">
-                   <div className="text-xs text-slate-400 flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {doc.data_publicacao 
-                        ? format(parseISO(doc.data_publicacao), "dd/MM/yyyy") 
-                        : "Data N/A"}
-                   </div>
-
-                  {temAcesso ? (
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDocSelecionado(doc)}
-                      >
-                        <Eye className="w-4 h-4 mr-1" />
-                        Detalhes
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="bg-[#1B3A5F] hover:bg-[#15304d]"
-                        onClick={() => registrarDownload(doc)}
-                      >
-                        <BookOpen className="w-4 h-4 mr-1" />
-                        Ler
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 text-xs text-slate-500">
-                      <Lock className="w-3 h-3" />
-                      Grau {doc.grau_minimo}
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
@@ -309,65 +239,78 @@ export default function IrmaoAcervoDigital() {
         })}
       </div>
 
-      {docsFiltrados.length === 0 && (
+      {itemsFiltrados.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <FileText className="w-12 h-12 mx-auto text-slate-300 mb-4" />
-            <p className="text-slate-500">Nenhum documento encontrado</p>
+            <Book className="w-12 h-12 mx-auto text-slate-300 mb-4" />
+            <p className="text-slate-500">Nenhum item encontrado</p>
           </CardContent>
         </Card>
       )}
 
-      <div className="text-center text-xs text-slate-400 mt-8 pb-4 border-t pt-4">
-        Conteúdo protegido por direitos autorais — uso permitido apenas para fins educacionais e sem autorização para reprodução ou distribuição
-      </div>
-
       {/* Dialog Detalhes */}
-      <Dialog open={!!docSelecionado} onOpenChange={() => setDocSelecionado(null)}>
+      <Dialog open={!!itemSelecionado} onOpenChange={() => setItemSelecionado(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{docSelecionado?.titulo}</DialogTitle>
+            <DialogTitle>{itemSelecionado?.nome}</DialogTitle>
           </DialogHeader>
-          {docSelecionado && (
+          {itemSelecionado && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row gap-6">
-                {docSelecionado.capa_url && (
+                {itemSelecionado.imagem_capa ? (
                   <img 
-                    src={docSelecionado.capa_url} 
+                    src={itemSelecionado.imagem_capa} 
                     alt="" 
                     className="w-full sm:w-48 h-64 object-cover rounded-lg shadow-md"
                   />
+                ) : (
+                  <div className="w-full sm:w-48 h-64 bg-slate-100 rounded-lg flex items-center justify-center">
+                    <Book className="w-16 h-16 text-slate-300" />
+                  </div>
                 )}
                 <div className="space-y-4 flex-1">
                   <div>
-                    <h3 className="font-semibold text-lg text-slate-800">Sobre a Obra</h3>
-                    {docSelecionado.autor && (
-                      <p className="text-slate-600">Autor: {docSelecionado.autor}</p>
+                    <h3 className="font-semibold text-lg text-slate-800">Detalhes do Item</h3>
+                    {itemSelecionado.autor && (
+                      <p className="text-slate-600">Autor: {itemSelecionado.autor}</p>
                     )}
                     <p className="text-slate-600">
-                      Publicado em: {docSelecionado.data_publicacao ? format(parseISO(docSelecionado.data_publicacao), "dd/MM/yyyy") : "—"}
+                      Publicado em: {itemSelecionado.data_publicacao ? format(parseISO(itemSelecionado.data_publicacao), "dd/MM/yyyy") : "—"}
                     </p>
-                    <div className="flex gap-2 mt-2">
-                      <Badge variant="outline">{docSelecionado.tipo}</Badge>
-                      <Badge className={grauColors[docSelecionado.grau_minimo]}>
-                        {docSelecionado.grau_minimo}
+                    <div className="flex gap-2 mt-2 flex-wrap">
+                      <Badge variant="outline">{itemSelecionado.tipo}</Badge>
+                      <Badge className="bg-slate-100 text-slate-700">
+                        <MapPin className="w-3 h-3 mr-1" />
+                        {itemSelecionado.localizacao || "Local não informado"}
+                      </Badge>
+                      <Badge className="bg-slate-100 text-slate-700">
+                        <GraduationCap className="w-3 h-3 mr-1" />
+                        Grau {itemSelecionado.grau_minimo}
                       </Badge>
                     </div>
                   </div>
+
+                  <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
+                    {itemSelecionado.quantidade_disponivel > 0 ? (
+                      <CheckCircle className="w-5 h-5 text-emerald-600" />
+                    ) : (
+                      <XCircle className="w-5 h-5 text-red-600" />
+                    )}
+                    <div>
+                      <p className="font-medium text-slate-800">
+                        {itemSelecionado.quantidade_disponivel} disponível(is)
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        Total no acervo: {itemSelecionado.quantidade_total}
+                      </p>
+                    </div>
+                  </div>
                   
-                  {docSelecionado.descricao && (
+                  {itemSelecionado.descricao && (
                     <div className="text-slate-600 text-sm leading-relaxed">
-                      {docSelecionado.descricao}
+                      {itemSelecionado.descricao}
                     </div>
                   )}
-
-                  <Button
-                    className="w-full bg-[#1B3A5F] hover:bg-[#15304d]"
-                    onClick={() => registrarDownload(docSelecionado)}
-                  >
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    Ler Documento
-                  </Button>
                 </div>
               </div>
 
@@ -380,8 +323,8 @@ export default function IrmaoAcervoDigital() {
 
                 {/* Lista de Comentários */}
                 <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
-                  {docComments.length > 0 ? (
-                    docComments.map((comment) => (
+                  {itemComments.length > 0 ? (
+                    itemComments.map((comment) => (
                       <div key={comment.id} className="bg-slate-50 p-3 rounded-lg text-sm">
                         <div className="flex justify-between items-start mb-1">
                           <span className="font-medium text-slate-700">{comment.irmao_nome}</span>
