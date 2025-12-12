@@ -73,6 +73,7 @@ export default function Layout({ children, currentPageName }) {
 
   const irmaoLinks = [
     { name: "Meus Empréstimos", page: "IrmaoEmprestimos", icon: BookMarked },
+    { name: "Acervo Físico", page: "IrmaoAcervo", icon: Library },
     { name: "Acervo Digital", page: "IrmaoAcervoDigital", icon: BookOpen },
     { name: "Escanear QR", page: "IrmaoScan", icon: QrCode },
   ];
