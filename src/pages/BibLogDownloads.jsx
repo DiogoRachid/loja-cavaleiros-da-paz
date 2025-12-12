@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { 
-  Loader2, Search, Calendar, Download, Clock, FileText, Filter, User
+  Loader2, Search, Calendar, Download, Clock, FileText, User, Trash2
 } from "lucide-react";
 import {
   Select,
@@ -14,8 +14,20 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 export default function BibLogDownloads() {
   const [logs, setLogs] = useState([]);
@@ -24,6 +36,10 @@ export default function BibLogDownloads() {
   const [irmaos, setIrmaos] = useState([]);
   const [filtroIrmao, setFiltroIrmao] = useState("todos");
   const [filtroDoc, setFiltroDoc] = useState("todos");
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(null); // 'single' or 'all'
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   useEffect(() => {
     const bibAuth = sessionStorage.getItem("bib_auth");
@@ -35,8 +51,9 @@ export default function BibLogDownloads() {
   }, []);
 
   const loadLogs = async () => {
+    setLoading(true);
     const [data, listaIrmaos] = await Promise.all([
-      base44.entities.LogDownload.list("-data_download", 200),
+      base44.entities.LogDownload.list("-data_download", 500),
       base44.entities.Irmao.list("nome_completo", 1000)
     ]);
     setLogs(data);
@@ -52,6 +69,24 @@ export default function BibLogDownloads() {
     const matchDoc = filtroDoc === "todos" || log.documento_titulo === filtroDoc;
     return matchSearch && matchIrmao && matchDoc;
   });
+
+  const handleDelete = async () => {
+    try {
+      if (deleteMode === 'all') {
+        const promises = filteredLogs.map(log => base44.entities.LogDownload.delete(log.id));
+        await Promise.all(promises);
+        toast.success("Histórico apagado com sucesso");
+      } else if (deleteMode === 'single' && itemToDelete) {
+        await base44.entities.LogDownload.delete(itemToDelete.id);
+        toast.success("Registro apagado");
+      }
+      setDeleteDialogOpen(false);
+      loadLogs();
+    } catch (error) {
+      console.error("Erro ao deletar:", error);
+      toast.error("Erro ao apagar registros");
+    }
+  };
 
   // Extrair lista única de documentos dos logs para o filtro
   const uniqueDocs = [...new Set(logs.map(log => log.documento_titulo))].sort();
@@ -74,9 +109,19 @@ export default function BibLogDownloads() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Downloads do Acervo Digital</h1>
-        <p className="text-slate-500">{logs.length} download(s) registrado(s)</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Downloads do Acervo Digital</h1>
+          <p className="text-slate-500">{logs.length} download(s) registrado(s)</p>
+        </div>
+        <Button 
+          variant="destructive"
+          onClick={() => { setDeleteMode('all'); setDeleteDialogOpen(true); }}
+          disabled={filteredLogs.length === 0}
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Limpar Filtro Atual
+        </Button>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4">
@@ -140,7 +185,7 @@ export default function BibLogDownloads() {
               <Card>
                 <CardContent className="p-0 divide-y">
                   {dayLogs.map((log) => (
-                    <div key={log.id} className="flex items-center gap-4 p-4">
+                    <div key={log.id} className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors group">
                       <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                         <FileText className="w-5 h-5 text-blue-600" />
                       </div>
@@ -150,12 +195,24 @@ export default function BibLogDownloads() {
                           {log.irmao_nome} • GLP: {log.irmao_numero_glp}
                         </p>
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <div className="flex items-center gap-1 text-sm text-slate-600">
-                          <Clock className="w-4 h-4" />
+                      <div className="flex flex-col items-end gap-1">
+                        <div className="text-sm text-slate-600 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
                           {format(parseISO(log.data_download), "HH:mm")}
                         </div>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600"
+                        onClick={() => { 
+                          setItemToDelete(log); 
+                          setDeleteMode('single'); 
+                          setDeleteDialogOpen(true); 
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   ))}
                 </CardContent>
@@ -164,6 +221,25 @@ export default function BibLogDownloads() {
           ))}
         </div>
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteMode === 'all' 
+                ? `Tem certeza que deseja apagar ${filteredLogs.length} registros listados? Esta ação não pode ser desfeita.`
+                : "Tem certeza que deseja apagar este registro de download?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+              Apagar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

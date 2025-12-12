@@ -4,7 +4,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { 
   Plus, Search, Filter, Loader2, BookMarked, 
-  ArrowLeftRight, CheckCircle, AlertTriangle, User, Library
+  ArrowLeftRight, CheckCircle, AlertTriangle, User, Library, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,14 +24,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { format, parseISO, isAfter } from "date-fns";
 import EmprestimoForm from "@/components/biblioteca/EmprestimoForm";
 import DevolucaoForm from "@/components/biblioteca/DevolucaoForm";
+import { toast } from "sonner";
 
 export default function BibEmprestimos() {
   const navigate = useNavigate();
@@ -46,6 +51,9 @@ export default function BibEmprestimos() {
   const [emprestimoFormOpen, setEmprestimoFormOpen] = useState(false);
   const [devolucaoFormOpen, setDevolucaoFormOpen] = useState(false);
   const [selectedEmprestimo, setSelectedEmprestimo] = useState(null);
+  
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   useEffect(() => {
     const bibAuth = sessionStorage.getItem("bib_auth");
@@ -95,6 +103,21 @@ export default function BibEmprestimos() {
     await loadEmprestimos();
     setDevolucaoFormOpen(false);
     setSelectedEmprestimo(null);
+  };
+
+  const handleDelete = async () => {
+    if (itemToDelete) {
+      try {
+        await base44.entities.Emprestimo.delete(itemToDelete.id);
+        toast.success("Empréstimo apagado");
+        setDeleteDialogOpen(false);
+        setItemToDelete(null);
+        loadEmprestimos();
+      } catch (error) {
+        console.error("Erro ao apagar:", error);
+        toast.error("Erro ao apagar empréstimo");
+      }
+    }
   };
 
   const openDevolucao = (emp) => {
@@ -209,7 +232,7 @@ export default function BibEmprestimos() {
           {filteredEmprestimos.map((emp) => (
             <Card 
               key={emp.id} 
-              className={`hover:shadow-md transition-shadow ${
+              className={`hover:shadow-md transition-shadow group ${
                 emp.status === "Atrasado" ? "border-red-200" : ""
               }`}
             >
@@ -256,15 +279,27 @@ export default function BibEmprestimos() {
                         </p>
                       )}
                     </div>
-                    {(emp.status === "Ativo" || emp.status === "Atrasado") && (
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => openDevolucao(emp)}
+                    
+                    <div className="flex gap-2">
+                      {(emp.status === "Ativo" || emp.status === "Atrasado") && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => openDevolucao(emp)}
+                        >
+                          Registrar Devolução
+                        </Button>
+                      )}
+                      
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => { setItemToDelete(emp); setDeleteDialogOpen(true); }}
                       >
-                        Registrar Devolução
+                        <Trash2 className="w-4 h-4" />
                       </Button>
-                    )}
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -299,6 +334,24 @@ export default function BibEmprestimos() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Dialogo Excluir */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Empréstimo</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja apagar este registro de empréstimo? Esta ação é irreversível e removerá o histórico.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+              Apagar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

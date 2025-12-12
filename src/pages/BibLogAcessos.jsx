@@ -2,8 +2,12 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { 
-  Loader2, Search, Calendar, User, Clock, LogIn, Filter
+  History, Search, Loader2, Calendar, User, 
+  Filter, Shield, Trash2, CheckSquare
 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -11,11 +15,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 export default function BibLogAcessos() {
   const [logs, setLogs] = useState([]);
@@ -23,6 +36,10 @@ export default function BibLogAcessos() {
   const [search, setSearch] = useState("");
   const [irmaos, setIrmaos] = useState([]);
   const [filtroIrmao, setFiltroIrmao] = useState("todos");
+  
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(null); // 'single' or 'all'
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   useEffect(() => {
     const bibAuth = sessionStorage.getItem("bib_auth");
@@ -34,8 +51,9 @@ export default function BibLogAcessos() {
   }, []);
 
   const loadLogs = async () => {
+    setLoading(true);
     const [data, listaIrmaos] = await Promise.all([
-      base44.entities.LogAcesso.list("-data_acesso", 200),
+      base44.entities.LogAcesso.list("-data_acesso", 500),
       base44.entities.Irmao.list("nome_completo", 1000)
     ]);
     setLogs(data);
@@ -49,6 +67,24 @@ export default function BibLogAcessos() {
     const matchIrmao = filtroIrmao === "todos" || log.irmao_id === filtroIrmao;
     return matchSearch && matchIrmao;
   });
+
+  const handleDelete = async () => {
+    try {
+      if (deleteMode === 'all') {
+        const promises = filteredLogs.map(log => base44.entities.LogAcesso.delete(log.id));
+        await Promise.all(promises);
+        toast.success("Histórico apagado com sucesso");
+      } else if (deleteMode === 'single' && itemToDelete) {
+        await base44.entities.LogAcesso.delete(itemToDelete.id);
+        toast.success("Registro apagado");
+      }
+      setDeleteDialogOpen(false);
+      loadLogs();
+    } catch (error) {
+      console.error("Erro ao deletar:", error);
+      toast.error("Erro ao apagar registros");
+    }
+  };
 
   // Agrupar por data
   const groupedLogs = filteredLogs.reduce((acc, log) => {
@@ -68,9 +104,19 @@ export default function BibLogAcessos() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Registro de Acessos</h1>
-        <p className="text-slate-500">{logs.length} acesso(s) registrado(s)</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Registro de Acessos</h1>
+          <p className="text-slate-500">{logs.length} acesso(s) registrado(s)</p>
+        </div>
+        <Button 
+          variant="destructive"
+          onClick={() => { setDeleteMode('all'); setDeleteDialogOpen(true); }}
+          disabled={filteredLogs.length === 0}
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Limpar Filtro Atual
+        </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
@@ -102,7 +148,7 @@ export default function BibLogAcessos() {
       {Object.keys(groupedLogs).length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <LogIn className="w-12 h-12 mx-auto text-slate-300 mb-4" />
+            <Shield className="w-12 h-12 mx-auto text-slate-300 mb-4" />
             <p className="text-slate-500">Nenhum acesso registrado</p>
           </CardContent>
         </Card>
@@ -120,23 +166,34 @@ export default function BibLogAcessos() {
               <Card>
                 <CardContent className="p-0 divide-y">
                   {dayLogs.map((log) => (
-                    <div key={log.id} className="flex items-center gap-4 p-4">
+                    <div key={log.id} className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors group">
                       <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                        <LogIn className="w-5 h-5 text-emerald-600" />
+                        <User className="w-5 h-5 text-emerald-600" />
                       </div>
                       <div className="flex-1">
                         <p className="font-medium text-slate-800">{log.irmao_nome}</p>
                         <p className="text-sm text-slate-500">GLP: {log.irmao_numero_glp}</p>
                       </div>
-                      <div className="text-right">
-                        <div className="flex items-center gap-1 text-sm text-slate-600">
-                          <Clock className="w-4 h-4" />
-                          {format(parseISO(log.data_acesso), "HH:mm")}
+                      <div className="flex flex-col items-end gap-1">
+                        <div className="text-sm text-slate-600">
+                           {format(parseISO(log.data_acesso), "HH:mm")}
                         </div>
-                        <Badge className="bg-emerald-100 text-emerald-700 mt-1">
+                        <Badge className="bg-emerald-100 text-emerald-700 text-xs">
                           {log.tipo_acesso}
                         </Badge>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600"
+                        onClick={() => { 
+                          setItemToDelete(log); 
+                          setDeleteMode('single'); 
+                          setDeleteDialogOpen(true); 
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   ))}
                 </CardContent>
@@ -145,6 +202,25 @@ export default function BibLogAcessos() {
           ))}
         </div>
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteMode === 'all' 
+                ? `Tem certeza que deseja apagar ${filteredLogs.length} registros listados? Esta ação não pode ser desfeita.`
+                : "Tem certeza que deseja apagar este registro de acesso?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+              Apagar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
