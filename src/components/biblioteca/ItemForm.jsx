@@ -21,6 +21,7 @@ export default function ItemForm({ item, onSave, onCancel }) {
     tipo: "Livro",
     autor: "",
     descricao: "",
+    data_publicacao: "",
     grau_minimo: "Aprendiz",
     quantidade_total: 1,
     quantidade_disponivel: 1,
@@ -37,6 +38,7 @@ export default function ItemForm({ item, onSave, onCancel }) {
         tipo: item.tipo || "Livro",
         autor: item.autor || "",
         descricao: item.descricao || "",
+        data_publicacao: item.data_publicacao || "",
         grau_minimo: item.grau_minimo || "Aprendiz",
         quantidade_total: item.quantidade_total || 1,
         quantidade_disponivel: item.quantidade_disponivel || 1,
@@ -112,6 +114,16 @@ export default function ItemForm({ item, onSave, onCancel }) {
             value={formData.autor}
             onChange={(e) => handleChange("autor", e.target.value)}
             placeholder="Ex: José da Silva"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="data_publicacao">Data de Publicação</Label>
+          <Input
+            id="data_publicacao"
+            type="date"
+            value={formData.data_publicacao}
+            onChange={(e) => handleChange("data_publicacao", e.target.value)}
           />
         </div>
 

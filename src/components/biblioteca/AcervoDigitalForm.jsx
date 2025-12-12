@@ -21,6 +21,7 @@ export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
     autor: "",
     tipo: "Livro",
     descricao: "",
+    data_publicacao: "",
     grau_minimo: "Aprendiz",
     arquivo_url: "",
     capa_url: "",
@@ -34,6 +35,7 @@ export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
         autor: documento.autor || "",
         tipo: documento.tipo || "Livro",
         descricao: documento.descricao || "",
+        data_publicacao: documento.data_publicacao || "",
         grau_minimo: documento.grau_minimo || "Aprendiz",
         arquivo_url: documento.arquivo_url || "",
         capa_url: documento.capa_url || "",
@@ -87,6 +89,16 @@ export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
           value={formData.autor}
           onChange={(e) => handleChange("autor", e.target.value)}
           placeholder="Nome do autor"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="data_publicacao">Data de Publicação</Label>
+        <Input
+          id="data_publicacao"
+          type="date"
+          value={formData.data_publicacao}
+          onChange={(e) => handleChange("data_publicacao", e.target.value)}
         />
       </div>
 
