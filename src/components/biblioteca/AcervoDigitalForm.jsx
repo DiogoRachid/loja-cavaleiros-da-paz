@@ -26,7 +26,8 @@ export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
     grau_minimo: "Aprendiz",
     arquivo_url: "",
     capa_url: "",
-    ativo: true
+    ativo: true,
+    disponivel: true
   });
 
   useEffect(() => {
