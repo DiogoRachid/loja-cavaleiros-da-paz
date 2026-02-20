@@ -65,6 +65,7 @@ import IrmaoLogin from './pages/IrmaoLogin';
 import IrmaoScan from './pages/IrmaoScan';
 import ScanDevolucao from './pages/ScanDevolucao';
 import ScanRetirada from './pages/ScanRetirada';
+import IrmaoAcervoDigital from './pages/IrmaoAcervoDigital';
 import __Layout from './Layout.jsx';
 
 
@@ -87,6 +88,7 @@ export const PAGES = {
     "IrmaoScan": IrmaoScan,
     "ScanDevolucao": ScanDevolucao,
     "ScanRetirada": ScanRetirada,
+    "IrmaoAcervoDigital": IrmaoAcervoDigital,
 }
 
 export const pagesConfig = {
