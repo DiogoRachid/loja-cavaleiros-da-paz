@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import AcervoDigitalForm from "@/components/biblioteca/AcervoDigitalForm";
+import AcervoDigitalForm from "@/components/biblioteca/AcervoDigitalForm.jsx";
 
 export default function BibAcervoDigital() {
   const [documentos, setDocumentos] = useState([]);
