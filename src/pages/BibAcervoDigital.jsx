@@ -205,6 +205,15 @@ export default function BibAcervoDigital() {
                   onClick={() => { setDocParaDeletar(doc); setDeleteDialogOpen(true); }}
                 >
                   <Trash2 className="w-4 h-4" />
+               
+               <div className="flex items-center justify-between mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                 <span className="text-sm text-slate-600">Disponível para irmãos</span>
+                 <Switch 
+                   checked={doc.disponivel !== false}
+                   onCheckedChange={() => handleToggleDisponibilidade(doc)}
+                 />
+               </div>
+
                 </Button>
               </div>
             </CardContent>
