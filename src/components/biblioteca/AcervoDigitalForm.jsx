@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -12,7 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Upload, FileText, Check } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
 
 export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
   const [saving, setSaving] = useState(false);
@@ -41,7 +41,8 @@ export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
         grau_minimo: documento.grau_minimo || "Aprendiz",
         arquivo_url: documento.arquivo_url || "",
         capa_url: documento.capa_url || "",
-        ativo: documento.ativo !== false
+        ativo: documento.ativo !== false,
+        disponivel: documento.disponivel !== false
       });
     }
   }, [documento]);
@@ -225,6 +226,26 @@ export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
               />
             </label>
           )}
+        </div>
+      </div>
+
+      {/* Status toggles */}
+      <div className="space-y-3 p-4 bg-slate-50 rounded-lg border">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="ativo" className="cursor-pointer">Ativo</Label>
+          <Switch
+            id="ativo"
+            checked={formData.ativo}
+            onCheckedChange={(v) => handleChange("ativo", v)}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="disponivel" className="cursor-pointer">Disponível para os irmãos</Label>
+          <Switch
+            id="disponivel"
+            checked={formData.disponivel}
+            onCheckedChange={(v) => handleChange("disponivel", v)}
+          />
         </div>
       </div>
 
