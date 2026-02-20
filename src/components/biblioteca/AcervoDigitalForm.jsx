@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Upload, FileText, Check } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
   const [saving, setSaving] = useState(false);
