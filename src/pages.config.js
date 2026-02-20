@@ -48,7 +48,6 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import BibAcervo from './pages/BibAcervo';
-import BibAcervoDigital from './pages/BibAcervoDigital';
 import BibBibliotecarios from './pages/BibBibliotecarios';
 import BibDashboard from './pages/BibDashboard';
 import BibEmprestimos from './pages/BibEmprestimos';
@@ -71,7 +70,6 @@ import __Layout from './Layout.jsx';
 
 export const PAGES = {
     "BibAcervo": BibAcervo,
-    "BibAcervoDigital": BibAcervoDigital,
     "BibBibliotecarios": BibBibliotecarios,
     "BibDashboard": BibDashboard,
     "BibEmprestimos": BibEmprestimos,
