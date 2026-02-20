@@ -208,15 +208,15 @@ export default function IrmaoAcervoDigital() {
       </div>
 
       {/* Lista de Documentos */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 auto-rows-max">
         {filteredDocs.map((doc) => {
           const mediaAvaliacao = getMediaAvaliacao(doc.id);
           const totalAvaliacoes = avaliacoes.filter(av => av.documento_id === doc.id).length;
           
           return (
-            <Card key={doc.id} className="hover:shadow-lg transition-shadow overflow-hidden flex flex-col h-full">
-              <CardContent className="p-4 flex flex-col h-full">
-                <div className="flex gap-4 mb-4">
+            <Card key={doc.id} className="hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
+              <CardContent className="p-4 flex flex-col gap-4 h-full">
+                <div className="flex gap-4">
                   <div className="w-16 h-20 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
                     {doc.capa_url ? (
                       <img src={doc.capa_url} alt="" className="w-full h-full object-cover rounded-lg" />
@@ -225,65 +225,67 @@ export default function IrmaoAcervoDigital() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-slate-800 truncate">{doc.titulo}</h3>
+                    <h3 className="font-semibold text-slate-800 line-clamp-2">{doc.titulo}</h3>
                     {doc.autor && (
-                      <p className="text-sm text-slate-500 truncate">{doc.autor}</p>
+                      <p className="text-xs text-slate-500 line-clamp-1 mt-1">{doc.autor}</p>
                     )}
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <Badge variant="outline">{doc.tipo}</Badge>
-                      <Badge className={grauColors[doc.grau_minimo]}>
-                        <GraduationCap className="w-3 h-3 mr-1" />
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      <Badge variant="outline" className="text-xs">{doc.tipo}</Badge>
+                      <Badge className={`${grauColors[doc.grau_minimo]} text-xs`}>
+                        <GraduationCap className="w-2 h-2 mr-1" />
                         {doc.grau_minimo}
                       </Badge>
                     </div>
                   </div>
                 </div>
 
-                {/* Avaliação */}
-                {mediaAvaliacao > 0 && (
-                  <div className="flex items-center gap-2 mb-3 text-sm text-slate-600">
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${i < Math.round(mediaAvaliacao) ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`}
-                        />
-                      ))}
+                <div className="space-y-2">
+                  {/* Avaliação */}
+                  {mediaAvaliacao > 0 && (
+                    <div className="flex items-center gap-2 text-xs text-slate-600">
+                      <div className="flex gap-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-3 h-3 ${i < Math.round(mediaAvaliacao) ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-slate-500">({totalAvaliacoes})</span>
                     </div>
-                    <span>({totalAvaliacoes})</span>
-                  </div>
-                )}
+                  )}
 
-                {/* Data de publicação */}
-                {doc.data_publicacao && (
-                  <div className="flex items-center gap-2 mb-3 text-xs text-slate-500">
-                    <Calendar className="w-3 h-3" />
-                    {format(parseISO(doc.data_publicacao), 'dd/MM/yyyy')}
-                  </div>
-                )}
+                  {/* Data de publicação */}
+                  {doc.data_publicacao && (
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <Calendar className="w-3 h-3 flex-shrink-0" />
+                      <span>{format(parseISO(doc.data_publicacao), 'dd/MM/yyyy')}</span>
+                    </div>
+                  )}
 
-                {/* Descrição */}
-                {doc.descricao && (
-                  <p className="text-sm text-slate-600 mb-4 line-clamp-2">{doc.descricao}</p>
-                )}
+                  {/* Descrição */}
+                  {doc.descricao && (
+                    <p className="text-xs text-slate-600 line-clamp-2">{doc.descricao}</p>
+                  )}
+                </div>
 
-                <div className="flex gap-2 mt-auto pt-4 border-t">
+                <div className="flex gap-2 pt-2 border-t">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
+                    className="flex-1 text-xs"
                     onClick={() => registrarDownload(doc)}
                   >
-                    <Eye className="w-4 h-4 mr-1" />
-                    Visualizar
+                    <Eye className="w-3 h-3 mr-1" />
+                    Ver PDF
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="flex-1"
+                    className="flex-1 text-xs"
                     onClick={() => setDocSelecionado(doc)}
                   >
-                    <MessageSquare className="w-4 h-4 mr-1" />
+                    <MessageSquare className="w-3 h-3 mr-1" />
                     Avaliar
                   </Button>
                 </div>
