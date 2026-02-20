@@ -60,7 +60,6 @@ import BibQRCodes from './pages/BibQRCodes';
 import BibRelatorios from './pages/BibRelatorios';
 import Home from './pages/Home';
 import IrmaoAcervo from './pages/IrmaoAcervo';
-import IrmaoAcervoDigital from './pages/IrmaoAcervoDigital';
 import IrmaoEmprestimos from './pages/IrmaoEmprestimos';
 import IrmaoLogin from './pages/IrmaoLogin';
 import IrmaoScan from './pages/IrmaoScan';
@@ -83,7 +82,6 @@ export const PAGES = {
     "BibRelatorios": BibRelatorios,
     "Home": Home,
     "IrmaoAcervo": IrmaoAcervo,
-    "IrmaoAcervoDigital": IrmaoAcervoDigital,
     "IrmaoEmprestimos": IrmaoEmprestimos,
     "IrmaoLogin": IrmaoLogin,
     "IrmaoScan": IrmaoScan,
