@@ -80,6 +80,14 @@ export default function BibAcervoDigital() {
     }
   };
 
+   const handleToggleDisponibilidade = async (doc) => {
+     await base44.entities.AcervoDigital.update(doc.id, {
+       disponivel: !doc.disponivel
+     });
+     loadDocumentos();
+   };
+
+
   const filteredDocs = documentos.filter(doc => {
     const matchSearch = doc.titulo?.toLowerCase().includes(search.toLowerCase()) ||
                        doc.autor?.toLowerCase().includes(search.toLowerCase());
