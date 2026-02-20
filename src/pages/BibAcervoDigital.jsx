@@ -240,7 +240,7 @@ export default function BibAcervoDigital() {
             </DialogTitle>
           </DialogHeader>
           <AcervoDigitalForm
-            item={editando}
+            documento={editando}
             onSave={handleSave}
             onCancel={() => setFormOpen(false)}
           />
