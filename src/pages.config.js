@@ -48,6 +48,7 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import BibAcervo from './pages/BibAcervo';
+import BibAcervoDigital from './pages/BibAcervoDigital';
 import BibBibliotecarios from './pages/BibBibliotecarios';
 import BibDashboard from './pages/BibDashboard';
 import BibEmprestimos from './pages/BibEmprestimos';
@@ -59,18 +60,18 @@ import BibQRCodes from './pages/BibQRCodes';
 import BibRelatorios from './pages/BibRelatorios';
 import Home from './pages/Home';
 import IrmaoAcervo from './pages/IrmaoAcervo';
+import IrmaoAcervoDigital from './pages/IrmaoAcervoDigital';
 import IrmaoEmprestimos from './pages/IrmaoEmprestimos';
 import IrmaoLogin from './pages/IrmaoLogin';
 import IrmaoScan from './pages/IrmaoScan';
 import ScanDevolucao from './pages/ScanDevolucao';
 import ScanRetirada from './pages/ScanRetirada';
-import IrmaoAcervoDigital from './pages/IrmaoAcervoDigital';
-import BibAcervoDigital from './pages/BibAcervoDigital';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "BibAcervo": BibAcervo,
+    "BibAcervoDigital": BibAcervoDigital,
     "BibBibliotecarios": BibBibliotecarios,
     "BibDashboard": BibDashboard,
     "BibEmprestimos": BibEmprestimos,
@@ -82,13 +83,12 @@ export const PAGES = {
     "BibRelatorios": BibRelatorios,
     "Home": Home,
     "IrmaoAcervo": IrmaoAcervo,
+    "IrmaoAcervoDigital": IrmaoAcervoDigital,
     "IrmaoEmprestimos": IrmaoEmprestimos,
     "IrmaoLogin": IrmaoLogin,
     "IrmaoScan": IrmaoScan,
     "ScanDevolucao": ScanDevolucao,
     "ScanRetirada": ScanRetirada,
-    "IrmaoAcervoDigital": IrmaoAcervoDigital,
-    "BibAcervoDigital": BibAcervoDigital,
 }
 
 export const pagesConfig = {
