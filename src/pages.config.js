@@ -80,6 +80,11 @@ import AdminRelatorios from './pages/AdminRelatorios';
 import AdminAutoridades from './pages/AdminAutoridades';
 import AdminOrdemEntrada from './pages/AdminOrdemEntrada';
 import AdminAgendaRitual from './pages/AdminAgendaRitual';
+import AdminMensalidades from './pages/AdminMensalidades';
+import AdminRelatorioFinanceiro from './pages/AdminRelatorioFinanceiro';
+import AdminCadastroIrmaos from './pages/AdminCadastroIrmaos';
+import AdminPresencas from './pages/AdminPresencas';
+import AdminAtestados from './pages/AdminAtestados';
 import __Layout from './Layout.jsx';
 
 
@@ -117,6 +122,11 @@ export const PAGES = {
     "AdminAutoridades": AdminAutoridades,
     "AdminOrdemEntrada": AdminOrdemEntrada,
     "AdminAgendaRitual": AdminAgendaRitual,
+    "AdminMensalidades": AdminMensalidades,
+    "AdminRelatorioFinanceiro": AdminRelatorioFinanceiro,
+    "AdminCadastroIrmaos": AdminCadastroIrmaos,
+    "AdminPresencas": AdminPresencas,
+    "AdminAtestados": AdminAtestados,
 }
 
 export const pagesConfig = {
