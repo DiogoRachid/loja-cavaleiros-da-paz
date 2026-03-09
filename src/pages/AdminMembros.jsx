@@ -51,6 +51,12 @@ export default function AdminMembros() {
     setSaving(false);
   };
 
+  const excluir = async (id) => {
+    if (!confirm("Deseja excluir permanentemente este irmão?")) return;
+    await base44.entities.Irmao.delete(id);
+    await loadIrmaos();
+  };
+
   const filtrados = irmaos
     .filter(i => {
       const matchBusca = !busca || i.nome_completo?.toLowerCase().includes(busca.toLowerCase()) || i.numero_glp?.includes(busca);
