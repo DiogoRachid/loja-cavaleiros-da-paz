@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { UserPlus, Edit2, Trash2, X, Save, Search, Upload } from "lucide-react";
+import { UserPlus, Edit2, Trash2, X, Save, Search, ArrowUp, ArrowDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,35 +11,52 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const CARGOS = ["Nenhum","Venerável Mestre","Primeiro Vigilante","Segundo Vigilante","Orador","Secretário","Tesoureiro","Chanceler","Bibliotecário","Mestre de Cerimônias","Primeiro Diácono","Segundo Diácono","Porta Bandeira","Porta Espada","Arquiteto","Hospitaleiro","Músico","Cobrador","Guarda Interno","Guarda Externo","Primeiro Experto","Segundo Experto","Mestre de Banquetes"];
 
 const FORM_VAZIO = {
-  nome_completo: "", cim: "", numero_glp: "", email: "", telefone: "",
+  nome_completo: "", numero_glp: "", email: "", telefone: "",
   grau: "Aprendiz", cargo: "Nenhum", situacao: "Regular", ativo: true,
   data_iniciacao: "", data_elevacao: "", data_exaltacao: "",
   profissao: "", data_nascimento: "", endereco: "", observacoes: "",
   senha: "", primeiro_acesso: true,
 };
 
+const situacaoColors = { Regular: "bg-green-100 text-green-800", Irregular: "bg-red-100 text-red-800", Suspenso: "bg-orange-100 text-orange-800", Afastado: "bg-slate-100 text-slate-600" };
+
 export default function AdminCadastroIrmaos() {
   const [irmaos, setIrmaos] = useState([]);
   const [busca, setBusca] = useState("");
+  const [filtroGrau, setFiltroGrau] = useState("Todos");
+  const [filtroSituacao, setFiltroSituacao] = useState("Todos");
+  const [filtroCargo, setFiltroCargo] = useState("Todos");
   const [showForm, setShowForm] = useState(false);
   const [editando, setEditando] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
   const [saving, setSaving] = useState(false);
+  const [sortField, setSortField] = useState("nome_completo");
+  const [sortDir, setSortDir] = useState("asc");
 
   useEffect(() => { loadIrmaos(); }, []);
 
   const loadIrmaos = async () => {
-    const data = await base44.entities.Irmao.list("-created_date", 100);
+    const data = await base44.entities.Irmao.list("-created_date", 200);
     setIrmaos(data);
+  };
+
+  const toggleSort = (field) => {
+    if (sortField === field) setSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setSortField(field); setSortDir("asc"); }
+  };
+
+  const SortIcon = ({ field }) => {
+    if (sortField !== field) return <ArrowUp className="w-3 h-3 opacity-30" />;
+    return sortDir === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />;
   };
 
   const abrirNovo = () => { setForm(FORM_VAZIO); setEditando(null); setShowForm(true); };
   const abrirEdicao = (ir) => { setForm({ ...ir }); setEditando(ir.id); setShowForm(true); };
 
   const salvar = async () => {
-    if (!form.nome_completo || !form.cim) return alert("Nome e CIM são obrigatórios.");
+    if (!form.nome_completo || !form.numero_glp) return alert("Nome e Nº GLP são obrigatórios.");
     setSaving(true);
-    const dados = { ...form, senha: form.senha || form.cim };
+    const dados = { ...form, senha: form.senha || form.numero_glp };
     if (editando) await base44.entities.Irmao.update(editando, dados);
     else await base44.entities.Irmao.create(dados);
     await loadIrmaos();
@@ -53,11 +70,19 @@ export default function AdminCadastroIrmaos() {
     await loadIrmaos();
   };
 
-  const filtrados = irmaos.filter(i =>
-    !busca || i.nome_completo?.toLowerCase().includes(busca.toLowerCase()) || i.cim?.includes(busca)
-  );
-
-  const situacaoColors = { Regular: "bg-green-100 text-green-800", Irregular: "bg-red-100 text-red-800", Suspenso: "bg-orange-100 text-orange-800", Afastado: "bg-slate-100 text-slate-600" };
+  const filtrados = irmaos
+    .filter(i => {
+      const matchBusca = !busca || i.nome_completo?.toLowerCase().includes(busca.toLowerCase()) || i.numero_glp?.includes(busca);
+      const matchGrau = filtroGrau === "Todos" || i.grau === filtroGrau;
+      const matchSituacao = filtroSituacao === "Todos" || i.situacao === filtroSituacao;
+      const matchCargo = filtroCargo === "Todos" || i.cargo === filtroCargo;
+      return matchBusca && matchGrau && matchSituacao && matchCargo;
+    })
+    .sort((a, b) => {
+      const va = (a[sortField] || "").toString().toLowerCase();
+      const vb = (b[sortField] || "").toString().toLowerCase();
+      return sortDir === "asc" ? va.localeCompare(vb) : vb.localeCompare(va);
+    });
 
   return (
     <div className="space-y-6">
@@ -76,10 +101,24 @@ export default function AdminCadastroIrmaos() {
         </Button>
       </div>
 
-      {/* Busca */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <Input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar por nome ou CIM..." className="pl-9" />
+      {/* Filtros */}
+      <div className="flex gap-3 flex-wrap">
+        <div className="relative flex-1 min-w-48">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar por nome ou Nº GLP..." className="pl-9" />
+        </div>
+        <Select value={filtroGrau} onValueChange={setFiltroGrau}>
+          <SelectTrigger className="w-36"><SelectValue placeholder="Grau" /></SelectTrigger>
+          <SelectContent>{["Todos","Aprendiz","Companheiro","Mestre"].map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
+        </Select>
+        <Select value={filtroSituacao} onValueChange={setFiltroSituacao}>
+          <SelectTrigger className="w-36"><SelectValue placeholder="Situação" /></SelectTrigger>
+          <SelectContent>{["Todos","Regular","Irregular","Suspenso","Afastado"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+        </Select>
+        <Select value={filtroCargo} onValueChange={setFiltroCargo}>
+          <SelectTrigger className="w-44"><SelectValue placeholder="Cargo" /></SelectTrigger>
+          <SelectContent>{["Todos", ...CARGOS].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+        </Select>
       </div>
 
       {/* Formulário */}
@@ -97,12 +136,8 @@ export default function AdminCadastroIrmaos() {
                 <Input value={form.nome_completo} onChange={e => setForm({ ...form, nome_completo: e.target.value })} />
               </div>
               <div className="space-y-1">
-                <Label>CIM *</Label>
-                <Input value={form.cim} onChange={e => setForm({ ...form, cim: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label>Nº GLP</Label>
-                <Input value={form.numero_glp} onChange={e => setForm({ ...form, numero_glp: e.target.value })} />
+                <Label>Nº GLP *</Label>
+                <Input value={form.numero_glp} onChange={e => setForm({ ...form, numero_glp: e.target.value })} placeholder="Número de cadastro GLP" />
               </div>
               <div className="space-y-1">
                 <Label>Email</Label>
@@ -150,6 +185,16 @@ export default function AdminCadastroIrmaos() {
                 </Select>
               </div>
               <div className="space-y-1">
+                <Label>Ativo</Label>
+                <Select value={form.ativo ? "true" : "false"} onValueChange={v => setForm({ ...form, ativo: v === "true" })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Ativo</SelectItem>
+                    <SelectItem value="false">Inativo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
                 <Label>Data de Iniciação</Label>
                 <Input type="date" value={form.data_iniciacao} onChange={e => setForm({ ...form, data_iniciacao: e.target.value })} />
               </div>
@@ -178,31 +223,81 @@ export default function AdminCadastroIrmaos() {
         </Card>
       )}
 
-      {/* Lista */}
-      <div className="space-y-2">
-        {filtrados.length === 0 && <Card><CardContent className="p-8 text-center text-slate-400">Nenhum irmão encontrado.</CardContent></Card>}
-        {filtrados.map(ir => (
-          <Card key={ir.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#1B3A5F]/10 flex items-center justify-center font-bold text-[#1B3A5F]">
-                  {ir.nome_completo?.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-semibold text-slate-800">{ir.nome_completo}</p>
-                  <p className="text-xs text-slate-500">CIM: {ir.cim} • {ir.grau}{ir.cargo && ir.cargo !== "Nenhum" ? ` • ${ir.cargo}` : ""}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge className={situacaoColors[ir.situacao] || ""}>{ir.situacao}</Badge>
-                <Badge className={ir.ativo ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"}>{ir.ativo ? "Ativo" : "Inativo"}</Badge>
-                <Button variant="ghost" size="icon" onClick={() => abrirEdicao(ir)}><Edit2 className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="icon" onClick={() => excluir(ir.id)} className="text-red-500"><Trash2 className="w-4 h-4" /></Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Cabeçalho da tabela com ordenação */}
+      <Card>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[#1B3A5F] text-white">
+                <tr>
+                  <th className="text-left px-4 py-3 text-sm font-medium">
+                    <button onClick={() => toggleSort("nome_completo")} className="flex items-center gap-1 hover:text-[#C9A227]">
+                      Nome <SortIcon field="nome_completo" />
+                    </button>
+                  </th>
+                  <th className="text-left px-4 py-3 text-sm font-medium">
+                    <button onClick={() => toggleSort("numero_glp")} className="flex items-center gap-1 hover:text-[#C9A227]">
+                      Nº GLP <SortIcon field="numero_glp" />
+                    </button>
+                  </th>
+                  <th className="text-left px-4 py-3 text-sm font-medium hidden md:table-cell">
+                    <button onClick={() => toggleSort("grau")} className="flex items-center gap-1 hover:text-[#C9A227]">
+                      Grau <SortIcon field="grau" />
+                    </button>
+                  </th>
+                  <th className="text-left px-4 py-3 text-sm font-medium hidden md:table-cell">
+                    <button onClick={() => toggleSort("cargo")} className="flex items-center gap-1 hover:text-[#C9A227]">
+                      Cargo <SortIcon field="cargo" />
+                    </button>
+                  </th>
+                  <th className="text-left px-4 py-3 text-sm font-medium hidden lg:table-cell">
+                    <button onClick={() => toggleSort("situacao")} className="flex items-center gap-1 hover:text-[#C9A227]">
+                      Situação <SortIcon field="situacao" />
+                    </button>
+                  </th>
+                  <th className="px-4 py-3 text-sm font-medium text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtrados.length === 0 && (
+                  <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-400">Nenhum irmão encontrado.</td></tr>
+                )}
+                {filtrados.map((ir, idx) => (
+                  <tr key={ir.id} className={`${idx % 2 === 0 ? "bg-white" : "bg-slate-50"} hover:bg-slate-100 transition-colors`}>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#1B3A5F]/10 flex items-center justify-center font-bold text-[#1B3A5F] text-sm flex-shrink-0">
+                          {ir.nome_completo?.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-800 text-sm">{ir.nome_completo}</p>
+                          <p className="text-xs text-slate-400">{ir.email || ""}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-600">{ir.numero_glp || "—"}</td>
+                    <td className="px-4 py-3 hidden md:table-cell">
+                      <Badge className={ir.grau === "Mestre" ? "bg-purple-100 text-purple-800" : ir.grau === "Companheiro" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}>
+                        {ir.grau}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-600 hidden md:table-cell">{ir.cargo && ir.cargo !== "Nenhum" ? ir.cargo : "—"}</td>
+                    <td className="px-4 py-3 hidden lg:table-cell">
+                      <Badge className={situacaoColors[ir.situacao] || ""}>{ir.situacao}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => abrirEdicao(ir)}><Edit2 className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => excluir(ir.id)} className="text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
