@@ -27,7 +27,7 @@ export default function AdminAtestados() {
   };
 
   const filtrados = irmaos.filter(i =>
-    !busca || i.nome_completo?.toLowerCase().includes(busca.toLowerCase()) || i.cim?.includes(busca)
+    !busca || i.nome_completo?.toLowerCase().includes(busca.toLowerCase()) || i.numero_glp?.includes(busca)
   );
 
   const getSecretario = () => quadro.find(q => q.cargo === "Secretário")?.titular_nome || "Secretário";
@@ -70,7 +70,7 @@ export default function AdminAtestados() {
             ${ir.nome_completo}
           </p>
           
-          <p>portador do CIM nº <strong>${ir.cim}</strong>, ${ir.numero_glp ? `inscrito na GLP sob o nº <strong>${ir.numero_glp}</strong>,` : ""}
+          <p>inscrito na GLP sob o nº <strong>${ir.numero_glp || "—"}</strong>,
           grau <strong>${ir.grau}</strong>, cargo <strong>${ir.cargo !== "Nenhum" ? ir.cargo : "Irmão"}</strong>,
           encontra-se em situação <strong>REGULAR</strong> perante esta Respeitável Loja,
           com suas obrigações maçônicas devidamente cumpridas até a presente data.</p>
@@ -116,7 +116,7 @@ export default function AdminAtestados() {
       {/* Busca */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <Input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar irmão por nome ou CIM..." className="pl-9" />
+        <Input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar irmão por nome ou Nº GLP..." className="pl-9" />
       </div>
 
       {/* Lista */}
@@ -132,7 +132,7 @@ export default function AdminAtestados() {
                   </div>
                   <div>
                     <p className="font-semibold text-slate-800">{ir.nome_completo}</p>
-                    <p className="text-xs text-slate-500">CIM: {ir.cim} • {ir.grau}</p>
+                    <p className="text-xs text-slate-500">Nº GLP: {ir.numero_glp} • {ir.grau}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
