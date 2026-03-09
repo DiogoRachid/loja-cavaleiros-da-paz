@@ -26,7 +26,7 @@ const CARGOS_ADMIN = [
 export default function AdminLogin() {
   const navigate = useNavigate();
   const [cargo, setCargo] = useState("");
-  const [cim, setCim] = useState("");
+  const [numeroGlp, setNumeroGlp] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
