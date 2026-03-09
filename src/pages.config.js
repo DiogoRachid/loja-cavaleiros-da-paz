@@ -88,6 +88,7 @@ import AdminAtestados from './pages/AdminAtestados';
 import AdminFrequencias from './pages/AdminFrequencias';
 import AdminComunicados from './pages/AdminComunicados';
 import IrmaoPortal from './pages/IrmaoPortal';
+import AdminDadosLoja from './pages/AdminDadosLoja';
 import __Layout from './Layout.jsx';
 
 
@@ -133,6 +134,7 @@ export const PAGES = {
     "AdminFrequencias": AdminFrequencias,
     "AdminComunicados": AdminComunicados,
     "IrmaoPortal": IrmaoPortal,
+    "AdminDadosLoja": AdminDadosLoja,
 }
 
 export const pagesConfig = {
