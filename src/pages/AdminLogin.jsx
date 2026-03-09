@@ -41,9 +41,9 @@ export default function AdminLogin() {
     setErro("");
 
     try {
-      const irmaos = await base44.entities.Irmao.filter({ cim, ativo: true });
+      const irmaos = await base44.entities.Irmao.filter({ numero_glp: numeroGlp, ativo: true });
       if (!irmaos || irmaos.length === 0) {
-        setErro("CIM não encontrado ou irmão inativo.");
+        setErro("Número GLP não encontrado ou irmão inativo.");
         setLoading(false);
         return;
       }
