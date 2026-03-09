@@ -77,6 +77,9 @@ import AdminSessoes from './pages/AdminSessoes';
 import AdminComissoes from './pages/AdminComissoes';
 import AdminMembros from './pages/AdminMembros';
 import AdminRelatorios from './pages/AdminRelatorios';
+import AdminAutoridades from './pages/AdminAutoridades';
+import AdminOrdemEntrada from './pages/AdminOrdemEntrada';
+import AdminAgendaRitual from './pages/AdminAgendaRitual';
 import __Layout from './Layout.jsx';
 
 
@@ -111,6 +114,9 @@ export const PAGES = {
     "AdminComissoes": AdminComissoes,
     "AdminMembros": AdminMembros,
     "AdminRelatorios": AdminRelatorios,
+    "AdminAutoridades": AdminAutoridades,
+    "AdminOrdemEntrada": AdminOrdemEntrada,
+    "AdminAgendaRitual": AdminAgendaRitual,
 }
 
 export const pagesConfig = {
