@@ -20,6 +20,7 @@ const CARGOS_ADMIN = [
   "Mestre de Cerimônias",
   "Primeiro Diácono",
   "Segundo Diácono",
+  "Bibliotecário",
 ];
 
 export default function AdminLogin() {
@@ -73,9 +74,10 @@ export default function AdminLogin() {
         "Tesoureiro": "AdminTesoureiro",
         "Secretário": "AdminSecretario",
         "Chanceler": "AdminChanceler",
+        "Bibliotecário": "BibDashboard",
       };
 
-      const destino = cargoRoutes[cargo] || "AdminDashboard";
+      const destino = cargoRoutes[cargo] || "AdminVM";
       navigate(createPageUrl(destino));
     } catch (err) {
       setErro("Erro ao realizar login. Tente novamente.");

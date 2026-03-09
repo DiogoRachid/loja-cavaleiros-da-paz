@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { BookOpen, Users, Shield, Calendar, Crown } from "lucide-react";
+import { BookOpen, Users, Calendar, Crown } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -47,7 +47,7 @@ export default function Home() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="w-full max-w-4xl"
         >
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             {/* Portal do Irmão */}
             <Link to={createPageUrl("IrmaoLogin")}>
               <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/20 transition-all duration-300 cursor-pointer h-full">
@@ -78,20 +78,7 @@ export default function Home() {
               </div>
             </Link>
 
-            {/* Portal Bibliotecário */}
-            <Link to={createPageUrl("BibLogin")}>
-              <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/20 transition-all duration-300 cursor-pointer h-full">
-                <div className="w-16 h-16 mb-6 rounded-xl bg-[#C9A227]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <BookOpen className="w-8 h-8 text-[#C9A227]" />
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  Portal Bibliotecário
-                </h3>
-                <p className="text-slate-300 text-sm">
-                  Gerencie o acervo, empréstimos e devoluções
-                </p>
-              </div>
-            </Link>
+
           </div>
         </motion.div>
 

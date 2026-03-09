@@ -118,8 +118,8 @@ export default function Layout({ children, currentPageName }) {
     return <>{children}</>;
   }
 
-  const isBibliotecario = currentPageName?.startsWith("Bib") || cargo === "Bibliotecário";
-  const isAdmin = currentPageName?.startsWith("Admin");
+  const isBibliotecario = cargo === "Bibliotecário";
+  const isAdmin = currentPageName?.startsWith("Admin") || currentPageName?.startsWith("Bib");
   const isIrmao = currentPageName?.startsWith("Irmao");
 
   let links = IRMAO_LINKS;
