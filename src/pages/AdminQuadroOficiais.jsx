@@ -16,7 +16,10 @@ const CARGOS = [
 
 const EXERCICIO = new Date().getFullYear().toString();
 const admin = () => JSON.parse(sessionStorage.getItem("admin_data") || "{}");
-const isVM = () => sessionStorage.getItem("admin_cargo") === "Venerável Mestre";
+const isVM = () => {
+  const cargo = sessionStorage.getItem("admin_cargo");
+  return cargo === "Venerável Mestre" || cargo === "Secretário";
+};
 
 export default function AdminQuadroOficiais() {
   const [quadro, setQuadro] = useState([]);
