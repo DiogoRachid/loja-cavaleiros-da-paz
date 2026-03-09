@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { BookOpen, Users, Shield, Calendar } from "lucide-react";
+import { BookOpen, Users, Shield, Calendar, Crown } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -33,14 +33,11 @@ export default function Home() {
             <BookOpen className="w-12 h-12 text-[#1B3A5F]" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
-            Biblioteca
-          </h1>
-          <h2 className="text-2xl md:text-3xl font-light text-[#C9A227]">
             Cavaleiros da Paz nº25
+          </h1>
+          <h2 className="text-xl md:text-2xl font-light text-[#C9A227]">
+            Sistema de Gestão da Loja
           </h2>
-          <p className="text-slate-300 mt-4 text-lg">
-            Sistema de Gestão do Acervo
-          </p>
         </motion.div>
 
         {/* Portal Selection */}
@@ -48,35 +45,50 @@ export default function Home() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="w-full max-w-3xl"
+          className="w-full max-w-4xl"
         >
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             {/* Portal do Irmão */}
             <Link to={createPageUrl("IrmaoLogin")}>
-              <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/20 transition-all duration-300 cursor-pointer">
+              <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/20 transition-all duration-300 cursor-pointer h-full">
                 <div className="w-16 h-16 mb-6 rounded-xl bg-[#C9A227]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <BookOpen className="w-8 h-8 text-[#C9A227]" />
+                  <Users className="w-8 h-8 text-[#C9A227]" />
                 </div>
-                <h3 className="text-2xl font-semibold text-white mb-2">
+                <h3 className="text-xl font-semibold text-white mb-2">
                   Portal do Irmão
                 </h3>
-                <p className="text-slate-300">
-                  Consulte seus empréstimos, faça retiradas e devoluções via QR Code
+                <p className="text-slate-300 text-sm">
+                  Acesse seus dados, mensalidades, frequência e biblioteca
+                </p>
+              </div>
+            </Link>
+
+            {/* Portal Administrativo */}
+            <Link to={createPageUrl("AdminLogin")}>
+              <div className="group bg-white/10 backdrop-blur-sm border border-[#C9A227]/40 rounded-2xl p-8 hover:bg-[#C9A227]/10 transition-all duration-300 cursor-pointer h-full">
+                <div className="w-16 h-16 mb-6 rounded-xl bg-[#C9A227]/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Crown className="w-8 h-8 text-[#C9A227]" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  Portal Administrativo
+                </h3>
+                <p className="text-slate-300 text-sm">
+                  Acesso exclusivo para oficiais e cargos da loja
                 </p>
               </div>
             </Link>
 
             {/* Portal Bibliotecário */}
             <Link to={createPageUrl("BibLogin")}>
-              <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/20 transition-all duration-300 cursor-pointer">
+              <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/20 transition-all duration-300 cursor-pointer h-full">
                 <div className="w-16 h-16 mb-6 rounded-xl bg-[#C9A227]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Shield className="w-8 h-8 text-[#C9A227]" />
+                  <BookOpen className="w-8 h-8 text-[#C9A227]" />
                 </div>
-                <h3 className="text-2xl font-semibold text-white mb-2">
+                <h3 className="text-xl font-semibold text-white mb-2">
                   Portal Bibliotecário
                 </h3>
-                <p className="text-slate-300">
-                  Gerencie o acervo, cadastre irmãos e controle empréstimos
+                <p className="text-slate-300 text-sm">
+                  Gerencie o acervo, empréstimos e devoluções
                 </p>
               </div>
             </Link>
