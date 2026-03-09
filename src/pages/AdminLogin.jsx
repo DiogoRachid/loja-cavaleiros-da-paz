@@ -56,7 +56,7 @@ export default function AdminLogin() {
         return;
       }
 
-      const senhaValida = irmao.senha ? irmao.senha === senha : irmao.cim === senha;
+      const senhaValida = irmao.senha ? irmao.senha === senha : irmao.numero_glp === senha;
       if (!senhaValida) {
         setErro("Senha incorreta.");
         setLoading(false);
