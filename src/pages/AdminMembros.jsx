@@ -274,7 +274,10 @@ export default function AdminMembros() {
                       <Badge className={situacaoColors[ir.situacao] || ""}>{ir.situacao}</Badge>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Button variant="ghost" size="icon" onClick={() => abrirEdicao(ir)}><Edit2 className="w-4 h-4" /></Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => abrirEdicao(ir)}><Edit2 className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => excluir(ir.id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
