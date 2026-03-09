@@ -56,13 +56,14 @@ const ADMIN_LINKS_BY_CARGO = {
 };
 
 const IRMAO_LINKS = [
+  { name: "Meu Portal", page: "IrmaoPortal", icon: Home },
   { name: "Meus Empréstimos", page: "IrmaoEmprestimos", icon: BookMarked },
   { name: "Acervo Físico", page: "IrmaoAcervo", icon: Library },
   { name: "Acervo Digital", page: "IrmaoAcervoDigital", icon: BookOpen },
   { name: "Escanear QR", page: "IrmaoScan", icon: QrCode },
 ];
 
-const PAGES_SEM_LAYOUT = ["Home", "ScanRetirada", "ScanDevolucao", "BibLogin", "IrmaoLogin", "AdminLogin"];
+const PAGES_SEM_LAYOUT = ["Home", "ScanRetirada", "ScanDevolucao", "BibLogin", "IrmaoLogin", "AdminLogin", "IrmaoPortal"];
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
