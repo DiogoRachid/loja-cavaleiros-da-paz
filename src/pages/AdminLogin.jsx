@@ -33,7 +33,7 @@ export default function AdminLogin() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!cargo || !cim || !senha) {
+    if (!cargo || !numeroGlp || !senha) {
       setErro("Preencha todos os campos.");
       return;
     }
