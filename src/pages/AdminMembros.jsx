@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Users, Search, UserCheck, UserX, Filter, ArrowUp, ArrowDown, Edit2, Save, X } from "lucide-react";
+import { Users, Search, UserCheck, UserX, Filter, ArrowUp, ArrowDown, Edit2, Save, X, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
