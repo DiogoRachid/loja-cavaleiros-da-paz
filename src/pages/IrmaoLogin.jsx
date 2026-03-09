@@ -70,7 +70,7 @@ export default function IrmaoLogin() {
       // Login normal
       sessionStorage.setItem("irmao_auth", "true");
       sessionStorage.setItem("irmao_data", JSON.stringify(irmao));
-      navigate(createPageUrl("IrmaoEmprestimos"));
+      navigate(createPageUrl("IrmaoPortal"));
     } catch (err) {
       console.error("Erro:", err);
       setError("Erro ao verificar cadastro. Tente novamente.");
@@ -113,7 +113,7 @@ export default function IrmaoLogin() {
       const irmaoAtualizado = { ...irmaoLogado, senha: novaSenha, primeiro_acesso: false };
       sessionStorage.setItem("irmao_auth", "true");
       sessionStorage.setItem("irmao_data", JSON.stringify(irmaoAtualizado));
-      navigate(createPageUrl("IrmaoEmprestimos"));
+      navigate(createPageUrl("IrmaoPortal"));
     } catch (err) {
       console.error("Erro:", err);
       setError("Erro ao atualizar senha. Tente novamente.");

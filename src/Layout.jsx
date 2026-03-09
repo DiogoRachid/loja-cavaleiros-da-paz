@@ -17,6 +17,7 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Sessões", page: "AdminSessoes", icon: Gavel },
     { name: "Comissões", page: "AdminComissoes", icon: Users },
     { name: "Membros", page: "AdminMembros", icon: Users },
+    { name: "Dados da Loja", page: "AdminDadosLoja", icon: Star },
     { name: "Relatórios", page: "AdminRelatorios", icon: BarChart },
   ],
   "Mestre de Cerimônias": [
