@@ -118,13 +118,13 @@ export default function AdminLogin() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-200">CIM</Label>
+              <Label className="text-slate-200">Número GLP</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
-                  value={cim}
-                  onChange={e => setCim(e.target.value)}
-                  placeholder="Seu número CIM"
+                  value={numeroGlp}
+                  onChange={e => setNumeroGlp(e.target.value)}
+                  placeholder="Seu número de cadastro GLP"
                   className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
                 />
               </div>
