@@ -67,6 +67,11 @@ import IrmaoScan from './pages/IrmaoScan';
 import ScanDevolucao from './pages/ScanDevolucao';
 import ScanRetirada from './pages/ScanRetirada';
 import AdminLogin from './pages/AdminLogin';
+import AdminVM from './pages/AdminVM';
+import AdminMC from './pages/AdminMC';
+import AdminTesoureiro from './pages/AdminTesoureiro';
+import AdminSecretario from './pages/AdminSecretario';
+import AdminChanceler from './pages/AdminChanceler';
 import __Layout from './Layout.jsx';
 
 
@@ -91,6 +96,11 @@ export const PAGES = {
     "ScanDevolucao": ScanDevolucao,
     "ScanRetirada": ScanRetirada,
     "AdminLogin": AdminLogin,
+    "AdminVM": AdminVM,
+    "AdminMC": AdminMC,
+    "AdminTesoureiro": AdminTesoureiro,
+    "AdminSecretario": AdminSecretario,
+    "AdminChanceler": AdminChanceler,
 }
 
 export const pagesConfig = {
