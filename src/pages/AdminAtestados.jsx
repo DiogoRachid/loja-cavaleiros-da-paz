@@ -35,6 +35,8 @@ export default function AdminAtestados() {
 
   const imprimir = (ir) => {
     const hoje = new Date().toLocaleDateString("pt-BR");
+    const LOGO_LOJA = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aea997b473b479398fe231/0745f3cd0_logolojafundotransparente.png";
+    const LOGO_GLP = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aea997b473b479398fe231/a206157c9_LOGOGLP2023.png";
     const janela = window.open("", "_blank");
     janela.document.write(`
       <!DOCTYPE html>
@@ -43,25 +45,31 @@ export default function AdminAtestados() {
         <meta charset="UTF-8">
         <title>Atestado de Regularidade</title>
         <style>
-          body { font-family: 'Times New Roman', serif; max-width: 700px; margin: 60px auto; color: #000; line-height: 1.8; }
-          .header { text-align: center; margin-bottom: 40px; }
+          body { font-family: 'Times New Roman', serif; max-width: 750px; margin: 40px auto; color: #000; line-height: 1.8; }
+          .header-logos { display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #1B3A5F; padding-bottom:16px; margin-bottom:20px; }
+          .header-center { text-align:center; flex:1; padding:0 20px; }
           .title { font-size: 18px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
-          .subtitle { font-size: 14px; margin-top: 5px; }
-          .body { text-align: justify; font-size: 14px; margin: 40px 0; }
+          .subtitle { font-size: 13px; margin-top: 5px; color: #475569; }
+          .doc-title { text-align:center; font-size:15px; font-weight:bold; color:#1B3A5F; text-transform:uppercase; letter-spacing:2px; margin:20px 0; }
+          .body { text-align: justify; font-size: 14px; margin: 30px 0; }
           .assinaturas { display: flex; justify-content: space-between; margin-top: 80px; }
           .assinatura { text-align: center; width: 45%; }
           .assinatura .linha { border-top: 1px solid #000; margin-bottom: 5px; }
-          .ornamento { text-align: center; font-size: 24px; color: #C9A227; margin: 10px 0; }
+          .ornamento { text-align: center; font-size: 22px; color: #C9A227; margin: 10px 0; }
         </style>
       </head>
       <body>
-        <div class="header">
-          <div class="ornamento">✦ ✦ ✦</div>
-          <div class="title">${dadosLoja?.nome || "Loja Maçônica"} Nº ${dadosLoja?.numero || ""}</div>
-          <div class="subtitle">${dadosLoja?.potencia || ""} — Oriente de ${dadosLoja?.oriente || ""}</div>
-          <br/>
-          <div class="title" style="font-size:16px; color:#1B3A5F;">ATESTADO DE REGULARIDADE</div>
+        <div class="header-logos">
+          <img src="${LOGO_LOJA}" style="height:80px;object-fit:contain" />
+          <div class="header-center">
+            <p style="margin:0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px">${dadosLoja?.potencia || "Grande Loja Maçônica do Paraná"}</p>
+            <div class="title" style="font-size:16px;color:#1B3A5F">${dadosLoja?.nome || "Loja Cavaleiros da Paz"} Nº ${dadosLoja?.numero || "25"}</div>
+            <div class="subtitle">${dadosLoja?.oriente ? "Oriente de " + dadosLoja.oriente : ""}</div>
+            <div class="subtitle">${dadosLoja?.endereco || ""}</div>
+          </div>
+          <img src="${LOGO_GLP}" style="height:80px;object-fit:contain" />
         </div>
+        <div class="doc-title">ATESTADO DE REGULARIDADE</div>
         <div class="body">
           <p>O <strong>Secretário</strong> da Respeitável Loja <strong>${dadosLoja?.nome || ""} Nº ${dadosLoja?.numero || ""}</strong>, 
           no uso de suas atribuições regimentais, <strong>ATESTA</strong> que o Irmão</p>
