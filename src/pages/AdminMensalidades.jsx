@@ -46,7 +46,7 @@ export default function AdminMensalidades() {
 
   const handleIrmaoChange = (id) => {
     const ir = irmaos.find(i => i.id === id);
-    setForm({ ...form, irmao_id: id, irmao_nome: ir?.nome_completo || "", irmao_cim: ir?.cim || "" });
+    setForm({ ...form, irmao_id: id, irmao_nome: ir?.nome_completo || "", irmao_cim: ir?.numero_glp || "" });
   };
 
   const salvar = async () => {
@@ -81,7 +81,7 @@ export default function AdminMensalidades() {
       const existente = mensalidades.find(m => m.irmao_id === ir.id && m.competencia === comp);
       if (!existente) {
         await base44.entities.Mensalidade.create({
-          irmao_id: ir.id, irmao_nome: ir.nome_completo, irmao_cim: ir.cim,
+          irmao_id: ir.id, irmao_nome: ir.nome_completo, irmao_cim: ir.numero_glp,
           competencia: comp, valor: valorPadrao, vencimento,
           status: "Pendente", registrado_por: admin.nome_completo || "",
         });
@@ -91,7 +91,7 @@ export default function AdminMensalidades() {
   };
 
   const filtradas = mensalidades.filter(m => {
-    const matchBusca = !busca || m.irmao_nome?.toLowerCase().includes(busca.toLowerCase()) || m.irmao_cim?.includes(busca);
+    const matchBusca = !busca || m.irmao_nome?.toLowerCase().includes(busca.toLowerCase()) || m.irmao_cim?.includes(busca) || m.irmao_nome?.includes(busca);
     const matchStatus = filtroStatus === "Todos" || m.status === filtroStatus;
     const matchComp = !filtroComp || m.competencia?.includes(filtroComp);
     return matchBusca && matchStatus && matchComp;
@@ -196,7 +196,7 @@ export default function AdminMensalidades() {
       <div className="flex gap-3 flex-wrap">
         <div className="relative flex-1 min-w-40">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <Input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar por nome ou CIM..." className="pl-9" />
+          <Input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar por nome..." className="pl-9" />
         </div>
         <Input value={filtroComp} onChange={e => setFiltroComp(e.target.value)} placeholder="Competência (03/2026)" className="w-44" />
         <Select value={filtroStatus} onValueChange={setFiltroStatus}>
@@ -213,7 +213,7 @@ export default function AdminMensalidades() {
             <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="font-medium text-slate-800">{m.irmao_nome}</p>
-                <p className="text-xs text-slate-500">CIM: {m.irmao_cim} • Competência: {m.competencia} • Venc: {m.vencimento}</p>
+                <p className="text-xs text-slate-500">GLP: {m.irmao_cim} • Competência: {m.competencia} • Venc: {m.vencimento}</p>
                 {m.observacoes && <p className="text-xs text-slate-400 mt-0.5">{m.observacoes}</p>}
               </div>
               <div className="flex items-center gap-3">

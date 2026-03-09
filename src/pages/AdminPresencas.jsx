@@ -39,7 +39,7 @@ export default function AdminPresencas() {
         sessao_data: sessao?.data || "",
         irmao_id: ir.id,
         irmao_nome: ir.nome_completo,
-        irmao_cim: ir.cim,
+        irmao_cim: ir.numero_glp,
         presente: false,
         justificativa: "",
         justificativa_aceita: false,
@@ -142,7 +142,7 @@ export default function AdminPresencas() {
                       </button>
                       <div>
                         <p className="font-medium text-slate-800 text-sm">{p.irmao_nome}</p>
-                        <p className="text-xs text-slate-500">CIM: {p.irmao_cim}</p>
+                        <p className="text-xs text-slate-500">Nº GLP: {p.irmao_cim}</p>
                       </div>
                     </div>
                     <Badge className={p.presente ? "bg-green-100 text-green-800" : "bg-red-100 text-red-700"}>
