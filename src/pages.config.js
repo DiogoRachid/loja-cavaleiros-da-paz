@@ -47,10 +47,26 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AdminAgendaRitual from './pages/AdminAgendaRitual';
+import AdminAtestados from './pages/AdminAtestados';
+import AdminAutoridades from './pages/AdminAutoridades';
+import AdminCadastroIrmaos from './pages/AdminCadastroIrmaos';
 import AdminChanceler from './pages/AdminChanceler';
+import AdminComissoes from './pages/AdminComissoes';
+import AdminComunicados from './pages/AdminComunicados';
+import AdminDadosLoja from './pages/AdminDadosLoja';
+import AdminFrequencias from './pages/AdminFrequencias';
 import AdminLogin from './pages/AdminLogin';
 import AdminMC from './pages/AdminMC';
+import AdminMembros from './pages/AdminMembros';
+import AdminMensalidades from './pages/AdminMensalidades';
+import AdminOrdemEntrada from './pages/AdminOrdemEntrada';
+import AdminPresencas from './pages/AdminPresencas';
+import AdminQuadroOficiais from './pages/AdminQuadroOficiais';
+import AdminRelatorioFinanceiro from './pages/AdminRelatorioFinanceiro';
+import AdminRelatorios from './pages/AdminRelatorios';
 import AdminSecretario from './pages/AdminSecretario';
+import AdminSessoes from './pages/AdminSessoes';
 import AdminTesoureiro from './pages/AdminTesoureiro';
 import AdminVM from './pages/AdminVM';
 import BibAcervo from './pages/BibAcervo';
@@ -69,34 +85,34 @@ import IrmaoAcervo from './pages/IrmaoAcervo';
 import IrmaoAcervoDigital from './pages/IrmaoAcervoDigital';
 import IrmaoEmprestimos from './pages/IrmaoEmprestimos';
 import IrmaoLogin from './pages/IrmaoLogin';
+import IrmaoPortal from './pages/IrmaoPortal';
 import IrmaoScan from './pages/IrmaoScan';
 import ScanDevolucao from './pages/ScanDevolucao';
 import ScanRetirada from './pages/ScanRetirada';
-import AdminQuadroOficiais from './pages/AdminQuadroOficiais';
-import AdminSessoes from './pages/AdminSessoes';
-import AdminComissoes from './pages/AdminComissoes';
-import AdminMembros from './pages/AdminMembros';
-import AdminRelatorios from './pages/AdminRelatorios';
-import AdminAutoridades from './pages/AdminAutoridades';
-import AdminOrdemEntrada from './pages/AdminOrdemEntrada';
-import AdminAgendaRitual from './pages/AdminAgendaRitual';
-import AdminMensalidades from './pages/AdminMensalidades';
-import AdminRelatorioFinanceiro from './pages/AdminRelatorioFinanceiro';
-import AdminCadastroIrmaos from './pages/AdminCadastroIrmaos';
-import AdminPresencas from './pages/AdminPresencas';
-import AdminAtestados from './pages/AdminAtestados';
-import AdminFrequencias from './pages/AdminFrequencias';
-import AdminComunicados from './pages/AdminComunicados';
-import IrmaoPortal from './pages/IrmaoPortal';
-import AdminDadosLoja from './pages/AdminDadosLoja';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AdminAgendaRitual": AdminAgendaRitual,
+    "AdminAtestados": AdminAtestados,
+    "AdminAutoridades": AdminAutoridades,
+    "AdminCadastroIrmaos": AdminCadastroIrmaos,
     "AdminChanceler": AdminChanceler,
+    "AdminComissoes": AdminComissoes,
+    "AdminComunicados": AdminComunicados,
+    "AdminDadosLoja": AdminDadosLoja,
+    "AdminFrequencias": AdminFrequencias,
     "AdminLogin": AdminLogin,
     "AdminMC": AdminMC,
+    "AdminMembros": AdminMembros,
+    "AdminMensalidades": AdminMensalidades,
+    "AdminOrdemEntrada": AdminOrdemEntrada,
+    "AdminPresencas": AdminPresencas,
+    "AdminQuadroOficiais": AdminQuadroOficiais,
+    "AdminRelatorioFinanceiro": AdminRelatorioFinanceiro,
+    "AdminRelatorios": AdminRelatorios,
     "AdminSecretario": AdminSecretario,
+    "AdminSessoes": AdminSessoes,
     "AdminTesoureiro": AdminTesoureiro,
     "AdminVM": AdminVM,
     "BibAcervo": BibAcervo,
@@ -115,26 +131,10 @@ export const PAGES = {
     "IrmaoAcervoDigital": IrmaoAcervoDigital,
     "IrmaoEmprestimos": IrmaoEmprestimos,
     "IrmaoLogin": IrmaoLogin,
+    "IrmaoPortal": IrmaoPortal,
     "IrmaoScan": IrmaoScan,
     "ScanDevolucao": ScanDevolucao,
     "ScanRetirada": ScanRetirada,
-    "AdminQuadroOficiais": AdminQuadroOficiais,
-    "AdminSessoes": AdminSessoes,
-    "AdminComissoes": AdminComissoes,
-    "AdminMembros": AdminMembros,
-    "AdminRelatorios": AdminRelatorios,
-    "AdminAutoridades": AdminAutoridades,
-    "AdminOrdemEntrada": AdminOrdemEntrada,
-    "AdminAgendaRitual": AdminAgendaRitual,
-    "AdminMensalidades": AdminMensalidades,
-    "AdminRelatorioFinanceiro": AdminRelatorioFinanceiro,
-    "AdminCadastroIrmaos": AdminCadastroIrmaos,
-    "AdminPresencas": AdminPresencas,
-    "AdminAtestados": AdminAtestados,
-    "AdminFrequencias": AdminFrequencias,
-    "AdminComunicados": AdminComunicados,
-    "IrmaoPortal": IrmaoPortal,
-    "AdminDadosLoja": AdminDadosLoja,
 }
 
 export const pagesConfig = {
