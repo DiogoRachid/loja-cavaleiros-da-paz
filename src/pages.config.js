@@ -47,6 +47,12 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AdminChanceler from './pages/AdminChanceler';
+import AdminLogin from './pages/AdminLogin';
+import AdminMC from './pages/AdminMC';
+import AdminSecretario from './pages/AdminSecretario';
+import AdminTesoureiro from './pages/AdminTesoureiro';
+import AdminVM from './pages/AdminVM';
 import BibAcervo from './pages/BibAcervo';
 import BibAcervoDigital from './pages/BibAcervoDigital';
 import BibBibliotecarios from './pages/BibBibliotecarios';
@@ -66,16 +72,21 @@ import IrmaoLogin from './pages/IrmaoLogin';
 import IrmaoScan from './pages/IrmaoScan';
 import ScanDevolucao from './pages/ScanDevolucao';
 import ScanRetirada from './pages/ScanRetirada';
-import AdminLogin from './pages/AdminLogin';
-import AdminVM from './pages/AdminVM';
-import AdminMC from './pages/AdminMC';
-import AdminTesoureiro from './pages/AdminTesoureiro';
-import AdminSecretario from './pages/AdminSecretario';
-import AdminChanceler from './pages/AdminChanceler';
+import AdminQuadroOficiais from './pages/AdminQuadroOficiais';
+import AdminSessoes from './pages/AdminSessoes';
+import AdminComissoes from './pages/AdminComissoes';
+import AdminMembros from './pages/AdminMembros';
+import AdminRelatorios from './pages/AdminRelatorios';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AdminChanceler": AdminChanceler,
+    "AdminLogin": AdminLogin,
+    "AdminMC": AdminMC,
+    "AdminSecretario": AdminSecretario,
+    "AdminTesoureiro": AdminTesoureiro,
+    "AdminVM": AdminVM,
     "BibAcervo": BibAcervo,
     "BibAcervoDigital": BibAcervoDigital,
     "BibBibliotecarios": BibBibliotecarios,
@@ -95,12 +106,11 @@ export const PAGES = {
     "IrmaoScan": IrmaoScan,
     "ScanDevolucao": ScanDevolucao,
     "ScanRetirada": ScanRetirada,
-    "AdminLogin": AdminLogin,
-    "AdminVM": AdminVM,
-    "AdminMC": AdminMC,
-    "AdminTesoureiro": AdminTesoureiro,
-    "AdminSecretario": AdminSecretario,
-    "AdminChanceler": AdminChanceler,
+    "AdminQuadroOficiais": AdminQuadroOficiais,
+    "AdminSessoes": AdminSessoes,
+    "AdminComissoes": AdminComissoes,
+    "AdminMembros": AdminMembros,
+    "AdminRelatorios": AdminRelatorios,
 }
 
 export const pagesConfig = {
