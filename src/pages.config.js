@@ -85,6 +85,9 @@ import AdminRelatorioFinanceiro from './pages/AdminRelatorioFinanceiro';
 import AdminCadastroIrmaos from './pages/AdminCadastroIrmaos';
 import AdminPresencas from './pages/AdminPresencas';
 import AdminAtestados from './pages/AdminAtestados';
+import AdminFrequencias from './pages/AdminFrequencias';
+import AdminComunicados from './pages/AdminComunicados';
+import IrmaoPortal from './pages/IrmaoPortal';
 import __Layout from './Layout.jsx';
 
 
@@ -127,6 +130,9 @@ export const PAGES = {
     "AdminCadastroIrmaos": AdminCadastroIrmaos,
     "AdminPresencas": AdminPresencas,
     "AdminAtestados": AdminAtestados,
+    "AdminFrequencias": AdminFrequencias,
+    "AdminComunicados": AdminComunicados,
+    "IrmaoPortal": IrmaoPortal,
 }
 
 export const pagesConfig = {
