@@ -63,7 +63,7 @@ const IRMAO_LINKS = [
   { name: "Escanear QR", page: "IrmaoScan", icon: QrCode },
 ];
 
-const PAGES_SEM_LAYOUT = ["Home", "ScanRetirada", "ScanDevolucao", "BibLogin", "IrmaoLogin", "AdminLogin", "IrmaoPortal"];
+const PAGES_SEM_LAYOUT = ["Home", "ScanRetirada", "ScanDevolucao", "BibLogin", "IrmaoLogin", "AdminLogin"];
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
