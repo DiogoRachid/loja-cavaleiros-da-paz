@@ -43,16 +43,28 @@ export default function AdminLogin() {
 
     try {
       if (isBibliotecario) {
-        // Login via entidade Bibliotecario
-        if (!loginBib || !senhaBib) { setErro("Preencha login e senha."); setLoading(false); return; }
-        const bibliotecarios = await base44.entities.Bibliotecario.filter({ login: loginBib.trim(), senha: senhaBib, ativo: true });
-        if (!bibliotecarios || bibliotecarios.length === 0) {
-          setErro("Login ou senha incorretos.");
+        // Login via entidade Irmao com cargo Bibliotecário
+        if (!numeroGlp || !senha) { setErro("Preencha todos os campos."); setLoading(false); return; }
+        const irmaos = await base44.entities.Irmao.filter({ numero_glp: numeroGlp, ativo: true });
+        if (!irmaos || irmaos.length === 0) {
+          setErro("Número GLP não encontrado ou irmão inativo.");
+          setLoading(false);
+          return;
+        }
+        const irmao = irmaos[0];
+        if (irmao.cargo !== "Bibliotecário") {
+          setErro("Este irmão não possui cargo de Bibliotecário.");
+          setLoading(false);
+          return;
+        }
+        const senhaValida = irmao.senha ? irmao.senha === senha : irmao.numero_glp === senha;
+        if (!senhaValida) {
+          setErro("Senha incorreta.");
           setLoading(false);
           return;
         }
         sessionStorage.setItem("bib_auth", "true");
-        sessionStorage.setItem("bib_data", JSON.stringify(bibliotecarios[0]));
+        sessionStorage.setItem("bib_data", JSON.stringify({ nome: irmao.nome_completo, ...irmao }));
         sessionStorage.setItem("admin_cargo", "Bibliotecário");
         navigate(createPageUrl("BibDashboard"));
       } else {
