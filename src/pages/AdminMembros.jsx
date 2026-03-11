@@ -92,7 +92,7 @@ export default function AdminMembros() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-[#1B3A5F]">Gestão de Membros</h1>
-          <p className="text-slate-500">{stats.total} irmãos ativos</p>
+          <p className="text-slate-500">{irmaos.length} cadastrados • {stats.total} ativos</p>
         </div>
       </div>
 
