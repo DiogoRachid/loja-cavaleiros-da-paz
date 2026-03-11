@@ -39,15 +39,17 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
     }
   };
 
+  const getValorSort = (linha, col) => {
+    if (col === "irmao_nome") return linha.irmao_nome;
+    if (col === "mensalidade") return parseFloat(linha.mensalidade) || 0;
+    if (col === "total") return calcularTotal(linha);
+    if (col === "status") return linha.status;
+    return parseFloat(linha.centros_custo[col]) || 0;
+  };
+
   const sortedLinhas = [...linhas].sort((a, b) => {
-    let valA, valB;
-    if (col => col === sortCol)(sortCol) {
-      if (sortCol === "irmao_nome") { valA = a.irmao_nome; valB = b.irmao_nome; }
-      else if (sortCol === "mensalidade") { valA = parseFloat(a.mensalidade) || 0; valB = parseFloat(b.mensalidade) || 0; }
-      else if (sortCol === "total") { valA = calcularTotal(a); valB = calcularTotal(b); }
-      else if (sortCol === "status") { valA = a.status; valB = b.status; }
-      else { valA = parseFloat(a.centros_custo[sortCol]) || 0; valB = parseFloat(b.centros_custo[sortCol]) || 0; }
-    }
+    const valA = getValorSort(a, sortCol);
+    const valB = getValorSort(b, sortCol);
     if (typeof valA === "string") return sortDir === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
     return sortDir === "asc" ? valA - valB : valB - valA;
   });
