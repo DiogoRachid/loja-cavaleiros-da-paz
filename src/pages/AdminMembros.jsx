@@ -171,10 +171,15 @@ export default function AdminMembros() {
               </div>
               <div className="space-y-1">
                 <Label>Cargo</Label>
-                <Select value={form.cargo} onValueChange={v => setForm({ ...form, cargo: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{CARGOS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                </Select>
+                <Input
+                  list="cargos-sugeridos-membros"
+                  value={form.cargo || ""}
+                  onChange={e => setForm({ ...form, cargo: e.target.value })}
+                  placeholder="Digite ou selecione um cargo"
+                />
+                <datalist id="cargos-sugeridos-membros">
+                  {CARGOS_SUGERIDOS.map(c => <option key={c} value={c} />)}
+                </datalist>
               </div>
               <div className="space-y-1">
                 <Label>Situação</Label>
