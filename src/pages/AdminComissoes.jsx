@@ -175,16 +175,12 @@ export default function AdminComissoes() {
                           <SelectTrigger className="flex-1"><SelectValue placeholder="Selecionar irmão..." /></SelectTrigger>
                           <SelectContent>{irmaos.map(i => <SelectItem key={i.id} value={i.id}>{i.nome_completo}</SelectItem>)}</SelectContent>
                         </Select>
-                        <Select value={novoMembro.funcao} onValueChange={v => setNovoMembro({ ...novoMembro, funcao: v })}>
-                          <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-                          <SelectContent>{["Presidente","Secretário","Membro"].map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}</SelectContent>
-                        </Select>
                         <Button size="sm" onClick={() => adicionarMembro(c.id, c.nome)} className="bg-[#1B3A5F] text-white">Adicionar</Button>
                         <Button size="sm" variant="ghost" onClick={() => setAddingMembro(null)}>Cancelar</Button>
                       </div>
                     ) : (
-                      <Button size="sm" variant="outline" onClick={() => setAddingMembro(c.id)} className="mt-2">
-                        <Plus className="w-3 h-3 mr-1" /> Adicionar Membro
+                      <Button size="sm" variant="outline" onClick={() => setAddingMembro(c.id)} className="mt-2" disabled={mc.length >= 3}>
+                        <Plus className="w-3 h-3 mr-1" /> {mc.length >= 3 ? "Máx. 3 membros" : "Adicionar Membro"}
                       </Button>
                     )}
                   </div>
