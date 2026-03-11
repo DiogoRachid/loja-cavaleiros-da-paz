@@ -58,6 +58,9 @@ export default function IrmaoPortal() {
             <div className="flex gap-2 mt-1 flex-wrap">
               <Badge className="bg-[#C9A227]/20 text-[#C9A227] border-0">{irmao.grau}</Badge>
               {irmao.cargo && irmao.cargo !== "Nenhum" && <Badge className="bg-white/10 text-white border-0">{irmao.cargo}</Badge>}
+              {comissoesDoIrmao.map(mc => (
+                <Badge key={mc.id} className="bg-white/10 text-white border-0">Membro da Comissão {mc.comissao_nome}</Badge>
+              ))}
               <Badge className={irmao.situacao === "Regular" ? "bg-green-500/20 text-green-300 border-0" : "bg-red-500/20 text-red-300 border-0"}>{irmao.situacao}</Badge>
             </div>
           </div>
