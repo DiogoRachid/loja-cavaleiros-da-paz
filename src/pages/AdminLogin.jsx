@@ -28,8 +28,7 @@ export default function AdminLogin() {
   const [cargo, setCargo] = useState("");
   const [numeroGlp, setNumeroGlp] = useState("");
   const [senha, setSenha] = useState("");
-  const [loginBib, setLoginBib] = useState("");
-  const [senhaBib, setSenhaBib] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
 
