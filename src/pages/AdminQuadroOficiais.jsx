@@ -47,11 +47,11 @@ export default function AdminQuadroOficiais() {
     }
   };
 
-  const handleChange = (cargo, field, value) => {
-    setQuadro(prev => prev.map(q => {
-      if (q.cargo !== cargo) return q;
+  const handleChange = (idx, field, value) => {
+    setQuadro(prev => prev.map((q, i) => {
+      if (i !== idx) return q;
       if (field === "cargo") return { ...q, cargo: value };
-      const irmao = irmaos.find(i => i.id === value);
+      const irmao = irmaos.find(ir => ir.id === value);
       if (field === "titular_id") return { ...q, titular_id: value, titular_nome: irmao?.nome_completo || "" };
       if (field === "substituto_id") return { ...q, substituto_id: value, substituto_nome: irmao?.nome_completo || "" };
       return q;
