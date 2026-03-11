@@ -122,14 +122,14 @@ export default function AdminQuadroOficiais() {
                       {editando && isVM() ? (
                         <Input
                           value={item.cargo}
-                          onChange={e => handleChange(item.cargo, "cargo", e.target.value)}
+                          onChange={e => handleChange(idx, "cargo", e.target.value)}
                           className="h-8 text-sm font-medium text-[#1B3A5F]"
                         />
                       ) : item.cargo}
                     </td>
                     <td className="px-4 py-3">
                       {editando && isVM() ? (
-                        <Select value={item.titular_id} onValueChange={v => handleChange(item.cargo, "titular_id", v)}>
+                        <Select value={item.titular_id} onValueChange={v => handleChange(idx, "titular_id", v)}>
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
                           <SelectContent>{irmaosOrdenados.map(i => <SelectItem key={i.id} value={i.id}>{i.nome_completo}</SelectItem>)}</SelectContent>
                         </Select>
@@ -139,7 +139,7 @@ export default function AdminQuadroOficiais() {
                     </td>
                     <td className="px-4 py-3">
                       {editando && isVM() ? (
-                        <Select value={item.substituto_id} onValueChange={v => handleChange(item.cargo, "substituto_id", v)}>
+                        <Select value={item.substituto_id} onValueChange={v => handleChange(idx, "substituto_id", v)}>
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
                           <SelectContent>{irmaosOrdenados.map(i => <SelectItem key={i.id} value={i.id}>{i.nome_completo}</SelectItem>)}</SelectContent>
                         </Select>
