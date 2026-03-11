@@ -93,7 +93,7 @@ export default function AdminCadastroIrmaos() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-[#1B3A5F]">Cadastro de Irmãos</h1>
-            <p className="text-slate-500">{irmaos.length} irmãos cadastrados</p>
+            <p className="text-slate-500">{irmaos.length} cadastrados • {irmaos.filter(i => i.ativo).length} ativos</p>
           </div>
         </div>
         <Button onClick={abrirNovo} className="bg-[#1B3A5F] text-white">
