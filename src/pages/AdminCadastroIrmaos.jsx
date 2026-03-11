@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const CARGOS = ["Nenhum","Venerável Mestre","Primeiro Vigilante","Segundo Vigilante","Orador","Secretário","Tesoureiro","Chanceler","Bibliotecário","Mestre de Cerimônias","Primeiro Diácono","Segundo Diácono","Porta Bandeira","Porta Espada","Arquiteto","Hospitaleiro","Músico","Cobrador","Guarda Interno","Guarda Externo","Primeiro Experto","Segundo Experto","Mestre de Banquetes"];
+const CARGOS_SUGERIDOS = ["Nenhum","Venerável Mestre","Primeiro Vigilante","Segundo Vigilante","Orador","Secretário","Tesoureiro","Chanceler","Bibliotecário","Mestre de Cerimônias","Primeiro Diácono","Segundo Diácono","Porta Bandeira","Porta Espada","Arquiteto","Hospitaleiro","Músico","Mestre de Harmonia","Cobrador","Guarda Interno","Guarda Externo","Primeiro Experto","Segundo Experto","Mestre de Banquetes"];
 
 const FORM_VAZIO = {
   nome_completo: "", numero_glp: "", email: "", telefone: "",
