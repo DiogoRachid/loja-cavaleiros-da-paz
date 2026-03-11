@@ -202,13 +202,27 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-[#1B3A5F] text-white">
-                <th className="text-left px-3 py-2 font-medium sticky left-0 bg-[#1B3A5F] min-w-[160px]">Irmão</th>
-                <th className="text-center px-3 py-2 font-medium min-w-[100px]">Mensalidade</th>
-                {centrosAtivos.map(c => (
-                  <th key={c.id} className="text-center px-3 py-2 font-medium min-w-[100px]">{c.nome}</th>
+                {[
+                  { col: "irmao_nome", label: "Irmão", align: "left", sticky: true, minW: "160px" },
+                  { col: "mensalidade", label: "Mensalidade", align: "center", minW: "100px" },
+                  ...centrosAtivos.map(c => ({ col: c.id, label: c.nome, align: "center", minW: "100px" })),
+                  { col: "total", label: "Total", align: "center", minW: "100px" },
+                  { col: "status", label: "Status", align: "center", minW: "110px" },
+                ].map(({ col, label, align, sticky, minW }) => (
+                  <th
+                    key={col}
+                    className={`px-3 py-2 font-medium cursor-pointer select-none hover:bg-[#C9A227]/30 transition-colors ${align === "left" ? "text-left" : "text-center"} ${sticky ? "sticky left-0 bg-[#1B3A5F]" : ""}`}
+                    style={{ minWidth: minW }}
+                    onClick={() => handleSort(col)}
+                  >
+                    <span className="inline-flex items-center gap-1 justify-center">
+                      {label}
+                      {sortCol === col
+                        ? (sortDir === "asc" ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)
+                        : <ChevronsUpDown className="w-3 h-3 opacity-40" />}
+                    </span>
+                  </th>
                 ))}
-                <th className="text-center px-3 py-2 font-medium min-w-[100px]">Total</th>
-                <th className="text-center px-3 py-2 font-medium min-w-[110px]">Status</th>
               </tr>
             </thead>
             <tbody>
