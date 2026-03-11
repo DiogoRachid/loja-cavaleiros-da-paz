@@ -116,13 +116,21 @@ export default function AdminQuadroOficiais() {
               </thead>
               <tbody>
                 {quadro.map((item, idx) => (
-                  <tr key={item.cargo} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
-                    <td className="px-4 py-3 font-medium text-[#1B3A5F] text-sm">{item.cargo}</td>
+                  <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
+                    <td className="px-4 py-3 font-medium text-[#1B3A5F] text-sm">
+                      {editando && isVM() ? (
+                        <Input
+                          value={item.cargo}
+                          onChange={e => handleChange(item.cargo, "cargo", e.target.value)}
+                          className="h-8 text-sm font-medium text-[#1B3A5F]"
+                        />
+                      ) : item.cargo}
+                    </td>
                     <td className="px-4 py-3">
                       {editando && isVM() ? (
                         <Select value={item.titular_id} onValueChange={v => handleChange(item.cargo, "titular_id", v)}>
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
-                          <SelectContent>{irmaos.map(i => <SelectItem key={i.id} value={i.id}>{i.nome_completo}</SelectItem>)}</SelectContent>
+                          <SelectContent>{irmaosOrdenados.map(i => <SelectItem key={i.id} value={i.id}>{i.nome_completo}</SelectItem>)}</SelectContent>
                         </Select>
                       ) : (
                         <span className="text-sm text-slate-700">{item.titular_nome || <span className="text-slate-400 italic">Não definido</span>}</span>
@@ -132,7 +140,7 @@ export default function AdminQuadroOficiais() {
                       {editando && isVM() ? (
                         <Select value={item.substituto_id} onValueChange={v => handleChange(item.cargo, "substituto_id", v)}>
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
-                          <SelectContent>{irmaos.map(i => <SelectItem key={i.id} value={i.id}>{i.nome_completo}</SelectItem>)}</SelectContent>
+                          <SelectContent>{irmaosOrdenados.map(i => <SelectItem key={i.id} value={i.id}>{i.nome_completo}</SelectItem>)}</SelectContent>
                         </Select>
                       ) : (
                         <span className="text-sm text-slate-500">{item.substituto_nome || "—"}</span>
