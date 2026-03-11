@@ -12,6 +12,7 @@ export default function IrmaoPortal() {
   const [presencas, setPresencas] = useState([]);
   const [sessoes, setSessoes] = useState([]);
   const [emprestimos, setEmprestimos] = useState([]);
+  const [comissoesDoIrmao, setComissoesDoIrmao] = useState([]);
 
   useEffect(() => { loadDados(); }, []);
 
