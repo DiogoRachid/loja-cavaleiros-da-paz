@@ -28,8 +28,12 @@ export default function AdminMembros() {
   useEffect(() => { loadIrmaos(); }, []);
 
   const loadIrmaos = async () => {
-    const data = await base44.entities.Irmao.list("-created_date", 200);
+    const [data, mc] = await Promise.all([
+      base44.entities.Irmao.list("-created_date", 200),
+      base44.entities.MembroComissao.filter({ ativo: true }),
+    ]);
     setIrmaos(data);
+    setMembrosComissao(mc);
   };
 
   const toggleSort = (field) => {
