@@ -9,10 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const CARGOS = [
   "Venerável Mestre","Primeiro Vigilante","Segundo Vigilante","Orador",
-  "Secretário","Tesoureiro","Chanceler","Bibliotecário","Mestre de Cerimônias",
-  "Primeiro Diácono","Segundo Diácono","Porta Bandeira","Porta Estandarte","Porta Espada",
-  "Arquiteto","Hospitaleiro","Mestre de Harmonia","Secretário de Ação Social","Guarda do Templo",
-  "Guarda Externo","Primeiro Experto","Segundo Experto","Mestre de Banquetes"
+  "Secretário","Tesoureiro","Chanceler","Mestre de Cerimônias","Hospitaleiro",
+  "Secretário de Ação Social","Primeiro Diácono","Segundo Diácono","Porta Espada",
+  "Porta Bandeira","Porta Estandarte","Primeiro Experto","Segundo Experto",
+  "Guarda do Templo","Cobridor","Mestre de Banquetes","Mestre de Harmonia",
+  "Arquiteto","Bibliotecário"
 ];
 
 const EXERCICIO = new Date().getFullYear().toString();
