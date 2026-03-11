@@ -4,13 +4,14 @@ import { Award, Save, Eye, CheckCircle, Edit2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const CARGOS = [
   "Venerável Mestre","Primeiro Vigilante","Segundo Vigilante","Orador",
   "Secretário","Tesoureiro","Chanceler","Bibliotecário","Mestre de Cerimônias",
-  "Primeiro Diácono","Segundo Diácono","Porta Bandeira","Porta Espada",
-  "Arquiteto","Hospitaleiro","Músico","Cobrador","Guarda Interno",
+  "Primeiro Diácono","Segundo Diácono","Porta Bandeira","Porta Estandarte","Porta Espada",
+  "Arquiteto","Hospitaleiro","Mestre de Harmonia","Secretário de Ação Social","Guarda do Templo",
   "Guarda Externo","Primeiro Experto","Segundo Experto","Mestre de Banquetes"
 ];
 
