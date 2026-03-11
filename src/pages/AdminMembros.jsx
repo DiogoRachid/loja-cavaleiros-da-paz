@@ -76,10 +76,11 @@ export default function AdminMembros() {
       return sortDir === "asc" ? va.localeCompare(vb) : vb.localeCompare(va);
     });
 
+  const ativos = irmaos.filter(i => i.ativo);
   const stats = {
-    total: irmaos.filter(i => i.ativo).length,
-    regulares: irmaos.filter(i => i.situacao === "Regular").length,
-    irregulares: irmaos.filter(i => i.situacao === "Irregular").length,
+    total: ativos.length,
+    regulares: ativos.filter(i => i.situacao === "Regular").length,
+    irregulares: ativos.filter(i => i.situacao === "Irregular").length,
   };
   const pctAdimplencia = stats.total > 0 ? Math.round((stats.regulares / stats.total) * 100) : 0;
 
