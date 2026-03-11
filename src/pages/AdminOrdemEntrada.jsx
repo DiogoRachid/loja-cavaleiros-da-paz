@@ -166,7 +166,11 @@ export default function AdminOrdemEntrada() {
                       <Select value={novoItem.autoridade_id} onValueChange={v => setNovoItem({ ...novoItem, autoridade_id: v })}>
                         <SelectTrigger><SelectValue placeholder="Selecionar..." /></SelectTrigger>
                         <SelectContent>
-                          {autoridades.map(a => <SelectItem key={a.id} value={a.id}>{a.titulo} — {a.nome}</SelectItem>)}
+                          {autoridades.map(a => (
+                            <SelectItem key={a.id} value={a.id}>
+                              {a.potencia ? `[${a.potencia}] ` : ""}{a.titulo} — {a.nome}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
