@@ -20,16 +20,18 @@ export default function IrmaoPortal() {
     const ir = JSON.parse(sessionStorage.getItem("irmao_data") || "{}");
     if (!ir.id) return;
     setIrmao(ir);
-    const [m, p, s, e] = await Promise.all([
+    const [m, p, s, e, mc] = await Promise.all([
       base44.entities.Mensalidade.filter({ irmao_id: ir.id }),
       base44.entities.Presenca.filter({ irmao_id: ir.id }),
       base44.entities.Sessao.filter({ status: "Agendada" }),
       base44.entities.Emprestimo.filter({ irmao_id: ir.id, status: "Ativo" }),
+      base44.entities.MembroComissao.filter({ irmao_id: ir.id, ativo: true }),
     ]);
     setMensalidades(m.sort((a, b) => b.competencia?.localeCompare(a.competencia)));
     setPresencas(p);
     setSessoes(s.slice(0, 3));
     setEmprestimos(e);
+    setComissoesDoIrmao(mc);
   };
 
   if (!irmao) return null;
