@@ -117,7 +117,7 @@ export default function AdminCadastroIrmaos() {
         </Select>
         <Select value={filtroCargo} onValueChange={setFiltroCargo}>
           <SelectTrigger className="w-44"><SelectValue placeholder="Cargo" /></SelectTrigger>
-          <SelectContent>{["Todos", ...CARGOS].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+          <SelectContent>{["Todos", ...CARGOS_SUGERIDOS].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
         </Select>
       </div>
 
