@@ -279,7 +279,21 @@ export default function AdminMembros() {
                     <td className="px-4 py-3 hidden md:table-cell">
                       <Badge className={grauColors[ir.grau] || ""}>{ir.grau}</Badge>
                     </td>
-                    <td className="px-4 py-3 text-sm text-slate-600 hidden lg:table-cell">{ir.cargo && ir.cargo !== "Nenhum" ? ir.cargo : "—"}</td>
+                    <td className="px-4 py-3 text-sm text-slate-600 hidden lg:table-cell">
+                      {(() => {
+                        const comissoes = membrosComissao.filter(m => m.irmao_id === ir.id);
+                        const temCargo = ir.cargo && ir.cargo !== "Nenhum";
+                        if (!temCargo && comissoes.length === 0) return "—";
+                        return (
+                          <div className="flex flex-col gap-1">
+                            {temCargo && <span>{ir.cargo}</span>}
+                            {comissoes.map(m => (
+                              <span key={m.id} className="text-xs text-slate-500">Membro da Comissão {m.comissao_nome}</span>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </td>
                     <td className="px-4 py-3 hidden lg:table-cell">
                       <Badge className={situacaoColors[ir.situacao] || ""}>{ir.situacao}</Badge>
                     </td>
