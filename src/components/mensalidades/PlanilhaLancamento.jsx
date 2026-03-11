@@ -5,19 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-
-const statusColors = {
-  Pago: "bg-green-100 text-green-800",
-  Pendente: "bg-yellow-100 text-yellow-800",
-  Atrasado: "bg-red-100 text-red-800",
-  Isento: "bg-slate-100 text-slate-600",
-};
 
 export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
   const admin = JSON.parse(sessionStorage.getItem("admin_data") || "{}");
 
-  // Config do mês
   const hoje = new Date();
   const mesAtual = `${String(hoje.getMonth() + 1).padStart(2, "0")}/${hoje.getFullYear()}`;
   const [competencia, setCompetencia] = useState(mesAtual);
@@ -26,33 +17,8 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
   const [linhas, setLinhas] = useState([]);
   const [saving, setSaving] = useState(false);
   const [carregando, setCarregando] = useState(false);
-  const [existentes, setExistentes] = useState([]);
   const [sortCol, setSortCol] = useState("irmao_nome");
   const [sortDir, setSortDir] = useState("asc");
-
-  const handleSort = (col) => {
-    if (sortCol === col) {
-      setSortDir(d => d === "asc" ? "desc" : "asc");
-    } else {
-      setSortCol(col);
-      setSortDir("asc");
-    }
-  };
-
-  const getValorSort = (linha, col) => {
-    if (col === "irmao_nome") return linha.irmao_nome;
-    if (col === "mensalidade") return parseFloat(linha.mensalidade) || 0;
-    if (col === "total") return calcularTotal(linha);
-    if (col === "status") return linha.status;
-    return parseFloat(linha.centros_custo[col]) || 0;
-  };
-
-  const sortedLinhas = [...linhas].sort((a, b) => {
-    const valA = getValorSort(a, sortCol);
-    const valB = getValorSort(b, sortCol);
-    if (typeof valA === "string") return sortDir === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    return sortDir === "asc" ? valA - valB : valB - valA;
-  });
 
   useEffect(() => {
     if (irmaos.length > 0) inicializarLinhas();
@@ -79,8 +45,6 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
     if (!competencia) return;
     setCarregando(true);
     const dados = await base44.entities.Mensalidade.filter({ competencia });
-    setExistentes(dados);
-
     const dadosLoja = await base44.entities.DadosLoja.list();
     const valorPadrao = dadosLoja[0]?.valor_mensalidade || 0;
 
@@ -105,11 +69,39 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
     setCarregando(false);
   };
 
+  const calcularTotal = (linha) => {
+    const m = parseFloat(linha.mensalidade) || 0;
+    const cc = Object.values(linha.centros_custo).reduce((a, v) => a + (parseFloat(v) || 0), 0);
+    return m + cc;
+  };
+
+  const handleSort = (col) => {
+    if (sortCol === col) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortCol(col);
+      setSortDir("asc");
+    }
+  };
+
+  const getValorSort = (linha, col) => {
+    if (col === "irmao_nome") return linha.irmao_nome;
+    if (col === "mensalidade") return parseFloat(linha.mensalidade) || 0;
+    if (col === "total") return calcularTotal(linha);
+    if (col === "status") return linha.status;
+    return parseFloat(linha.centros_custo[col]) || 0;
+  };
+
+  const sortedLinhas = [...linhas].sort((a, b) => {
+    const valA = getValorSort(a, sortCol);
+    const valB = getValorSort(b, sortCol);
+    if (typeof valA === "string") return sortDir === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    return sortDir === "asc" ? valA - valB : valB - valA;
+  });
+
   const setValorCC = (irmaoId, ccId, val) => {
     setLinhas(prev => prev.map(l =>
-      l.irmao_id === irmaoId
-        ? { ...l, centros_custo: { ...l.centros_custo, [ccId]: val } }
-        : l
+      l.irmao_id === irmaoId ? { ...l, centros_custo: { ...l.centros_custo, [ccId]: val } } : l
     ));
   };
 
@@ -124,12 +116,6 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
   const aplicarMensalidadeGlobal = () => {
     if (!valorMensalidade) return;
     setLinhas(prev => prev.map(l => ({ ...l, mensalidade: valorMensalidade })));
-  };
-
-  const calcularTotal = (linha) => {
-    const m = parseFloat(linha.mensalidade) || 0;
-    const cc = Object.values(linha.centros_custo).reduce((a, v) => a + (parseFloat(v) || 0), 0);
-    return m + cc;
   };
 
   const salvarTudo = async () => {
@@ -165,6 +151,14 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
 
   const totalGeral = linhas.reduce((a, l) => a + calcularTotal(l), 0);
   const totalPago = linhas.filter(l => l.status === "Pago").reduce((a, l) => a + calcularTotal(l), 0);
+
+  const colunas = [
+    { col: "irmao_nome", label: "Irmão", align: "left", sticky: true, minW: "160px" },
+    { col: "mensalidade", label: "Mensalidade", align: "center", minW: "100px" },
+    ...centrosAtivos.map(c => ({ col: c.id, label: c.nome, align: "center", minW: "100px" })),
+    { col: "total", label: "Total", align: "center", minW: "100px" },
+    { col: "status", label: "Status", align: "center", minW: "110px" },
+  ];
 
   return (
     <Card className="border-[#C9A227]">
@@ -202,20 +196,14 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-[#1B3A5F] text-white">
-                {[
-                  { col: "irmao_nome", label: "Irmão", align: "left", sticky: true, minW: "160px" },
-                  { col: "mensalidade", label: "Mensalidade", align: "center", minW: "100px" },
-                  ...centrosAtivos.map(c => ({ col: c.id, label: c.nome, align: "center", minW: "100px" })),
-                  { col: "total", label: "Total", align: "center", minW: "100px" },
-                  { col: "status", label: "Status", align: "center", minW: "110px" },
-                ].map(({ col, label, align, sticky, minW }) => (
+                {colunas.map(({ col, label, align, sticky, minW }) => (
                   <th
                     key={col}
-                    className={`px-3 py-2 font-medium cursor-pointer select-none hover:bg-[#C9A227]/30 transition-colors ${align === "left" ? "text-left" : "text-center"} ${sticky ? "sticky left-0 bg-[#1B3A5F]" : ""}`}
+                    className={`px-3 py-2 font-medium cursor-pointer select-none hover:bg-white/10 transition-colors ${align === "left" ? "text-left" : "text-center"} ${sticky ? "sticky left-0 bg-[#1B3A5F]" : ""}`}
                     style={{ minWidth: minW }}
                     onClick={() => handleSort(col)}
                   >
-                    <span className="inline-flex items-center gap-1 justify-center">
+                    <span className="inline-flex items-center gap-1">
                       {label}
                       {sortCol === col
                         ? (sortDir === "asc" ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)
