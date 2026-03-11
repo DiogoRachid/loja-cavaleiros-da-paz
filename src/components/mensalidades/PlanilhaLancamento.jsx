@@ -226,7 +226,7 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
               </tr>
             </thead>
             <tbody>
-              {linhas.map((linha, idx) => {
+              {sortedLinhas.map((linha, idx) => {
                 const total = calcularTotal(linha);
                 return (
                   <tr key={linha.irmao_id} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
