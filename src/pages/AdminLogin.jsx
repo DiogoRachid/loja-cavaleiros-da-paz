@@ -140,35 +140,7 @@ export default function AdminLogin() {
               </Select>
             </div>
 
-            {isBibliotecario ? (
-              <>
-                <div className="space-y-2">
-                  <Label className="text-slate-200">Login</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input
-                      value={loginBib}
-                      onChange={e => setLoginBib(e.target.value)}
-                      placeholder="Seu login de bibliotecário"
-                      className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-slate-200">Senha</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input
-                      type="password"
-                      value={senhaBib}
-                      onChange={e => setSenhaBib(e.target.value)}
-                      placeholder="Sua senha"
-                      className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
-                    />
-                  </div>
-                </div>
-              </>
-            ) : cargo ? (
+            {cargo ? (
               <>
                 <div className="space-y-2">
                   <Label className="text-slate-200">Número GLP</Label>
