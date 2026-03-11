@@ -135,10 +135,6 @@ export default function AdminSessoes() {
               <Label>Pauta</Label>
               <Textarea value={form.pauta} onChange={e => setForm({ ...form, pauta: e.target.value })} rows={3} placeholder="Descreva os itens da pauta..." />
             </div>
-            <div className="space-y-1">
-              <Label>Ata</Label>
-              <Textarea value={form.ata} onChange={e => setForm({ ...form, ata: e.target.value })} rows={4} placeholder="Registro da ata (preencher após a sessão)..." />
-            </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
               <Button onClick={salvar} disabled={saving} className="bg-[#1B3A5F] text-white">
