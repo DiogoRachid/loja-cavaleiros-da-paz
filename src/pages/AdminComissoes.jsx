@@ -53,16 +53,18 @@ export default function AdminComissoes() {
 
   const adicionarMembro = async (comissaoId, comissaoNome) => {
     if (!novoMembro.irmao_id) return;
+    const mc = getMembros(comissaoId);
+    if (mc.length >= 3) return;
     const irmao = irmaos.find(i => i.id === novoMembro.irmao_id);
     await base44.entities.MembroComissao.create({
       comissao_id: comissaoId,
       comissao_nome: comissaoNome,
       irmao_id: novoMembro.irmao_id,
       irmao_nome: irmao?.nome_completo || "",
-      funcao: novoMembro.funcao,
+      funcao: "Membro",
       ativo: true,
     });
-    setNovoMembro({ comissao_id: "", irmao_id: "", funcao: "Membro" });
+    setNovoMembro({ comissao_id: "", irmao_id: "" });
     setAddingMembro(null);
     await loadDados();
   };
