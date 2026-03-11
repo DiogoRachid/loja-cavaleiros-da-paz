@@ -161,13 +161,13 @@ export default function AdminComissoes() {
                 <CardContent className="pt-0">
                   <div className="border-t pt-4 space-y-2">
                     {mc.map(m => (
-                      <div key={m.id} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
-                        <div>
-                          <p className="text-sm font-medium text-slate-800">{m.irmao_nome}</p>
-                          <Badge className="text-xs bg-slate-200 text-slate-700">{m.funcao}</Badge>
-                        </div>
-                        <Button variant="ghost" size="icon" onClick={() => removerMembro(m.id)} className="text-red-500 h-7 w-7"><X className="w-3 h-3" /></Button>
-                      </div>
+                     <div key={m.id} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
+                       <div>
+                         <p className="text-sm font-medium text-slate-800">{m.irmao_nome}</p>
+                         <Badge className="text-xs bg-slate-200 text-slate-700">Membro da Comissão {m.comissao_nome}</Badge>
+                       </div>
+                       <Button variant="ghost" size="icon" onClick={() => removerMembro(m.id)} className="text-red-500 h-7 w-7"><X className="w-3 h-3" /></Button>
+                     </div>
                     ))}
                     {addingMembro === c.id ? (
                       <div className="flex gap-2 pt-2">
