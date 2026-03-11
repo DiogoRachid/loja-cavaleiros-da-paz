@@ -39,7 +39,8 @@ export default function AdminQuadroOficiais() {
     ]);
     setIrmaos(ir);
     if (q.length > 0) {
-      setQuadro(q);
+      const ordenado = CARGOS.map(cargo => q.find(item => item.cargo === cargo) || { cargo, exercicio: EXERCICIO, titular_id: "", titular_nome: "", substituto_id: "", substituto_nome: "", publicado: false });
+      setQuadro(ordenado);
       setPublicado(q[0]?.publicado || false);
     } else {
       // Inicializar quadro vazio
