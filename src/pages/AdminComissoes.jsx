@@ -19,7 +19,7 @@ export default function AdminComissoes() {
   const [form, setForm] = useState(FORM_VAZIO);
   const [expandido, setExpandido] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [novoMembro, setNovoMembro] = useState({ comissao_id: "", irmao_id: "", funcao: "Membro" });
+  const [novoMembro, setNovoMembro] = useState({ comissao_id: "", irmao_id: "" });
   const [addingMembro, setAddingMembro] = useState(null);
 
   useEffect(() => { loadDados(); }, []);
