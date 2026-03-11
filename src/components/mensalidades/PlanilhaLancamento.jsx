@@ -27,6 +27,30 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
   const [saving, setSaving] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [existentes, setExistentes] = useState([]);
+  const [sortCol, setSortCol] = useState("irmao_nome");
+  const [sortDir, setSortDir] = useState("asc");
+
+  const handleSort = (col) => {
+    if (sortCol === col) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortCol(col);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedLinhas = [...linhas].sort((a, b) => {
+    let valA, valB;
+    if (col => col === sortCol)(sortCol) {
+      if (sortCol === "irmao_nome") { valA = a.irmao_nome; valB = b.irmao_nome; }
+      else if (sortCol === "mensalidade") { valA = parseFloat(a.mensalidade) || 0; valB = parseFloat(b.mensalidade) || 0; }
+      else if (sortCol === "total") { valA = calcularTotal(a); valB = calcularTotal(b); }
+      else if (sortCol === "status") { valA = a.status; valB = b.status; }
+      else { valA = parseFloat(a.centros_custo[sortCol]) || 0; valB = parseFloat(b.centros_custo[sortCol]) || 0; }
+    }
+    if (typeof valA === "string") return sortDir === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    return sortDir === "asc" ? valA - valB : valB - valA;
+  });
 
   useEffect(() => {
     if (irmaos.length > 0) inicializarLinhas();
