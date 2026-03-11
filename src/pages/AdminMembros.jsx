@@ -14,6 +14,7 @@ const CARGOS_SUGERIDOS = ["Nenhum","Venerável Mestre","Primeiro Vigilante","Seg
 
 export default function AdminMembros() {
   const [irmaos, setIrmaos] = useState([]);
+  const [membrosComissao, setMembrosComissao] = useState([]);
   const [busca, setBusca] = useState("");
   const [filtroGrau, setFiltroGrau] = useState("Todos");
   const [filtroSituacao, setFiltroSituacao] = useState("Todos");
