@@ -212,17 +212,47 @@ export default function PrepararReuniao() {
   </table>
 </div>
 
-${autPresentes.length > 0 ? `
 <div class="section">
-  <div class="section-title">Autoridades Presentes</div>
-  <table>
-    <thead><tr><th>Título</th><th>Nome</th></tr></thead>
+  <div class="section-title">Ordem de Entrada</div>
+  <table style="font-size:9pt; border-collapse:collapse; width:100%; margin-bottom:8px;">
     <tbody>
-      ${autPresentes.map(a => `<tr><td>${a.titulo}</td><td>${a.nome}</td></tr>`).join("")}
+      <tr>
+        <td style="border:1px solid #999;padding:3px 6px;font-weight:bold">1º - Aprendizes</td>
+        <td style="border:1px solid #999;padding:3px 6px;font-weight:bold">2º - Companheiros</td>
+        <td style="border:1px solid #999;padding:3px 6px;font-weight:bold">3º - Mestres</td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #999;padding:3px 6px">4º - Oficiais</td>
+        <td style="border:1px solid #999;padding:3px 6px">5º - Dignidades (Or.: e Sec.:)</td>
+        <td style="border:1px solid #999;padding:3px 6px">6º - Mestres Instalados</td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #999;padding:3px 6px">7º - 1º e 2º VVig.:</td>
+        <td style="border:1px solid #999;padding:3px 6px">8º - Venerável Mestre</td>
+        <td style="border:1px solid #999;padding:3px 6px">9º - Autoridades</td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #999;padding:3px 6px">QQf.: da GLP</td>
+        <td style="border:1px solid #999;padding:3px 6px">Ministros do S.:T.:M.:</td>
+        <td style="border:1px solid #999;padding:3px 6px">Grandes QQf.:</td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #999;padding:3px 6px">Eminente(s) Delegado(s)</td>
+        <td style="border:1px solid #999;padding:3px 6px">Eminente Deputado</td>
+        <td style="border:1px solid #999;padding:3px 6px">Ser.: Gr&#227;o Mestre</td>
+      </tr>
     </tbody>
   </table>
+  <p style="font-weight:bold; margin-bottom:5px;">AUTORIDADES (nesta ordem de chamada)</p>
+  <p style="margin-bottom:5px; font-style:italic;">&ldquo;Vener&#225;vel Mestre: o Templo encontra-se devidamente ornamentado, e pronto para darmos in&#237;cio aos nossos trabalhos.&rdquo;</p>
+  <p style="margin-bottom:5px;">Ap&#243;s a fala do VM: <em><strong>&ldquo;Irm&#227;os Guarda do Templo e Mestre de Harmonia, ocupai vossos lugares.&rdquo;</strong></em></p>
+  <p style="margin-bottom:5px; font-style:italic;">&ldquo;Encontra-se no &#193;trio (falar as autoridades)&rdquo;.</p>
+  <p style="margin-bottom:10px;">Ap&#243;s a autoriza&#231;&#227;o do VM: &ldquo;(falar as Autoridades)...A ARLS Cavaleiros da Paz n&#186;25 tem a honra de receber-vos e o meu VM pede-vos que me acompanheis.&rdquo;</p>
+  ${autPresentes.length > 0
+    ? autPresentes.map(a => `<p style="margin-bottom:5px; padding:4px 6px; border-bottom:1px solid #ddd;"><strong>${a.titulo}${a.nome ? ` \u2013 ${a.nome}` : ""}</strong></p>`).join("")
+    : "<p style='color:#999; font-style:italic;'>Nenhuma autoridade confirmada.</p>"
+  }
 </div>
-` : ""}
 
 <div class="section">
   <div class="section-title">Roteiro da Reunião</div>
