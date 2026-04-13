@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Calendar, CheckCircle, Clock, MapPin, FileText, Users } from "lucide-react";
+import { Calendar, CheckCircle, Clock, MapPin, FileText, Users, Plus, X, Save } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -22,21 +25,35 @@ const tipoColors = {
   "Fúnebre": "bg-gray-100 text-gray-700",
 };
 
+const FORM_VAZIO = { numero: "", data: "", hora: "19:30", tipo: "Ordinária", grau: "Mestre", local: "Templo da Loja", pauta: "", status: "Agendada" };
+
 export default function AdminAgendaRitual() {
   const [sessoes, setSessoes] = useState([]);
   const [selecionada, setSelecionada] = useState(null);
   const [ordemCount, setOrdemCount] = useState({});
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(FORM_VAZIO);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => { loadDados(); }, []);
 
   const loadDados = async () => {
     const data = await base44.entities.Sessao.list("-data", 30);
     setSessoes(data);
-    // Contar participantes por sessão
     const ordens = await base44.entities.OrdemEntrada.list();
     const counts = {};
     ordens.forEach(o => { counts[o.sessao_id] = (counts[o.sessao_id] || 0) + 1; });
     setOrdemCount(counts);
+  };
+
+  const salvarSessao = async () => {
+    if (!form.data || !form.hora || !form.tipo) return;
+    setSaving(true);
+    await base44.entities.Sessao.create(form);
+    await loadDados();
+    setShowForm(false);
+    setForm(FORM_VAZIO);
+    setSaving(false);
   };
 
   const agendadas = sessoes.filter(s => s.status === "Agendada");
@@ -44,7 +61,7 @@ export default function AdminAgendaRitual() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-[#1B3A5F] flex items-center justify-center">
             <Calendar className="w-6 h-6 text-[#C9A227]" />
@@ -54,7 +71,66 @@ export default function AdminAgendaRitual() {
             <p className="text-slate-500">{agendadas.length} sessões agendadas</p>
           </div>
         </div>
+        <Button onClick={() => setShowForm(!showForm)} className="bg-[#1B3A5F] text-white">
+          <Plus className="w-4 h-4 mr-2" /> Nova Sessão
+        </Button>
       </div>
+
+      {/* Formulário nova sessão */}
+      {showForm && (
+        <Card className="border-[#C9A227]">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-[#1B3A5F] text-base">Nova Sessão</CardTitle>
+            <Button variant="ghost" size="icon" onClick={() => setShowForm(false)}><X className="w-4 h-4" /></Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="space-y-1">
+                <Label>Número</Label>
+                <Input value={form.numero} onChange={e => setForm({ ...form, numero: e.target.value })} placeholder="001/2026" />
+              </div>
+              <div className="space-y-1">
+                <Label>Data *</Label>
+                <Input type="date" value={form.data} onChange={e => setForm({ ...form, data: e.target.value })} />
+              </div>
+              <div className="space-y-1">
+                <Label>Hora *</Label>
+                <Input type="time" value={form.hora} onChange={e => setForm({ ...form, hora: e.target.value })} />
+              </div>
+              <div className="space-y-1">
+                <Label>Tipo *</Label>
+                <Select value={form.tipo} onValueChange={v => setForm({ ...form, tipo: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["Ordinária","Extraordinária","Magna","Pública","De Instrução","Fúnebre"].map(t => (
+                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Grau</Label>
+                <Select value={form.grau} onValueChange={v => setForm({ ...form, grau: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["Aprendiz","Companheiro","Mestre"].map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1 md:col-span-2">
+                <Label>Local</Label>
+                <Input value={form.local} onChange={e => setForm({ ...form, local: e.target.value })} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
+              <Button onClick={salvarSessao} disabled={saving} className="bg-[#1B3A5F] text-white">
+                <Save className="w-4 h-4 mr-2" />{saving ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Próximas Sessões */}
       {agendadas.length > 0 && (
@@ -84,9 +160,7 @@ export default function AdminAgendaRitual() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Badge className={statusColors[s.status]}>{s.status}</Badge>
-                    </div>
+                    <Badge className={statusColors[s.status]}>{s.status}</Badge>
                   </div>
 
                   {selecionada?.id === s.id && (
@@ -97,10 +171,15 @@ export default function AdminAgendaRitual() {
                           <p className="text-sm text-slate-600 bg-slate-50 rounded-lg p-3 whitespace-pre-wrap">{s.pauta}</p>
                         </div>
                       )}
-                      <div className="flex gap-2">
-                        <Link to={createPageUrl(`AdminOrdemEntrada`)}>
-                          <Button size="sm" className="bg-[#1B3A5F] text-white">
-                            <Users className="w-3 h-3 mr-1" /> Preparar Ordem de Entrada
+                      <div className="flex gap-2 flex-wrap">
+                        <Link to={`${createPageUrl("PrepararReuniao")}?sessao=${s.id}`}>
+                          <Button size="sm" className="bg-[#C9A227] text-[#1B3A5F] font-semibold hover:bg-[#8B7019]">
+                            <FileText className="w-3 h-3 mr-1" /> Preparar Reunião
+                          </Button>
+                        </Link>
+                        <Link to={createPageUrl("AdminOrdemEntrada")}>
+                          <Button size="sm" variant="outline" className="border-[#1B3A5F] text-[#1B3A5F]">
+                            <Users className="w-3 h-3 mr-1" /> Ordem de Entrada
                           </Button>
                         </Link>
                       </div>
@@ -141,9 +220,9 @@ export default function AdminAgendaRitual() {
           <CardContent className="p-8 text-center text-slate-400">
             <Calendar className="w-12 h-12 mx-auto mb-3 opacity-30" />
             <p>Nenhuma sessão cadastrada.</p>
-            <Link to={createPageUrl("AdminSessoes")}>
-              <Button className="mt-3 bg-[#1B3A5F] text-white">Cadastrar Sessão</Button>
-            </Link>
+            <Button onClick={() => setShowForm(true)} className="mt-3 bg-[#1B3A5F] text-white">
+              <Plus className="w-4 h-4 mr-2" /> Criar Primeira Sessão
+            </Button>
           </CardContent>
         </Card>
       )}
