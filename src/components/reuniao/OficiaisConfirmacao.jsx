@@ -19,7 +19,11 @@ export default function OficiaisConfirmacao({ quadro, irmaos, onChange }) {
     onChange(updated);
   };
 
-  const irmaosOrdenados = [...irmaos].sort((a, b) => a.nome_completo.localeCompare(b.nome_completo, "pt-BR"));
+  // IDs dos titulares que já estão confirmados como presentes
+  const titularesConfirmados = new Set(quadro.filter(o => o.confirmado && o.titular_id).map(o => o.titular_id));
+  const irmaosOrdenados = [...irmaos]
+    .filter(ir => !titularesConfirmados.has(ir.id))
+    .sort((a, b) => a.nome_completo.localeCompare(b.nome_completo, "pt-BR"));
 
   return (
     <Card>

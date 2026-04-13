@@ -81,12 +81,15 @@ export default function PrepararReuniao() {
       ]);
       if (sess.length > 0) setSessao(sess[0]);
 
-      // Montar lista na ordem de entrada, com titulares do quadro
-      const linhaOficiais = CARGOS_ORDEM_ENTRADA
-        .map(cargo => {
-          const q = quadro.find(x => x.cargo === cargo);
-          return { cargo, titular_id: q?.titular_id || "", titular_nome: q?.titular_nome || "", confirmado: false, substituto_id: "", substituto_nome: "" };
-        });
+      // Montar lista com os cargos exatamente como cadastrados no quadro
+      const linhaOficiais = quadro.map(q => ({
+        cargo: q.cargo,
+        titular_id: q.titular_id || "",
+        titular_nome: q.titular_nome || "",
+        confirmado: false,
+        substituto_id: "",
+        substituto_nome: "",
+      }));
       setQuadroOficiais(linhaOficiais);
       setOficiais(quadro);
     }

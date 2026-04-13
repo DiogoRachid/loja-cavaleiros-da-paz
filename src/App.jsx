@@ -61,7 +61,7 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-      <Route path="/PrepararReuniao" element={<LayoutWrapper currentPageName="PrepararReuniao"><PrepararReuniao /></LayoutWrapper>} />
+      <Route path="/PrepararReuniao" element={<LayoutWrapper currentPageName="AdminPrepararReuniao"><PrepararReuniao /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
