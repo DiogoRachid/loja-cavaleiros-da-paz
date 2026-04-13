@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Calendar, CheckCircle, Clock, MapPin, FileText, Users, Plus, X, Save } from "lucide-react";
+import { Calendar, CheckCircle, Clock, MapPin, FileText, Users, Plus, X, Save, Edit2, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,8 @@ export default function AdminAgendaRitual() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(FORM_VAZIO);
   const [saving, setSaving] = useState(false);
+  const [editando, setEditando] = useState(null);
+  const [formEdicao, setFormEdicao] = useState(FORM_VAZIO);
 
   useEffect(() => { loadDados(); }, []);
 
@@ -44,6 +46,28 @@ export default function AdminAgendaRitual() {
     const counts = {};
     ordens.forEach(o => { counts[o.sessao_id] = (counts[o.sessao_id] || 0) + 1; });
     setOrdemCount(counts);
+  };
+
+  const abrirEdicao = (s, e) => {
+    e.stopPropagation();
+    setFormEdicao({ numero: s.numero || "", data: s.data || "", hora: s.hora || "19:30", tipo: s.tipo || "Ordinária", grau: s.grau || "Mestre", local: s.local || "", pauta: s.pauta || "", status: s.status || "Agendada" });
+    setEditando(s.id);
+  };
+
+  const salvarEdicao = async () => {
+    setSaving(true);
+    await base44.entities.Sessao.update(editando, formEdicao);
+    await loadDados();
+    setEditando(null);
+    setSaving(false);
+  };
+
+  const excluir = async (id, e) => {
+    e.stopPropagation();
+    if (!confirm("Deseja excluir esta sessão?")) return;
+    await base44.entities.Sessao.delete(id);
+    if (selecionada?.id === id) setSelecionada(null);
+    await loadDados();
   };
 
   const salvarSessao = async () => {
@@ -160,10 +184,50 @@ export default function AdminAgendaRitual() {
                         </div>
                       </div>
                     </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
                     <Badge className={statusColors[s.status]}>{s.status}</Badge>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-500" onClick={e => abrirEdicao(s, e)}><Edit2 className="w-3 h-3" /></Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500" onClick={e => excluir(s.id, e)}><Trash2 className="w-3 h-3" /></Button>
+                  </div>
                   </div>
 
-                  {selecionada?.id === s.id && (
+                  {editando === s.id && (
+                    <div className="mt-4 pt-4 border-t space-y-4" onClick={e => e.stopPropagation()}>
+                      <p className="text-sm font-semibold text-[#1B3A5F]">Editar Sessão</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="space-y-1"><Label>Número</Label><Input value={formEdicao.numero} onChange={e => setFormEdicao({ ...formEdicao, numero: e.target.value })} placeholder="001/2026" className="h-8" /></div>
+                        <div className="space-y-1"><Label>Data</Label><Input type="date" value={formEdicao.data} onChange={e => setFormEdicao({ ...formEdicao, data: e.target.value })} className="h-8" /></div>
+                        <div className="space-y-1"><Label>Hora</Label><Input type="time" value={formEdicao.hora} onChange={e => setFormEdicao({ ...formEdicao, hora: e.target.value })} className="h-8" /></div>
+                        <div className="space-y-1"><Label>Status</Label>
+                          <Select value={formEdicao.status} onValueChange={v => setFormEdicao({ ...formEdicao, status: v })}>
+                            <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                            <SelectContent>{["Agendada","Realizada","Cancelada"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1"><Label>Tipo</Label>
+                          <Select value={formEdicao.tipo} onValueChange={v => setFormEdicao({ ...formEdicao, tipo: v })}>
+                            <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                            <SelectContent>{["Ordinária","Extraordinária","Magna","Pública","De Instrução","Fúnebre"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1"><Label>Grau</Label>
+                          <Select value={formEdicao.grau} onValueChange={v => setFormEdicao({ ...formEdicao, grau: v })}>
+                            <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                            <SelectContent>{["Aprendiz","Companheiro","Mestre"].map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1 md:col-span-2"><Label>Local</Label><Input value={formEdicao.local} onChange={e => setFormEdicao({ ...formEdicao, local: e.target.value })} className="h-8" /></div>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setEditando(null)}>Cancelar</Button>
+                        <Button size="sm" onClick={salvarEdicao} disabled={saving} className="bg-[#1B3A5F] text-white">
+                          <Save className="w-3 h-3 mr-1" />{saving ? "Salvando..." : "Salvar"}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {selecionada?.id === s.id && editando !== s.id && (
                     <div className="mt-4 pt-4 border-t space-y-3">
                       {s.pauta && (
                         <div>
