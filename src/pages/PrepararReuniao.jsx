@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { FileText, Users, Shield, ClipboardList, Printer, Save, ChevronLeft } from "lucide-react";
+import { FileText, Users, Shield, ClipboardList, Printer, Save, ChevronLeft, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -75,6 +75,8 @@ export default function PrepararReuniao() {
   const [autoridadesLista, setAutoridadesLista] = useState([]);
   const [roteiro, setRoteiro] = useState(ITENS_PADRAO.map(i => ({ ...i })));
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState(null);
   const [activeTab, setActiveTab] = useState("oficiais");
   const [dadosLoja, setDadosLoja] = useState(null);
 
@@ -117,10 +119,47 @@ export default function PrepararReuniao() {
           substituto_id: "",
           substituto_nome: "",
         }));
-      setQuadroOficiais(linhaOficiais);
+      // Tentar restaurar dados salvos
+      if (sess.length > 0 && sess[0].preparacao_json) {
+        try {
+          const salvo = JSON.parse(sess[0].preparacao_json);
+          if (salvo.quadroOficiais) {
+            // Mesclar: preservar estrutura atual mas restaurar confirmados/substitutos
+            const restaurado = linhaOficiais.map(o => {
+              const salvoItem = salvo.quadroOficiais.find(s => s.cargo === o.cargo);
+              return salvoItem ? { ...o, confirmado: salvoItem.confirmado, substituto_id: salvoItem.substituto_id || "", substituto_nome: salvoItem.substituto_nome || "" } : o;
+            });
+            setQuadroOficiais(restaurado);
+          } else {
+            setQuadroOficiais(linhaOficiais);
+          }
+          if (salvo.autoridadesLista) setAutoridadesLista(salvo.autoridadesLista);
+          if (salvo.roteiro) setRoteiro(salvo.roteiro);
+          setSavedAt(salvo.savedAt || null);
+        } catch (e) {
+          setQuadroOficiais(linhaOficiais);
+        }
+      } else {
+        setQuadroOficiais(linhaOficiais);
+      }
       setOficiais(quadro);
     }
     setLoading(false);
+  };
+
+  const salvarDados = async () => {
+    if (!sessaoId) return;
+    setSaving(true);
+    const agora = new Date().toISOString();
+    const dados = {
+      quadroOficiais: quadroOficiais.map(o => ({ cargo: o.cargo, confirmado: o.confirmado, substituto_id: o.substituto_id, substituto_nome: o.substituto_nome })),
+      autoridadesLista,
+      roteiro,
+      savedAt: agora,
+    };
+    await base44.entities.Sessao.update(sessaoId, { preparacao_json: JSON.stringify(dados) });
+    setSavedAt(agora);
+    setSaving(false);
   };
 
   const formatarData = (dataStr) => {
@@ -316,9 +355,19 @@ export default function PrepararReuniao() {
             )}
           </div>
         </div>
-        <Button onClick={gerarPDF} className="bg-[#C9A227] text-[#1B3A5F] font-semibold hover:bg-[#8B7019]">
-          <Printer className="w-4 h-4 mr-2" /> Gerar PDF / Imprimir
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {savedAt && (
+            <span className="text-xs text-green-600 flex items-center gap-1">
+              <CheckCircle className="w-3 h-3" /> Salvo
+            </span>
+          )}
+          <Button onClick={salvarDados} disabled={saving || !sessaoId} variant="outline" className="border-[#1B3A5F] text-[#1B3A5F]">
+            <Save className="w-4 h-4 mr-2" />{saving ? "Salvando..." : "Salvar"}
+          </Button>
+          <Button onClick={gerarPDF} className="bg-[#C9A227] text-[#1B3A5F] font-semibold hover:bg-[#8B7019]">
+            <Printer className="w-4 h-4 mr-2" /> Gerar PDF
+          </Button>
+        </div>
       </div>
 
       {/* Tabs */}
