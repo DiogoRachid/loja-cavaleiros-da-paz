@@ -37,11 +37,30 @@ const SIMBOLO_CARGO = {
   "Mestre de Banquetes": "⚗",
 };
 
-const CARGOS_ORDEM_ENTRADA = [
-  "Guarda Externo","Guarda Interno","Segundo Diácono","Primeiro Diácono",
-  "Mestre de Cerimônias","Porta Espada","Porta Bandeira","Músico","Hospitaleiro",
-  "Chanceler","Tesoureiro","Secretário","Arquiteto","Orador",
-  "Segundo Vigilante","Primeiro Vigilante","Venerável Mestre",
+const CARGOS_ORDEM_EXIBICAO = [
+  "Venerável Mestre",
+  "Primeiro Vigilante",
+  "Segundo Vigilante",
+  "Orador",
+  "Secretário",
+  "Guarda do Templo",
+  "Mestre de Cerimônias",
+  "Primeiro Diácono",
+  "Segundo Diácono",
+  "Cobridor",
+  "Tesoureiro",
+  "Hospitaleiro",
+  "Chanceler",
+  "Mestre de Harmonia",
+  "Primeiro Experto",
+  "Segundo Experto",
+  "Porta Espada",
+  "Porta Bandeira",
+  "Porta Estandarte",
+  "Mestre de Banquetes",
+  "Arquiteto",
+  "Bibliotecário",
+  "Secretário de Ação Social",
 ];
 
 export default function PrepararReuniao() {
@@ -81,15 +100,23 @@ export default function PrepararReuniao() {
       ]);
       if (sess.length > 0) setSessao(sess[0]);
 
-      // Montar lista com os cargos exatamente como cadastrados no quadro
-      const linhaOficiais = quadro.map(q => ({
-        cargo: q.cargo,
-        titular_id: q.titular_id || "",
-        titular_nome: q.titular_nome || "",
-        confirmado: false,
-        substituto_id: "",
-        substituto_nome: "",
-      }));
+      // Ordenar quadro pela ordem de exibição definida
+      const linhaOficiais = [...quadro]
+        .sort((a, b) => {
+          const ia = CARGOS_ORDEM_EXIBICAO.indexOf(a.cargo);
+          const ib = CARGOS_ORDEM_EXIBICAO.indexOf(b.cargo);
+          const pa = ia === -1 ? 999 : ia;
+          const pb = ib === -1 ? 999 : ib;
+          return pa - pb;
+        })
+        .map(q => ({
+          cargo: q.cargo,
+          titular_id: q.titular_id || "",
+          titular_nome: q.titular_nome || "",
+          confirmado: false,
+          substituto_id: "",
+          substituto_nome: "",
+        }));
       setQuadroOficiais(linhaOficiais);
       setOficiais(quadro);
     }
