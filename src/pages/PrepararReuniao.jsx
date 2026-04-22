@@ -190,25 +190,28 @@ export default function PrepararReuniao() {
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; background: #fff; }
-  @page { size: A4; margin: 2cm 2cm 2.5cm 2cm; }
-  
+  @page { size: A4; margin: 2cm 2cm 2cm 2cm; }
+
+  .page { page-break-after: always; padding-bottom: 1.5cm; position: relative; }
+  .page:last-child { page-break-after: avoid; }
+
   .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
   .header .loja-nome { font-size: 14pt; font-weight: bold; text-transform: uppercase; }
   .header .loja-sub { font-size: 10pt; color: #333; }
   .header .titulo-doc { font-size: 13pt; font-weight: bold; margin-top: 8px; }
-  
-  .section { margin-bottom: 18px; }
+
+  .section { margin-bottom: 16px; }
   .section-title { font-size: 11pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #ccc; padding-bottom: 3px; margin-bottom: 8px; }
-  
+
   table { width: 100%; border-collapse: collapse; font-size: 10pt; }
   th { background: #1B3A5F; color: white; padding: 5px 8px; text-align: left; font-size: 10pt; }
   td { padding: 4px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
   tr:nth-child(even) td { background: #f9f9f9; }
-  
-  .simbolo { font-size: 14pt; width: 20px; display: inline-block; text-align: center; }
+
+  .simbolo { font-size: 13pt; width: 22px; display: inline-block; text-align: center; }
   .confirmado { color: green; font-weight: bold; }
   .ausente { color: #c00; }
-  
+
   .roteiro-list { list-style: none; }
   .roteiro-item { margin-bottom: 6px; display: flex; align-items: flex-start; gap: 8px; }
   .roteiro-num { font-weight: bold; min-width: 28px; }
@@ -216,102 +219,139 @@ export default function PrepararReuniao() {
   .roteiro-subtexto { margin-top: 3px; padding-left: 20px; font-style: italic; color: #333; font-size: 10pt; }
   .roteiro-subtexto li { margin-bottom: 4px; list-style-type: lower-alpha; }
 
-  .footer { position: fixed; bottom: 0; left: 0; right: 0; font-size: 8pt; text-align: center; color: #666; border-top: 1px solid #ccc; padding: 4px 2cm; }
-  
-  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  .page-footer { border-top: 1px solid #ccc; padding-top: 4px; margin-top: 20px; font-size: 8pt; text-align: center; color: #666; }
+
+  .aut-item { margin-bottom: 6px; padding: 5px 8px; border-bottom: 1px solid #ddd; }
+  .aut-cargo { font-weight: bold; font-size: 10pt; }
+  .aut-nome { font-size: 10pt; color: #333; margin-top: 1px; }
+  .aut-potencia { font-size: 9pt; color: #666; font-style: italic; }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { page-break-after: always; }
+    .page:last-child { page-break-after: avoid; }
+  }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="loja-nome">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""}</div>
-  ${potencia ? `<div class="loja-sub">${potencia}${oriente ? ` — Oriente de ${oriente}` : ""}</div>` : ""}
-  <div class="titulo-doc">Roteiro da Reunião — ${dataFormatada}</div>
-  <div class="loja-sub">${sessao?.tipo || ""} ${sessao?.hora ? `às ${sessao.hora}` : ""} ${sessao?.local ? `| ${sessao.local}` : ""}</div>
+<!-- PÁGINA 1: Cabeçalho + Tabela de Oficiais -->
+<div class="page">
+  <div class="header">
+    <div class="loja-nome">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""}</div>
+    ${potencia ? `<div class="loja-sub">${potencia}${oriente ? ` — Oriente de ${oriente}` : ""}</div>` : ""}
+    <div class="titulo-doc">Roteiro da Reunião — ${dataFormatada}</div>
+    <div class="loja-sub">${sessao?.tipo || ""} ${sessao?.hora ? `às ${sessao.hora}` : ""} ${sessao?.local ? `| ${sessao.local}` : ""}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Quadro de Oficiais Presentes</div>
+    <table>
+      <thead><tr><th style="width:30px"></th><th>Cargo</th><th>Irmão</th><th>Situação</th></tr></thead>
+      <tbody>
+        ${quadroOficiais.map(o => {
+          const nome = o.confirmado ? o.titular_nome : (o.substituto_nome || '<span class="ausente">— Vago —</span>');
+          const situacao = o.confirmado
+            ? '<span class="confirmado">✔ Presente</span>'
+            : (o.substituto_nome ? '<span style="color:#855">✦ Substituto</span>' : '<span class="ausente">✘ Ausente</span>');
+          return `<tr>
+            <td><span class="simbolo">${SIMBOLO_CARGO[o.cargo] || "◆"}</span></td>
+            <td><strong>${o.cargo}</strong></td>
+            <td>${nome || "—"}</td>
+            <td>${situacao}</td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-footer">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""} — Roteiro da Reunião de ${dataFormatada} — Mestre de Cerimônias — Pág. 1</div>
 </div>
 
-<div class="section">
-  <div class="section-title">Ordem de Entrada dos Oficiais</div>
-  <table>
-    <thead><tr><th style="width:30px"></th><th>Cargo</th><th>Irmão</th><th>Situação</th></tr></thead>
-    <tbody>
-      ${quadroOficiais.map(o => {
-        const nome = o.confirmado ? o.titular_nome : (o.substituto_nome || '<span class="ausente">— Vago —</span>');
-        const situacao = o.confirmado
-          ? '<span class="confirmado">✔ Presente</span>'
-          : (o.substituto_nome ? '<span style="color:#855">✦ Substituto</span>' : '<span class="ausente">✘ Ausente</span>');
-        return `<tr>
-          <td class="simbolo">${SIMBOLO_CARGO[o.cargo] || "◆"}</td>
-          <td><strong>${o.cargo}</strong></td>
-          <td>${nome || "—"}</td>
-          <td>${situacao}</td>
-        </tr>`;
-      }).join("")}
-    </tbody>
-  </table>
+<!-- PÁGINA 2: Ordem de Entrada + Autoridades -->
+<div class="page">
+  <div class="header">
+    <div class="loja-nome">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""}</div>
+    <div class="titulo-doc">Ordem de Entrada — ${dataFormatada}</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Protocolo de Entrada no Templo</div>
+    <table style="font-size:9pt; border-collapse:collapse; width:100%; margin-bottom:10px;">
+      <tbody>
+        <tr>
+          <td style="border:1px solid #999;padding:4px 6px;font-weight:bold">1º - Aprendizes</td>
+          <td style="border:1px solid #999;padding:4px 6px;font-weight:bold">2º - Companheiros</td>
+          <td style="border:1px solid #999;padding:4px 6px;font-weight:bold">3º - Mestres</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #999;padding:4px 6px">4º - Oficiais</td>
+          <td style="border:1px solid #999;padding:4px 6px">5º - Dignidades (Or.: e Sec.:)</td>
+          <td style="border:1px solid #999;padding:4px 6px">6º - Mestres Instalados</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #999;padding:4px 6px">7º - 1º e 2º VVig.:</td>
+          <td style="border:1px solid #999;padding:4px 6px">8º - Venerável Mestre</td>
+          <td style="border:1px solid #999;padding:4px 6px">9º - Autoridades</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #999;padding:4px 6px">QQf.: da GLP</td>
+          <td style="border:1px solid #999;padding:4px 6px">Ministros do S.:T.:M.:</td>
+          <td style="border:1px solid #999;padding:4px 6px">Grandes QQf.:</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #999;padding:4px 6px">Eminente(s) Delegado(s)</td>
+          <td style="border:1px solid #999;padding:4px 6px">Eminente Deputado</td>
+          <td style="border:1px solid #999;padding:4px 6px">Ser.: Gr&#227;o Mestre</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Autoridades (nesta ordem de chamada)</div>
+    <p style="margin-bottom:6px; font-style:italic; font-size:10pt;">&ldquo;Vener&#225;vel Mestre: o Templo encontra-se devidamente ornamentado, e pronto para darmos in&#237;cio aos nossos trabalhos.&rdquo;</p>
+    <p style="margin-bottom:6px; font-size:10pt;">Ap&#243;s a fala do VM: <em><strong>&ldquo;Irm&#227;os Guarda do Templo e Mestre de Harmonia, ocupai vossos lugares.&rdquo;</strong></em></p>
+    <p style="margin-bottom:6px; font-style:italic; font-size:10pt;">&ldquo;Encontra-se no &#193;trio (falar as autoridades)&rdquo;.</p>
+    <p style="margin-bottom:10px; font-size:10pt;">Ap&#243;s a autoriza&#231;&#227;o do VM: &ldquo;(falar as Autoridades)...A ARLS Cavaleiros da Paz n&#186;25 tem a honra de receber-vos e o meu VM pede-vos que me acompanheis.&rdquo;</p>
+    ${autPresentes.length > 0
+      ? autPresentes.map((a, i) => {
+          const cargo = [a.titulo, a.cargo_potencia].filter(Boolean).join(" — ");
+          return `<div class="aut-item">
+            <div class="aut-cargo">${i + 1}. ${cargo}</div>
+            ${a.potencia ? `<div class="aut-potencia">${a.potencia}</div>` : ""}
+            ${a.nome ? `<div class="aut-nome">${a.nome}</div>` : ""}
+          </div>`;
+        }).join("")
+      : "<p style='color:#999; font-style:italic; font-size:10pt;'>Nenhuma autoridade confirmada.</p>"
+    }
+  </div>
+
+  <div class="page-footer">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""} — Roteiro da Reunião de ${dataFormatada} — Mestre de Cerimônias — Pág. 2</div>
 </div>
 
-<div class="section">
-  <div class="section-title">Ordem de Entrada</div>
-  <table style="font-size:9pt; border-collapse:collapse; width:100%; margin-bottom:8px;">
-    <tbody>
-      <tr>
-        <td style="border:1px solid #999;padding:3px 6px;font-weight:bold">1º - Aprendizes</td>
-        <td style="border:1px solid #999;padding:3px 6px;font-weight:bold">2º - Companheiros</td>
-        <td style="border:1px solid #999;padding:3px 6px;font-weight:bold">3º - Mestres</td>
-      </tr>
-      <tr>
-        <td style="border:1px solid #999;padding:3px 6px">4º - Oficiais</td>
-        <td style="border:1px solid #999;padding:3px 6px">5º - Dignidades (Or.: e Sec.:)</td>
-        <td style="border:1px solid #999;padding:3px 6px">6º - Mestres Instalados</td>
-      </tr>
-      <tr>
-        <td style="border:1px solid #999;padding:3px 6px">7º - 1º e 2º VVig.:</td>
-        <td style="border:1px solid #999;padding:3px 6px">8º - Venerável Mestre</td>
-        <td style="border:1px solid #999;padding:3px 6px">9º - Autoridades</td>
-      </tr>
-      <tr>
-        <td style="border:1px solid #999;padding:3px 6px">QQf.: da GLP</td>
-        <td style="border:1px solid #999;padding:3px 6px">Ministros do S.:T.:M.:</td>
-        <td style="border:1px solid #999;padding:3px 6px">Grandes QQf.:</td>
-      </tr>
-      <tr>
-        <td style="border:1px solid #999;padding:3px 6px">Eminente(s) Delegado(s)</td>
-        <td style="border:1px solid #999;padding:3px 6px">Eminente Deputado</td>
-        <td style="border:1px solid #999;padding:3px 6px">Ser.: Gr&#227;o Mestre</td>
-      </tr>
-    </tbody>
-  </table>
-  <p style="font-weight:bold; margin-bottom:5px;">AUTORIDADES (nesta ordem de chamada)</p>
-  <p style="margin-bottom:5px; font-style:italic;">&ldquo;Vener&#225;vel Mestre: o Templo encontra-se devidamente ornamentado, e pronto para darmos in&#237;cio aos nossos trabalhos.&rdquo;</p>
-  <p style="margin-bottom:5px;">Ap&#243;s a fala do VM: <em><strong>&ldquo;Irm&#227;os Guarda do Templo e Mestre de Harmonia, ocupai vossos lugares.&rdquo;</strong></em></p>
-  <p style="margin-bottom:5px; font-style:italic;">&ldquo;Encontra-se no &#193;trio (falar as autoridades)&rdquo;.</p>
-  <p style="margin-bottom:10px;">Ap&#243;s a autoriza&#231;&#227;o do VM: &ldquo;(falar as Autoridades)...A ARLS Cavaleiros da Paz n&#186;25 tem a honra de receber-vos e o meu VM pede-vos que me acompanheis.&rdquo;</p>
-  ${autPresentes.length > 0
-    ? autPresentes.map(a => {
-        const linhaCargoCompleto = [a.titulo, a.cargo_potencia, a.potencia].filter(Boolean).join(" — ");
-        return `<p style="margin-bottom:5px; padding:4px 6px; border-bottom:1px solid #ddd;"><strong>${linhaCargoCompleto}</strong>${a.nome ? `<br/><span style="font-weight:normal;">${a.nome}</span>` : ""}</p>`;
-      }).join("")
-    : "<p style='color:#999; font-style:italic;'>Nenhuma autoridade confirmada.</p>"
-  }
-</div>
+<!-- PÁGINA 3: Roteiro da Reunião -->
+<div class="page">
+  <div class="header">
+    <div class="loja-nome">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""}</div>
+    <div class="titulo-doc">Roteiro da Reunião — ${dataFormatada}</div>
+  </div>
 
-<div class="section">
-  <div class="section-title">Roteiro da Reunião</div>
-  <ol class="roteiro-list">
-    ${roteiroOrdenado.map(item => `
-    <li class="roteiro-item">
-      <span class="roteiro-num">${item.numero}.</span>
-      <div class="roteiro-texto">
-        ${item.texto}
-        ${item.subtexto ? `<div class="roteiro-subtexto"><ul><li>${item.subtexto}</li></ul></div>` : ""}
-      </div>
-    </li>`).join("")}
-  </ol>
-</div>
+  <div class="section">
+    <div class="section-title">Roteiro da Reunião</div>
+    <ol class="roteiro-list">
+      ${roteiroOrdenado.map(item => `
+      <li class="roteiro-item">
+        <span class="roteiro-num">${item.numero}.</span>
+        <div class="roteiro-texto">
+          ${item.texto}
+          ${item.subtexto ? `<div class="roteiro-subtexto"><ul><li>${item.subtexto}</li></ul></div>` : ""}
+        </div>
+      </li>`).join("")}
+    </ol>
+  </div>
 
-<div class="footer">
-  ${nomeLoja}${numLoja ? ` nº${numLoja}` : ""} — Roteiro da Reunião de ${dataFormatada} — Mestre de Cerimônias
+  <div class="page-footer">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""} — Roteiro da Reunião de ${dataFormatada} — Mestre de Cerimônias — Pág. 3</div>
 </div>
 
 </body>
