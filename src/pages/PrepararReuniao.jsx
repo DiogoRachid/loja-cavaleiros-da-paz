@@ -288,7 +288,10 @@ export default function PrepararReuniao() {
   <p style="margin-bottom:5px; font-style:italic;">&ldquo;Encontra-se no &#193;trio (falar as autoridades)&rdquo;.</p>
   <p style="margin-bottom:10px;">Ap&#243;s a autoriza&#231;&#227;o do VM: &ldquo;(falar as Autoridades)...A ARLS Cavaleiros da Paz n&#186;25 tem a honra de receber-vos e o meu VM pede-vos que me acompanheis.&rdquo;</p>
   ${autPresentes.length > 0
-    ? autPresentes.map(a => `<p style="margin-bottom:5px; padding:4px 6px; border-bottom:1px solid #ddd;"><strong>${a.titulo}${a.nome ? ` \u2013 ${a.nome}` : ""}</strong></p>`).join("")
+    ? autPresentes.map(a => {
+        const linhaCargoCompleto = [a.titulo, a.cargo_potencia, a.potencia].filter(Boolean).join(" — ");
+        return `<p style="margin-bottom:5px; padding:4px 6px; border-bottom:1px solid #ddd;"><strong>${linhaCargoCompleto}</strong>${a.nome ? `<br/><span style="font-weight:normal;">${a.nome}</span>` : ""}</p>`;
+      }).join("")
     : "<p style='color:#999; font-style:italic;'>Nenhuma autoridade confirmada.</p>"
   }
 </div>
