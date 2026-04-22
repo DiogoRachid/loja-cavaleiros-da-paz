@@ -175,11 +175,8 @@ export default function PrepararReuniao() {
     const potencia = dadosLoja?.potencia || "";
     const oriente = dadosLoja?.oriente || "";
 
-    // Usar todas as autoridades da lista (presentes primeiro, depois as demais)
-    const autPresentes = [
-      ...autoridadesLista.filter(a => a.presente),
-      ...autoridadesLista.filter(a => !a.presente),
-    ];
+    // Separar autoridades presentes
+    const autPresentes = autoridadesLista.filter(a => a.presente);
 
     // Ordenar roteiro por número
     const roteiroOrdenado = [...roteiro].sort((a, b) => a.numero - b.numero);
@@ -295,7 +292,7 @@ export default function PrepararReuniao() {
         const linhaCargoCompleto = [a.titulo, a.cargo_potencia, a.potencia].filter(Boolean).join(" — ");
         return `<p style="margin-bottom:5px; padding:4px 6px; border-bottom:1px solid #ddd;"><strong>${linhaCargoCompleto}</strong>${a.nome ? `<br/><span style="font-weight:normal;">${a.nome}</span>` : ""}</p>`;
       }).join("")
-    : "<p style='color:#999; font-style:italic;'>Nenhuma autoridade cadastrada.</p>"
+    : "<p style='color:#999; font-style:italic;'>Nenhuma autoridade confirmada.</p>"
   }
 </div>
 
