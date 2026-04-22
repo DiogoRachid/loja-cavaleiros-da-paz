@@ -19,7 +19,6 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Membros", page: "AdminMembros", icon: Users },
     { name: "Cadastro de Irmãos", page: "AdminCadastroIrmaos", icon: Users },
     { name: "Autoridades", page: "AdminAutoridades", icon: Shield },
-    { name: "Ordem de Entrada", page: "AdminOrdemEntrada", icon: ClipboardList },
     { name: "Agenda Ritual", page: "AdminAgendaRitual", icon: Calendar },
     { name: "Mensalidades", page: "AdminMensalidades", icon: DollarSign },
     { name: "Rel. Financeiro", page: "AdminRelatorioFinanceiro", icon: BarChart },
@@ -34,7 +33,6 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Painel MC", page: "AdminMC", icon: Star },
     { name: "Quadro de Oficiais", page: "AdminQuadroOficiais", icon: Award },
     { name: "Autoridades", page: "AdminAutoridades", icon: Shield },
-    { name: "Ordem de Entrada", page: "AdminOrdemEntrada", icon: ClipboardList },
     { name: "Agenda Ritual", page: "AdminAgendaRitual", icon: Calendar },
   ],
   "Tesoureiro": [
