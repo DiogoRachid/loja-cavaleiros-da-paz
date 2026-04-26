@@ -30,7 +30,7 @@ const FORM_VAZIO = { numero: "", data: "", hora: "19:30", tipo: "Ordinária", gr
 export default function AdminAgendaRitual() {
   const [sessoes, setSessoes] = useState([]);
   const [selecionada, setSelecionada] = useState(null);
-  const [ordemCount, setOrdemCount] = useState({});
+
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(FORM_VAZIO);
   const [saving, setSaving] = useState(false);
@@ -42,10 +42,6 @@ export default function AdminAgendaRitual() {
   const loadDados = async () => {
     const data = await base44.entities.Sessao.list("-data", 30);
     setSessoes(data);
-    const ordens = await base44.entities.OrdemEntrada.list();
-    const counts = {};
-    ordens.forEach(o => { counts[o.sessao_id] = (counts[o.sessao_id] || 0) + 1; });
-    setOrdemCount(counts);
   };
 
   const abrirEdicao = (s, e) => {
@@ -180,7 +176,7 @@ export default function AdminAgendaRitual() {
                         <div className="flex items-center gap-3 mt-1 text-sm text-slate-500 flex-wrap">
                           <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{s.hora}</span>
                           {s.local && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{s.local}</span>}
-                          {ordemCount[s.id] > 0 && <span className="flex items-center gap-1"><Users className="w-3 h-3" />{ordemCount[s.id]} na ordem</span>}
+
                         </div>
                       </div>
                     </div>
@@ -241,11 +237,7 @@ export default function AdminAgendaRitual() {
                             <FileText className="w-3 h-3 mr-1" /> Preparar Reunião
                           </Button>
                         </Link>
-                        <Link to={createPageUrl("AdminOrdemEntrada")}>
-                          <Button size="sm" variant="outline" className="border-[#1B3A5F] text-[#1B3A5F]">
-                            <Users className="w-3 h-3 mr-1" /> Ordem de Entrada
-                          </Button>
-                        </Link>
+
                       </div>
                     </div>
                   )}
