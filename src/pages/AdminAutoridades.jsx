@@ -39,7 +39,11 @@ export default function AdminAutoridades() {
 
   const excluir = async (id) => {
     if (!confirm("Excluir esta autoridade?")) return;
-    await base44.entities.Autoridade.delete(id);
+    try {
+      await base44.entities.Autoridade.delete(id);
+    } catch (e) {
+      // Já foi removida externamente — apenas atualiza a lista
+    }
     await loadAutoridades();
   };
 
