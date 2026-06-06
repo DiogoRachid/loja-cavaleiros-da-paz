@@ -1,0 +1,80 @@
+{
+  "name": "Mensalidade",
+  "type": "object",
+  "properties": {
+    "irmao_id": {
+      "type": "string",
+      "description": "ID do irm\u00e3o"
+    },
+    "irmao_nome": {
+      "type": "string",
+      "description": "Nome do irm\u00e3o (para exibi\u00e7\u00e3o r\u00e1pida)"
+    },
+    "irmao_cim": {
+      "type": "string",
+      "description": "CIM do irm\u00e3o"
+    },
+    "competencia": {
+      "type": "string",
+      "description": "Compet\u00eancia no formato MM/AAAA (ex: 03/2026)"
+    },
+    "valor_mensalidade": {
+      "type": "number",
+      "description": "Valor base da mensalidade"
+    },
+    "valor": {
+      "type": "number",
+      "description": "Valor total do boleto (mensalidade + centros de custo)"
+    },
+    "centros_custo": {
+      "type": "object",
+      "description": "Mapa de centro_custo_id -> valor lan\u00e7ado"
+    },
+    "vencimento": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de vencimento"
+    },
+    "data_pagamento": {
+      "type": "string",
+      "format": "date",
+      "description": "Data efetiva do pagamento"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Pago",
+        "Atrasado",
+        "Isento"
+      ],
+      "default": "Pendente",
+      "description": "Status do pagamento"
+    },
+    "forma_pagamento": {
+      "type": "string",
+      "enum": [
+        "Dinheiro",
+        "PIX",
+        "Transfer\u00eancia",
+        "Outro"
+      ],
+      "description": "Forma de pagamento"
+    },
+    "observacoes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es sobre o pagamento"
+    },
+    "registrado_por": {
+      "type": "string",
+      "description": "Nome do respons\u00e1vel pelo registro"
+    }
+  },
+  "required": [
+    "irmao_id",
+    "competencia",
+    "valor",
+    "vencimento",
+    "status"
+  ]
+}

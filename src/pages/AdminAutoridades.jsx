@@ -20,7 +20,7 @@ export default function AdminAutoridades() {
   useEffect(() => { loadAutoridades(); }, []);
 
   const loadAutoridades = async () => {
-    const data = await base44.entities.Autoridade.list("ordem_protocolar", 100);
+    const data = await base44.entities.Autoridade.list("ordem_protocolar", 500);
     setAutoridades(data);
   };
 

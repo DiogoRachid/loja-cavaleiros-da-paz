@@ -1,0 +1,79 @@
+{
+  "name": "Item",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string",
+      "description": "Nome do item (livro, revista, etc.)"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Livro",
+        "Revista",
+        "Peri\u00f3dico",
+        "Outro"
+      ],
+      "description": "Tipo do item"
+    },
+    "autor": {
+      "type": "string",
+      "description": "Autor ou editora"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o ou observa\u00e7\u00f5es sobre o item"
+    },
+    "data_publicacao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de publica\u00e7\u00e3o ou elabora\u00e7\u00e3o da obra"
+    },
+    "grau_minimo": {
+      "type": "string",
+      "enum": [
+        "Aprendiz",
+        "Companheiro",
+        "Mestre"
+      ],
+      "default": "Aprendiz",
+      "description": "Grau m\u00ednimo para acesso"
+    },
+    "quantidade_total": {
+      "type": "number",
+      "default": 1,
+      "description": "Quantidade total de exemplares"
+    },
+    "quantidade_disponivel": {
+      "type": "number",
+      "default": 1,
+      "description": "Quantidade dispon\u00edvel para empr\u00e9stimo"
+    },
+    "quantidade_emprestada": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade atualmente emprestada"
+    },
+    "codigo_qr": {
+      "type": "string",
+      "description": "C\u00f3digo \u00fanico para QR Code"
+    },
+    "imagem_capa": {
+      "type": "string",
+      "description": "URL da imagem da capa"
+    },
+    "localizacao": {
+      "type": "string",
+      "description": "Localiza\u00e7\u00e3o na biblioteca (estante, prateleira)"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o item est\u00e1 ativo no acervo"
+    }
+  },
+  "required": [
+    "nome",
+    "tipo"
+  ]
+}

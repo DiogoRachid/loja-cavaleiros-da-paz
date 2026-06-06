@@ -1,0 +1,74 @@
+{
+  "name": "QuadroOficiais",
+  "type": "object",
+  "properties": {
+    "exercicio": {
+      "type": "string",
+      "description": "Exerc\u00edcio (ano) do quadro ex: 2026"
+    },
+    "cargo": {
+      "type": "string",
+      "enum": [
+        "Vener\u00e1vel Mestre",
+        "Primeiro Vigilante",
+        "Segundo Vigilante",
+        "Orador",
+        "Secret\u00e1rio",
+        "Tesoureiro",
+        "Chanceler",
+        "Bibliotec\u00e1rio",
+        "Mestre de Cerim\u00f4nias",
+        "Primeiro Di\u00e1cono",
+        "Segundo Di\u00e1cono",
+        "Porta Bandeira",
+        "Porta Espada",
+        "Arquiteto",
+        "Hospitaleiro",
+        "Mestre de Harmonia",
+        "Cobridor",
+        "Guarda do Templo",
+        "Guarda Externo",
+        "Primeiro Experto",
+        "Segundo Experto",
+        "Porta Estandarte",
+        "Secret\u00e1rio de Ac\u00e3o Social",
+        "Mestre de Banquetes"
+      ],
+      "description": "Cargo no quadro"
+    },
+    "titular_id": {
+      "type": "string",
+      "description": "ID do irm\u00e3o titular"
+    },
+    "titular_nome": {
+      "type": "string",
+      "description": "Nome do titular"
+    },
+    "titular_cim": {
+      "type": "string",
+      "description": "CIM do titular"
+    },
+    "substituto_id": {
+      "type": "string",
+      "description": "ID do irm\u00e3o substituto"
+    },
+    "substituto_nome": {
+      "type": "string",
+      "description": "Nome do substituto"
+    },
+    "publicado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o quadro foi publicado pelo VM"
+    },
+    "data_publicacao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de publica\u00e7\u00e3o do quadro"
+    }
+  },
+  "required": [
+    "exercicio",
+    "cargo"
+  ]
+}

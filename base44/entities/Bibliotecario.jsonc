@@ -1,0 +1,28 @@
+{
+  "name": "Bibliotecario",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string",
+      "description": "Nome do bibliotec\u00e1rio"
+    },
+    "login": {
+      "type": "string",
+      "description": "Login de acesso"
+    },
+    "senha": {
+      "type": "string",
+      "description": "Senha de acesso"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o bibliotec\u00e1rio est\u00e1 ativo"
+    }
+  },
+  "required": [
+    "nome",
+    "login",
+    "senha"
+  ]
+}

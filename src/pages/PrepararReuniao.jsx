@@ -20,6 +20,7 @@ const SIMBOLO_CARGO = {
   "Tesoureiro": "⚷",
   "Chanceler": "✦",
   "Mestre de Cerimônias": "⚜",
+  "Mestre de Cerimônias Adjunto": "⚜",
   "Bibliotecário": "📖",
   "Primeiro Diácono": "✦",
   "Segundo Diácono": "✧",
@@ -45,6 +46,7 @@ const CARGOS_ORDEM_EXIBICAO = [
   "Secretário",
   "Guarda do Templo",
   "Mestre de Cerimônias",
+  "Mestre de Cerimônias Adjunto",
   "Primeiro Diácono",
   "Segundo Diácono",
   "Cobridor",
@@ -189,8 +191,8 @@ export default function PrepararReuniao() {
 <title>Roteiro da Reunião — ${dataFormatada}</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; background: #fff; }
-  @page { size: A4; margin: 2cm 2cm 2cm 2cm; }
+  body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; background: #fff; transform: scale(0.8); transform-origin: top left; width: 125%; }
+  @page { size: A4; margin: 1.5cm 1.5cm 1.5cm 1.5cm; }
 
   .page { page-break-after: always; padding-bottom: 1.5cm; position: relative; }
   .page:last-child { page-break-after: avoid; }
@@ -215,8 +217,8 @@ export default function PrepararReuniao() {
   .roteiro-list { list-style: none; }
   .roteiro-item { margin-bottom: 6px; display: flex; align-items: flex-start; gap: 8px; }
   .roteiro-num { font-weight: bold; min-width: 28px; }
-  .roteiro-texto { flex: 1; }
-  .roteiro-subtexto { margin-top: 3px; padding-left: 20px; font-style: italic; color: #333; font-size: 10pt; }
+  .roteiro-texto { flex: 1; white-space: pre-wrap; }
+  .roteiro-subtexto { margin-top: 3px; padding-left: 20px; font-style: italic; color: #333; font-size: 10pt; white-space: pre-wrap; }
   .roteiro-subtexto li { margin-bottom: 4px; list-style-type: lower-alpha; }
 
   .page-footer { border-top: 1px solid #ccc; padding-top: 4px; margin-top: 20px; font-size: 8pt; text-align: center; color: #666; }
@@ -340,14 +342,18 @@ export default function PrepararReuniao() {
   <div class="section">
     <div class="section-title">Roteiro da Reunião</div>
     <ol class="roteiro-list">
-      ${roteiroOrdenado.map(item => `
+      ${roteiroOrdenado.map(item => {
+        const textoFormatado = (item.texto || "").replace(/\n/g, "<br>");
+        const subtextoFormatado = (item.subtexto || "").replace(/\n/g, "<br>");
+        return `
       <li class="roteiro-item">
         <span class="roteiro-num">${item.numero}.</span>
         <div class="roteiro-texto">
-          ${item.texto}
-          ${item.subtexto ? `<div class="roteiro-subtexto"><ul><li>${item.subtexto}</li></ul></div>` : ""}
+          ${textoFormatado}
+          ${item.subtexto ? `<div class="roteiro-subtexto">${subtextoFormatado}</div>` : ""}
         </div>
-      </li>`).join("")}
+      </li>`;
+      }).join("")}
     </ol>
   </div>
 

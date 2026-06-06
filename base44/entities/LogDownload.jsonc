@@ -1,0 +1,37 @@
+{
+  "name": "LogDownload",
+  "type": "object",
+  "properties": {
+    "documento_id": {
+      "type": "string",
+      "description": "ID do documento baixado"
+    },
+    "documento_titulo": {
+      "type": "string",
+      "description": "T\u00edtulo do documento"
+    },
+    "irmao_id": {
+      "type": "string",
+      "description": "ID do irm\u00e3o"
+    },
+    "irmao_nome": {
+      "type": "string",
+      "description": "Nome do irm\u00e3o"
+    },
+    "irmao_numero_glp": {
+      "type": "string",
+      "description": "N\u00famero GLP do irm\u00e3o"
+    },
+    "data_download": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora do download"
+    }
+  },
+  "required": [
+    "documento_id",
+    "documento_titulo",
+    "irmao_id",
+    "data_download"
+  ]
+}

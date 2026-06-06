@@ -1,0 +1,58 @@
+{
+  "name": "DadosLoja",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string",
+      "description": "Nome da loja"
+    },
+    "numero": {
+      "type": "string",
+      "description": "N\u00famero da loja"
+    },
+    "potencia": {
+      "type": "string",
+      "description": "Pot\u00eancia ma\u00e7\u00f4nica"
+    },
+    "oriente": {
+      "type": "string",
+      "description": "Cidade/Oriente da loja"
+    },
+    "endereco": {
+      "type": "string",
+      "description": "Endere\u00e7o do Templo"
+    },
+    "telefone": {
+      "type": "string",
+      "description": "Telefone da loja"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email institucional"
+    },
+    "valor_mensalidade": {
+      "type": "number",
+      "description": "Valor padr\u00e3o da mensalidade"
+    },
+    "dia_reuniao": {
+      "type": "string",
+      "description": "Dia habitual de reuni\u00e3o (ex: Toda segunda segunda-feira do m\u00eas)"
+    },
+    "hora_reuniao": {
+      "type": "string",
+      "description": "Hor\u00e1rio padr\u00e3o de reuni\u00e3o"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL da logo da loja"
+    },
+    "exercicio_atual": {
+      "type": "string",
+      "description": "Exerc\u00edcio atual (ano)"
+    }
+  },
+  "required": [
+    "nome",
+    "numero"
+  ]
+}

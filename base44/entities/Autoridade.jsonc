@@ -1,0 +1,77 @@
+{
+  "name": "Autoridade",
+  "type": "object",
+  "properties": {
+    "titulo": {
+      "type": "string",
+      "description": "T\u00edtulo protocolar da autoridade"
+    },
+    "nome": {
+      "type": "string",
+      "description": "Nome completo da autoridade"
+    },
+    "potencia": {
+      "type": "string",
+      "description": "Pot\u00eancia ou Obedi\u00eancia ma\u00e7\u00f4nica"
+    },
+    "cargo_potencia": {
+      "type": "string",
+      "description": "Cargo dentro da Pot\u00eancia"
+    },
+    "ordem_protocolar": {
+      "type": "number",
+      "description": "Posi\u00e7\u00e3o na ordem de entrada protocolar"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email de contato"
+    },
+    "telefone": {
+      "type": "string",
+      "description": "Telefone de contato"
+    },
+    "ativa": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se a autoridade est\u00e1 ativa"
+    },
+    "observacoes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es adicionais"
+    }
+  },
+  "required": [
+    "titulo",
+    "nome"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "cargo_masonico": "Mestre de Cerim\u00f4nias"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "cargo_masonico": "Mestre de Cerim\u00f4nias"
+          }
+        }
+      ]
+    }
+  }
+}

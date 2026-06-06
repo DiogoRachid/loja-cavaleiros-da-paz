@@ -11,8 +11,10 @@ const ITENS_PADRAO = [
   { numero: 5, texto: "Abertura da Loja", subtexto: "" },
   { numero: 6, texto: "Balaustre (Votação)", subtexto: "" },
   { numero: 7, texto: "Bolsa de Propostas", subtexto: "" },
+  { numero: 8, texto: "Ordem do Dia", subtexto: "" },
   { numero: 9, texto: "Tronco", subtexto: "" },
   { numero: 10, texto: "Palavra", subtexto: "" },
+  { numero: 11, texto: "Minuto da Ritualística", subtexto: "" },
   { numero: 12, texto: "Encerramento", subtexto: "" },
   { numero: 13, texto: "Guarda das Joias; Cédulas; Outros", subtexto: "" },
 ];

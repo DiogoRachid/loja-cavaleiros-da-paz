@@ -25,7 +25,7 @@ const tipoColors = {
   "Fúnebre": "bg-gray-100 text-gray-700",
 };
 
-const FORM_VAZIO = { numero: "", data: "", hora: "19:30", tipo: "Ordinária", grau: "Mestre", local: "Templo da Loja", pauta: "", status: "Agendada" };
+const FORM_VAZIO = { data: "", hora: "20:00", tipo: "Ordinária", grau: "Mestre", local: "Templo da ARLS Cavaleiros da Paz", pauta: "", status: "Agendada" };
 
 export default function AdminAgendaRitual() {
   const [sessoes, setSessoes] = useState([]);
@@ -46,7 +46,7 @@ export default function AdminAgendaRitual() {
 
   const abrirEdicao = (s, e) => {
     e.stopPropagation();
-    setFormEdicao({ numero: s.numero || "", data: s.data || "", hora: s.hora || "19:30", tipo: s.tipo || "Ordinária", grau: s.grau || "Mestre", local: s.local || "", pauta: s.pauta || "", status: s.status || "Agendada" });
+    setFormEdicao({ numero: s.numero || "", data: s.data || "", hora: s.hora || "20:00", tipo: s.tipo || "Ordinária", grau: s.grau || "Mestre", local: s.local || "", pauta: s.pauta || "", status: s.status || "Agendada" });
     setEditando(s.id);
   };
 
@@ -105,10 +105,6 @@ export default function AdminAgendaRitual() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="space-y-1">
-                <Label>Número</Label>
-                <Input value={form.numero} onChange={e => setForm({ ...form, numero: e.target.value })} placeholder="001/2026" />
-              </div>
               <div className="space-y-1">
                 <Label>Data *</Label>
                 <Input type="date" value={form.data} onChange={e => setForm({ ...form, data: e.target.value })} />

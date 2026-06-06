@@ -1,0 +1,37 @@
+{
+  "name": "LogAcesso",
+  "type": "object",
+  "properties": {
+    "irmao_id": {
+      "type": "string",
+      "description": "ID do irm\u00e3o"
+    },
+    "irmao_nome": {
+      "type": "string",
+      "description": "Nome do irm\u00e3o"
+    },
+    "irmao_numero_glp": {
+      "type": "string",
+      "description": "N\u00famero GLP do irm\u00e3o"
+    },
+    "data_acesso": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora do acesso"
+    },
+    "tipo_acesso": {
+      "type": "string",
+      "enum": [
+        "Login",
+        "Logout"
+      ],
+      "default": "Login",
+      "description": "Tipo de acesso"
+    }
+  },
+  "required": [
+    "irmao_id",
+    "irmao_nome",
+    "data_acesso"
+  ]
+}

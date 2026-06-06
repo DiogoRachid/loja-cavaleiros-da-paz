@@ -1,0 +1,60 @@
+{
+  "name": "OrdemEntrada",
+  "type": "object",
+  "properties": {
+    "sessao_id": {
+      "type": "string",
+      "description": "ID da sess\u00e3o (opcional, pode ser um registro avulso)"
+    },
+    "sessao_data": {
+      "type": "string",
+      "description": "Data da sess\u00e3o"
+    },
+    "posicao": {
+      "type": "number",
+      "description": "Posi\u00e7\u00e3o na ordem de entrada (1 a 12+)"
+    },
+    "tipo_participante": {
+      "type": "string",
+      "enum": [
+        "Autoridade",
+        "Oficial"
+      ],
+      "description": "Se \u00e9 uma autoridade externa ou oficial da loja"
+    },
+    "autoridade_id": {
+      "type": "string",
+      "description": "ID da autoridade (se tipo = Autoridade)"
+    },
+    "autoridade_titulo": {
+      "type": "string",
+      "description": "T\u00edtulo da autoridade"
+    },
+    "autoridade_nome": {
+      "type": "string",
+      "description": "Nome da autoridade"
+    },
+    "oficial_cargo": {
+      "type": "string",
+      "description": "Cargo do oficial da loja (se tipo = Oficial)"
+    },
+    "oficial_nome": {
+      "type": "string",
+      "description": "Nome do oficial"
+    },
+    "presente": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se esteve presente na sess\u00e3o"
+    },
+    "confirmado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Presen\u00e7a confirmada pelo MC"
+    }
+  },
+  "required": [
+    "posicao",
+    "tipo_participante"
+  ]
+}

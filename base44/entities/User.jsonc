@@ -1,0 +1,67 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "default": "user",
+      "description": "Papel do usu\u00e1rio no sistema"
+    },
+    "cargo_masonico": {
+      "type": "string",
+      "enum": [
+        "Irm\u00e3o",
+        "Vener\u00e1vel Mestre",
+        "Primeiro Vigilante",
+        "Segundo Vigilante",
+        "Orador",
+        "Secret\u00e1rio",
+        "Tesoureiro",
+        "Chanceler",
+        "Bibliotec\u00e1rio",
+        "Mestre de Cerim\u00f4nias",
+        "Primeiro Di\u00e1cono",
+        "Segundo Di\u00e1cono",
+        "Porta Bandeira",
+        "Porta Espada",
+        "Arquiteto",
+        "Hospitaleiro",
+        "M\u00fasico",
+        "Cobrador",
+        "Guarda Interno",
+        "Guarda Externo",
+        "Primeiro Experto",
+        "Segundo Experto",
+        "Mestre de Banquetes"
+      ],
+      "default": "Irm\u00e3o",
+      "description": "Cargo ma\u00e7\u00f4nico do usu\u00e1rio"
+    },
+    "cim": {
+      "type": "string",
+      "description": "Cadastro de Identidade Ma\u00e7\u00f4nica"
+    },
+    "grau": {
+      "type": "string",
+      "enum": [
+        "Aprendiz",
+        "Companheiro",
+        "Mestre"
+      ],
+      "default": "Aprendiz",
+      "description": "Grau ma\u00e7\u00f4nico"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o usu\u00e1rio est\u00e1 ativo"
+    }
+  },
+  "required": [
+    "cim"
+  ]
+}
