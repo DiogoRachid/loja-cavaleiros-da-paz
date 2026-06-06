@@ -25,9 +25,9 @@ export default function AdminHistoricoContatos() {
     setContatos(prev => prev.filter(c => c.id !== id));
   };
 
-  const filtrados = contatos.filter(c =>
-    (c.irmao_nome || "").toLowerCase().includes(busca.toLowerCase())
-  );
+  const filtrados = contatos
+    .filter(c => (c.irmao_nome || "").toLowerCase().includes(busca.toLowerCase()))
+    .sort((a, b) => (a.irmao_nome || "").localeCompare(b.irmao_nome || ""));
 
   if (loading) {
     return (

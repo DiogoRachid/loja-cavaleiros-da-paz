@@ -37,7 +37,7 @@ export default function FaltasConsecutivas({ irmaos, sessoes, presencas, contato
       contatoPendente: contatos.find(c => c.irmao_id === ir.id && c.status === "Pendente"),
     }))
     .filter(ir => ir.faltasConsecutivas >= 3)
-    .sort((a, b) => b.faltasConsecutivas - a.faltasConsecutivas);
+    .sort((a, b) => (a.nome_completo || "").localeCompare(b.nome_completo || ""));
 
   const registrarContato = async (irmao, status) => {
     setSalvando(true);
