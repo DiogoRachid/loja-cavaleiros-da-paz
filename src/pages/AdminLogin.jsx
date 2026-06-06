@@ -18,6 +18,7 @@ const CARGOS_ADMIN = [
   "Tesoureiro",
   "Chanceler",
   "Mestre de Cerimônias",
+  "Hospitaleiro",
   "Primeiro Diácono",
   "Segundo Diácono",
   "Bibliotecário",
@@ -96,6 +97,7 @@ export default function AdminLogin() {
           "Tesoureiro": "AdminTesoureiro",
           "Secretário": "AdminSecretario",
           "Chanceler": "AdminChanceler",
+          "Hospitaleiro": "AdminHospitaleiro",
         };
         const destino = cargoRoutes[cargo] || "AdminVM";
         navigate(createPageUrl(destino));
