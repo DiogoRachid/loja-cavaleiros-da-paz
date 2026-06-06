@@ -1,0 +1,9 @@
+{
+  "name": "Loja Ma\u00e7\u00f4nica Cavaleiros da Paz",
+  "site": {
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "serveCommand": "npm run dev",
+    "outputDirectory": "./dist"
+  }
+}
