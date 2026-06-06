@@ -4,7 +4,7 @@ import {
   BookOpen, Users, History, QrCode, LogOut, 
   Menu, X, Home, Library, BookMarked, BarChart,
   Crown, Calendar, DollarSign, FileText, Award,
-  Gavel, ClipboardList, Shield, Star
+  Gavel, ClipboardList, Shield, Star, Heart
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Rel. Financeiro", page: "AdminRelatorioFinanceiro", icon: BarChart },
     { name: "Presenças", page: "AdminPresencas", icon: ClipboardList },
     { name: "Frequências", page: "AdminFrequencias", icon: BarChart },
+    { name: "Hospitaleiro", page: "AdminHospitaleiro", icon: Heart },
     { name: "Atestados", page: "AdminAtestados", icon: Award },
     { name: "Comunicados", page: "AdminComunicados", icon: ClipboardList },
     { name: "Dados da Loja", page: "AdminDadosLoja", icon: Star },
@@ -34,6 +35,11 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Quadro de Oficiais", page: "AdminQuadroOficiais", icon: Award },
     { name: "Autoridades", page: "AdminAutoridades", icon: Shield },
     { name: "Agenda Ritual", page: "AdminAgendaRitual", icon: Calendar },
+  ],
+  "Hospitaleiro": [
+    { name: "Painel Hospitaleiro", page: "AdminHospitaleiro", icon: Heart },
+    { name: "Presenças", page: "AdminPresencas", icon: ClipboardList },
+    { name: "Frequências", page: "AdminFrequencias", icon: BarChart },
   ],
   "Tesoureiro": [
     { name: "Painel Financeiro", page: "AdminTesoureiro", icon: DollarSign },

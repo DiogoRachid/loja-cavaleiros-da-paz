@@ -27,6 +27,11 @@
       "default": false,
       "description": "Se o irm\u00e3o esteve presente"
     },
+    "dispensado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o irm\u00e3o foi dispensado (grau inferior ao da sess\u00e3o)"
+    },
     "justificativa": {
       "type": "string",
       "description": "Justificativa da aus\u00eancia"

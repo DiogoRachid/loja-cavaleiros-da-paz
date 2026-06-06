@@ -1,0 +1,46 @@
+{
+  "name": "ContatoHospitaleiro",
+  "type": "object",
+  "properties": {
+    "irmao_id": {
+      "type": "string",
+      "description": "ID do irm\u00e3o"
+    },
+    "irmao_nome": {
+      "type": "string",
+      "description": "Nome do irm\u00e3o"
+    },
+    "faltas_consecutivas": {
+      "type": "number",
+      "description": "N\u00famero de faltas consecutivas no momento do contato"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Contatado",
+        "Sem Contato"
+      ],
+      "default": "Pendente",
+      "description": "Status do contato"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do contato realizado"
+    },
+    "data_contato": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora do registro do contato"
+    },
+    "registrado_por": {
+      "type": "string",
+      "description": "Nome de quem registrou"
+    }
+  },
+  "required": [
+    "irmao_id",
+    "irmao_nome",
+    "status"
+  ]
+}

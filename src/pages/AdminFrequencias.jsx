@@ -11,7 +11,6 @@ export default function AdminFrequencias() {
   const [irmaos, setIrmaos] = useState([]);
   const [sessoes, setSessoes] = useState([]);
   const [presencas, setPresencas] = useState([]);
-  const [busca, setBusca] = useState([]);
   const [busca2, setBusca2] = useState("");
 
   useEffect(() => { loadDados(); }, []);
@@ -34,15 +33,18 @@ export default function AdminFrequencias() {
     return { presentes, total, pct: total > 0 ? Math.round((presentes / total) * 100) : 0 };
   };
 
-  const dadosGrafico = irmaos.slice(0, 10).map(ir => {
-    const f = getFrequencia(ir.id);
-    return { nome: ir.nome_completo?.split(" ")[0], pct: f.pct };
-  }).sort((a, b) => b.pct - a.pct);
+  const irmaosOrdenados = [...irmaos].sort((a, b) =>
+    (a.nome_completo || "").localeCompare(b.nome_completo || "", "pt-BR")
+  );
 
-  const filtrados = irmaos.filter(i =>
+  const filtrados = irmaosOrdenados.filter(i =>
     !busca2 || i.nome_completo?.toLowerCase().includes(busca2.toLowerCase())
-  ).map(ir => ({ ...ir, freq: getFrequencia(ir.id) }))
-    .sort((a, b) => b.freq.pct - a.freq.pct);
+  ).map(ir => ({ ...ir, freq: getFrequencia(ir.id) }));
+
+  const dadosGrafico = [...filtrados]
+    .sort((a, b) => b.freq.pct - a.freq.pct)
+    .slice(0, 10)
+    .map(ir => ({ nome: ir.nome_completo?.split(" ")[0], pct: ir.freq.pct }));
 
   const exportarCSV = () => {
     const linhas = filtrados.map(i => `"${i.nome_completo}","${i.cim}","${i.freq.presentes}","${i.freq.total}","${i.freq.pct}%"`);
@@ -74,7 +76,6 @@ export default function AdminFrequencias() {
         </Button>
       </div>
 
-      {/* Gráfico Top 10 */}
       {dadosGrafico.length > 0 && (
         <Card>
           <CardHeader><CardTitle className="text-[#1B3A5F] text-base">Top 10 Frequência (%)</CardTitle></CardHeader>
@@ -92,13 +93,11 @@ export default function AdminFrequencias() {
         </Card>
       )}
 
-      {/* Busca */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <Input value={busca2} onChange={e => setBusca2(e.target.value)} placeholder="Buscar irmão..." className="pl-9" />
       </div>
 
-      {/* Lista */}
       <div className="space-y-2">
         {filtrados.map(ir => (
           <Card key={ir.id}>
@@ -109,7 +108,7 @@ export default function AdminFrequencias() {
                 </div>
                 <div>
                   <p className="font-medium text-slate-800">{ir.nome_completo}</p>
-                  <p className="text-xs text-slate-500">CIM: {ir.cim}</p>
+                  <p className="text-xs text-slate-500">CIM: {ir.numero_glp}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
