@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { AlertTriangle, Phone, PhoneOff, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
+import { AlertTriangle, Phone, PhoneOff, CheckCircle, ChevronDown, ChevronUp, Pencil, Trash2, X, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,8 @@ export default function FaltasConsecutivas({ irmaos, sessoes, presencas, contato
   const [expandido, setExpandido] = useState(null);
   const [descricao, setDescricao] = useState("");
   const [salvando, setSalvando] = useState(false);
+  const [editando, setEditando] = useState(null);
+  const [descricaoEdit, setDescricaoEdit] = useState("");
 
   // Ordenar sessões por data (mais antiga primeiro)
   const sessoesOrdenadas = [...sessoes].sort((a, b) => (a.data || "").localeCompare(b.data || ""));
@@ -51,6 +53,21 @@ export default function FaltasConsecutivas({ irmaos, sessoes, presencas, contato
     });
     setDescricao("");
     setExpandido(null);
+    setSalvando(false);
+    onContatoSalvo();
+  };
+
+  const excluirContato = async (contatoId) => {
+    if (!confirm("Excluir este registro de contato?")) return;
+    await base44.entities.ContatoHospitaleiro.delete(contatoId);
+    onContatoSalvo();
+  };
+
+  const salvarEdicao = async (contatoId) => {
+    setSalvando(true);
+    await base44.entities.ContatoHospitaleiro.update(contatoId, { descricao: descricaoEdit });
+    setEditando(null);
+    setDescricaoEdit("");
     setSalvando(false);
     onContatoSalvo();
   };
@@ -119,11 +136,41 @@ export default function FaltasConsecutivas({ irmaos, sessoes, presencas, contato
                   <div className="mt-4 space-y-3 border-t pt-3">
                     {ir.ultimoContato && (
                       <div className="bg-slate-50 p-3 rounded-lg text-sm">
-                        <p className="font-medium text-slate-700">Último contato: {ir.ultimoContato.status}</p>
-                        {ir.ultimoContato.descricao && <p className="text-slate-600 mt-1">{ir.ultimoContato.descricao}</p>}
-                        <p className="text-xs text-slate-400 mt-1">
-                          {ir.ultimoContato.data_contato ? new Date(ir.ultimoContato.data_contato).toLocaleDateString("pt-BR") : ""} — por {ir.ultimoContato.registrado_por}
-                        </p>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <p className="font-medium text-slate-700">Último contato: {ir.ultimoContato.status}</p>
+                            {editando === ir.ultimoContato.id ? (
+                              <div className="mt-2 flex items-center gap-2">
+                                <Textarea
+                                  value={descricaoEdit}
+                                  onChange={e => setDescricaoEdit(e.target.value)}
+                                  className="h-16 text-sm"
+                                />
+                                <Button size="icon" className="h-8 w-8 bg-green-600 hover:bg-green-700" disabled={salvando} onClick={() => salvarEdicao(ir.ultimoContato.id)}>
+                                  <Check className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditando(null)}>
+                                  <X className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
+                            ) : (
+                              ir.ultimoContato.descricao && <p className="text-slate-600 mt-1">{ir.ultimoContato.descricao}</p>
+                            )}
+                            <p className="text-xs text-slate-400 mt-1">
+                              {ir.ultimoContato.data_contato ? new Date(ir.ultimoContato.data_contato).toLocaleDateString("pt-BR") : ""} — por {ir.ultimoContato.registrado_por}
+                            </p>
+                          </div>
+                          {editando !== ir.ultimoContato.id && (
+                            <div className="flex items-center gap-1">
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-500 hover:text-blue-600" onClick={() => { setEditando(ir.ultimoContato.id); setDescricaoEdit(ir.ultimoContato.descricao || ""); }}>
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => excluirContato(ir.ultimoContato.id)}>
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
 
@@ -160,34 +207,7 @@ export default function FaltasConsecutivas({ irmaos, sessoes, presencas, contato
         </div>
       )}
 
-      {/* Histórico de contatos recentes */}
-      {contatos.length > 0 && (
-        <div className="space-y-3 mt-6">
-          <h3 className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Histórico de Contatos Recentes</h3>
-          <div className="space-y-2">
-            {contatos.slice(0, 10).map(c => (
-              <Card key={c.id} className="bg-slate-50">
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div>
-                      <p className="font-medium text-sm text-slate-800">{c.irmao_nome}</p>
-                      {c.descricao && <p className="text-xs text-slate-600 mt-0.5">{c.descricao}</p>}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={c.status === "Contatado" ? "bg-green-100 text-green-700" : c.status === "Sem Contato" ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-600"}>
-                        {c.status === "Contatado" ? <><Phone className="w-3 h-3 mr-1" />{c.status}</> : c.status === "Sem Contato" ? <><PhoneOff className="w-3 h-3 mr-1" />{c.status}</> : c.status}
-                      </Badge>
-                      <span className="text-xs text-slate-400">
-                        {c.data_contato ? new Date(c.data_contato).toLocaleDateString("pt-BR") : ""}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

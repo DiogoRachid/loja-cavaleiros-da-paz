@@ -25,6 +25,7 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Presenças", page: "AdminPresencas", icon: ClipboardList },
     { name: "Frequências", page: "AdminFrequencias", icon: BarChart },
     { name: "Hospitaleiro", page: "AdminHospitaleiro", icon: Heart },
+    { name: "Hist. Contatos", page: "AdminHistoricoContatos", icon: History },
     { name: "Atestados", page: "AdminAtestados", icon: Award },
     { name: "Comunicados", page: "AdminComunicados", icon: ClipboardList },
     { name: "Dados da Loja", page: "AdminDadosLoja", icon: Star },
@@ -38,6 +39,7 @@ const ADMIN_LINKS_BY_CARGO = {
   ],
   "Hospitaleiro": [
     { name: "Painel Hospitaleiro", page: "AdminHospitaleiro", icon: Heart },
+    { name: "Histórico Contatos", page: "AdminHistoricoContatos", icon: History },
     { name: "Presenças", page: "AdminPresencas", icon: ClipboardList },
     { name: "Frequências", page: "AdminFrequencias", icon: BarChart },
   ],
