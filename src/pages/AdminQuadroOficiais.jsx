@@ -9,9 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const CARGOS = [
   "Venerável Mestre","Primeiro Vigilante","Segundo Vigilante","Orador",
-  "Secretário","Tesoureiro","Chanceler","Mestre de Cerimônias","Hospitaleiro",
-  "Secretário de Ação Social","Primeiro Diácono","Segundo Diácono","Porta Espada",
-  "Porta Bandeira","Porta Estandarte","Primeiro Experto","Segundo Experto",
+  "Secretário","Tesoureiro","Chanceler","Mestre de Cerimônias","Mestre de Cerimônias Adjunto",
+  "Hospitaleiro","Secretário de Ação Social","Primeiro Diácono","Segundo Diácono",
+  "Porta Espada","Porta Bandeira","Porta Estandarte","Primeiro Experto","Segundo Experto",
   "Guarda do Templo","Cobridor","Mestre de Banquetes","Mestre de Harmonia",
   "Arquiteto","Bibliotecário"
 ];
