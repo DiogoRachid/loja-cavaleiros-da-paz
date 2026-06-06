@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FaltasConsecutivas from "@/components/hospitaleiro/FaltasConsecutivas";
+import { autoRealizarSessoes } from "@/utils/autoRealizarSessoes";
 
 export default function AdminHospitaleiro() {
   const [irmaos, setIrmaos] = useState([]);
@@ -18,6 +19,7 @@ export default function AdminHospitaleiro() {
   useEffect(() => { loadDados(); }, []);
 
   const loadDados = async () => {
+    await autoRealizarSessoes();
     const [ir, s, p, c] = await Promise.all([
       base44.entities.Irmao.filter({ ativo: true }),
       base44.entities.Sessao.filter({ status: "Realizada" }),

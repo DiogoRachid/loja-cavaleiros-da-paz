@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { autoRealizarSessoes } from "@/utils/autoRealizarSessoes";
 
 export default function AdminVM() {
   const [stats, setStats] = useState({ total: 0, regulares: 0, inadimplentes: 0, sessoes: 0 });
@@ -17,6 +18,7 @@ export default function AdminVM() {
   }, []);
 
   const loadDados = async () => {
+    await autoRealizarSessoes();
     const [irmaos, sessoes, mensalidades] = await Promise.all([
       base44.entities.Irmao.filter({ ativo: true }),
       base44.entities.Sessao.list("-data", 5),

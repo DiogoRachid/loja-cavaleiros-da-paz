@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { autoRealizarSessoes } from "@/utils/autoRealizarSessoes";
 
 export default function AdminMC() {
   const [stats, setStats] = useState({ autoridades: 0, sessoes: 0, checklist: 0 });
@@ -16,6 +17,7 @@ export default function AdminMC() {
   }, []);
 
   const loadDados = async () => {
+    await autoRealizarSessoes();
     const [autoridades, sessoes] = await Promise.all([
       base44.entities.Autoridade.filter({ ativa: true }),
       base44.entities.Sessao.filter({ status: "Agendada" }),
