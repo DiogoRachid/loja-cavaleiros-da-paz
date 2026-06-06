@@ -217,8 +217,8 @@ export default function PrepararReuniao() {
   .roteiro-list { list-style: none; margin: 0; padding: 0; }
   .roteiro-item { margin-bottom: 2px; padding-bottom: 2px; display: flex; align-items: flex-start; gap: 8px; }
   .roteiro-num { font-weight: bold; min-width: 28px; }
-  .roteiro-texto { flex: 1; white-space: pre-wrap; margin: 0; padding: 0; min-height: 0; }
-  .roteiro-subtexto { margin-top: 1px; margin-bottom: 0; padding-left: 20px; font-style: italic; color: #333; font-size: 10pt; white-space: pre-wrap; }
+  .roteiro-texto { flex: 1; margin: 0; padding: 0; min-height: 0; }
+  .roteiro-subtexto { margin-top: 1px; margin-bottom: 0; padding-left: 20px; font-style: italic; color: #333; font-size: 10pt; }
   .roteiro-subtexto li { margin-bottom: 4px; list-style-type: lower-alpha; }
 
   .page-footer { border-top: 1px solid #ccc; padding-top: 4px; margin-top: 20px; font-size: 8pt; text-align: center; color: #666; }
@@ -346,14 +346,7 @@ export default function PrepararReuniao() {
         const textoFormatado = (item.texto || "").replace(/\n/g, "<br>");
         const subtextoFormatado = (item.subtexto || "").replace(/\n/g, "<br>");
         if (!item.texto && !item.subtexto) return "";
-        return `
-      <li class="roteiro-item">
-        <span class="roteiro-num">${item.numero}.</span>
-        <div class="roteiro-texto">
-          ${textoFormatado}
-          ${item.subtexto ? `<div class="roteiro-subtexto">${subtextoFormatado}</div>` : ""}
-        </div>
-      </li>`;
+        return `<li class="roteiro-item"><span class="roteiro-num">${item.numero}.</span><div class="roteiro-texto">${textoFormatado}${item.subtexto ? `<div class="roteiro-subtexto">${subtextoFormatado}</div>` : ""}</div></li>`;
       }).join("")}
     </ol>
   </div>
