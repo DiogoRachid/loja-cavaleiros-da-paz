@@ -18,6 +18,7 @@ const CARGOS_ADMIN = [
   "Tesoureiro",
   "Chanceler",
   "Mestre de Cerimônias",
+  "Mestre de Harmonia",
   "Hospitaleiro",
   "Primeiro Diácono",
   "Segundo Diácono",
@@ -94,6 +95,7 @@ export default function AdminLogin() {
         const cargoRoutes = {
           "Venerável Mestre": "AdminVM",
           "Mestre de Cerimônias": "AdminMC",
+          "Mestre de Harmonia": "AdminMestreHarmonia",
           "Tesoureiro": "AdminTesoureiro",
           "Secretário": "AdminSecretario",
           "Chanceler": "AdminChanceler",

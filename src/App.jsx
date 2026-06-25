@@ -10,6 +10,8 @@ import PageNotFound from './lib/PageNotFound';
 import PrepararReuniao from './pages/PrepararReuniao';
 import AdminHospitaleiro from './pages/AdminHospitaleiro';
 import AdminHistoricoContatos from './pages/AdminHistoricoContatos';
+import AdminMestreHarmonia from './pages/AdminMestreHarmonia';
+import AdminPlaylistSessao from './pages/AdminPlaylistSessao';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -66,6 +68,8 @@ const AuthenticatedApp = () => {
       <Route path="/PrepararReuniao" element={<LayoutWrapper currentPageName="AdminPrepararReuniao"><PrepararReuniao /></LayoutWrapper>} />
       <Route path="/AdminHospitaleiro" element={<LayoutWrapper currentPageName="AdminHospitaleiro"><AdminHospitaleiro /></LayoutWrapper>} />
       <Route path="/AdminHistoricoContatos" element={<LayoutWrapper currentPageName="AdminHistoricoContatos"><AdminHistoricoContatos /></LayoutWrapper>} />
+      <Route path="/AdminMestreHarmonia" element={<LayoutWrapper currentPageName="AdminMestreHarmonia"><AdminMestreHarmonia /></LayoutWrapper>} />
+      <Route path="/AdminPlaylistSessao" element={<LayoutWrapper currentPageName="AdminPlaylistSessao"><AdminPlaylistSessao /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
