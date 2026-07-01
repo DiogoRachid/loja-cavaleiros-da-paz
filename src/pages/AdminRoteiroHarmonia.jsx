@@ -6,8 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import RoteiroEtapa from "@/components/harmonia/RoteiroEtapa";
 import TrackSearchModal from "@/components/harmonia/TrackSearchModal";
-import MinhasPlaylistsSidebar from "@/components/harmonia/MinhasPlaylistsSidebar";
-import AddPlaylistModal from "@/components/harmonia/AddPlaylistModal";
 
 const ETAPAS_PADRAO = [
   "Entrada",
@@ -34,18 +32,11 @@ export default function AdminRoteiroHarmonia() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Minhas playlists
-  const [minhasPlaylists, setMinhasPlaylists] = useState([]);
-  const [loadingPlaylists, setLoadingPlaylists] = useState(true);
-  const [showAddPlaylist, setShowAddPlaylist] = useState(false);
-  const [activePlaylistId, setActivePlaylistId] = useState(null);
-
   // Track search modal
   const [searchModalEtapa, setSearchModalEtapa] = useState(null);
 
   useEffect(() => {
     if (sessaoId) loadDados();
-    loadPlaylists();
   }, [sessaoId]);
 
   const loadDados = async () => {
@@ -79,12 +70,6 @@ export default function AdminRoteiroHarmonia() {
     setLoading(false);
   };
 
-  const loadPlaylists = async () => {
-    const data = await base44.entities.MinhaPlaylist.list("-created_date", 50);
-    setMinhasPlaylists(data);
-    setLoadingPlaylists(false);
-  };
-
   const salvar = async () => {
     setSaving(true);
     await base44.entities.RoteiroHarmonia.update(roteiro.id, {
@@ -102,7 +87,6 @@ export default function AdminRoteiroHarmonia() {
       prev.map((e) => (e.id === searchModalEtapa ? { ...e, tracks } : e))
     );
     setSearchModalEtapa(null);
-    setActivePlaylistId(null);
   };
 
   const handleRemoveTrack = (etapaId, trackId) => {
@@ -119,26 +103,6 @@ export default function AdminRoteiroHarmonia() {
 
   const handleAddEtapa = () => {
     setEtapas((prev) => [...prev, { id: genId(), numero: prev.length + 1, nome: "Nova Etapa", tracks: [] }]);
-  };
-
-  const handleAddPlaylist = async (playlistData) => {
-    const exists = minhasPlaylists.some((p) => p.spotify_playlist_id === playlistData.spotify_playlist_id);
-    if (exists) return;
-    await base44.entities.MinhaPlaylist.create(playlistData);
-    await loadPlaylists();
-  };
-
-  const handleDeletePlaylist = async (playlist) => {
-    if (!confirm(`Remover a playlist "${playlist.spotify_playlist_name}"?`)) return;
-    await base44.entities.MinhaPlaylist.delete(playlist.id);
-    await loadPlaylists();
-  };
-
-  const handleSelectPlaylist = (playlist) => {
-    setActivePlaylistId(playlist.spotify_playlist_id);
-    // Abre o modal de busca direto na playlist selecionada, se houver etapa ativa
-    if (searchModalEtapa) return;
-    // Se não há etapa ativa, apenas destaca a playlist
   };
 
   if (loading) {
@@ -184,61 +148,40 @@ export default function AdminRoteiroHarmonia() {
         </Button>
       </div>
 
-      {/* Layout: Sidebar + Roteiro */}
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-        <MinhasPlaylistsSidebar
-          playlists={minhasPlaylists}
-          loading={loadingPlaylists}
-          onAddPlaylist={() => setShowAddPlaylist(true)}
-          onDeletePlaylist={handleDeletePlaylist}
-          activePlaylistId={activePlaylistId}
-          onSelectPlaylist={handleSelectPlaylist}
-        />
+      <Card>
+        <CardContent className="p-6">
+          <div className="space-y-2">
+            {etapas.map((etapa, i) => (
+              <RoteiroEtapa
+                key={etapa.id}
+                etapa={etapa}
+                index={i}
+                onRename={handleRename}
+                onAddTrack={(etapaId) => setSearchModalEtapa(etapaId)}
+                onRemoveTrack={handleRemoveTrack}
+                onRemove={handleRemoveEtapa}
+              />
+            ))}
 
-        {/* Roteiro - padrão do webapp */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="space-y-2">
-              {etapas.map((etapa, i) => (
-                <RoteiroEtapa
-                  key={etapa.id}
-                  etapa={etapa}
-                  index={i}
-                  onRename={handleRename}
-                  onAddTrack={(etapaId) => setSearchModalEtapa(etapaId)}
-                  onRemoveTrack={handleRemoveTrack}
-                  onRemove={handleRemoveEtapa}
-                />
-              ))}
+            {etapas.length === 0 && (
+              <p className="text-center text-slate-400 py-8">Nenhuma etapa. Adicione abaixo.</p>
+            )}
 
-              {etapas.length === 0 && (
-                <p className="text-center text-slate-400 py-8">Nenhuma etapa. Adicione abaixo.</p>
-              )}
-
-              <button
-                onClick={handleAddEtapa}
-                className="w-full py-3 rounded-xl border border-dashed border-slate-300 text-[#1B3A5F] hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
-              >
-                <Plus className="w-4 h-4" /> Adicionar Etapa
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            <button
+              onClick={handleAddEtapa}
+              className="w-full py-3 rounded-xl border border-dashed border-slate-300 text-[#1B3A5F] hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
+            >
+              <Plus className="w-4 h-4" /> Adicionar Etapa
+            </button>
+          </div>
+        </CardContent>
+      </Card>
 
       <TrackSearchModal
         open={searchModalEtapa !== null}
-        onClose={() => { setSearchModalEtapa(null); setActivePlaylistId(null); }}
+        onClose={() => setSearchModalEtapa(null)}
         selectedTracks={etapaAtiva?.tracks || []}
         onConfirm={handleConfirmTracks}
-        initialPlaylistId={activePlaylistId}
-      />
-
-      <AddPlaylistModal
-        open={showAddPlaylist}
-        onClose={() => setShowAddPlaylist(false)}
-        onAdd={handleAddPlaylist}
-        existingIds={minhasPlaylists.map((p) => p.spotify_playlist_id)}
       />
     </div>
   );

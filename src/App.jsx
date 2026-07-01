@@ -13,6 +13,7 @@ import AdminHistoricoContatos from './pages/AdminHistoricoContatos';
 import AdminMestreHarmonia from './pages/AdminMestreHarmonia';
 import AdminPlaylistSessao from './pages/AdminPlaylistSessao';
 import AdminRoteiroHarmonia from './pages/AdminRoteiroHarmonia';
+import AdminMinhasPlaylists from './pages/AdminMinhasPlaylists';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -72,6 +73,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminMestreHarmonia" element={<LayoutWrapper currentPageName="AdminMestreHarmonia"><AdminMestreHarmonia /></LayoutWrapper>} />
       <Route path="/AdminPlaylistSessao" element={<LayoutWrapper currentPageName="AdminPlaylistSessao"><AdminPlaylistSessao /></LayoutWrapper>} />
       <Route path="/AdminRoteiroHarmonia" element={<LayoutWrapper currentPageName="AdminRoteiroHarmonia"><AdminRoteiroHarmonia /></LayoutWrapper>} />
+      <Route path="/AdminMinhasPlaylists" element={<LayoutWrapper currentPageName="AdminMinhasPlaylists"><AdminMinhasPlaylists /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
