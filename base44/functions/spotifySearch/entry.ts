@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
         return Response.json({
           error: "Esta playlist pertence a outra conta Spotify e o app não tem permissão para acessar suas músicas (limitação do modo de desenvolvimento do Spotify).",
           tracks: [],
-        }, { status: 403 });
+        }, { status: 200 });
       }
       const rawItems = data.items?.items || data.tracks?.items || [];
       const tracks = rawItems
