@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
       if (res.status !== 200) {
         return Response.json({ error: "Spotify tracks error", status: res.status, details: data }, { status: 500 });
       }
-      if (!data.tracks) {
+      if (!data.tracks && !data.items) {
         return Response.json({
           error: "O Spotify não permite listar as músicas desta playlist específica pela API (restrição do próprio Spotify para este tipo de playlist). Tente recriá-la como uma playlist comum na sua conta.",
           tracks: [],
