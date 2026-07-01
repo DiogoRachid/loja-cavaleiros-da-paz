@@ -2,9 +2,12 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { ArrowLeft, Plus, Save, Loader2, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import RoteiroEtapa from "@/components/harmonia/RoteiroEtapa";
 import TrackSearchModal from "@/components/harmonia/TrackSearchModal";
+import MinhasPlaylistsSidebar from "@/components/harmonia/MinhasPlaylistsSidebar";
+import AddPlaylistModal from "@/components/harmonia/AddPlaylistModal";
 
 const ETAPAS_PADRAO = [
   "Entrada",
@@ -30,10 +33,19 @@ export default function AdminRoteiroHarmonia() {
   const [etapas, setEtapas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // Minhas playlists
+  const [minhasPlaylists, setMinhasPlaylists] = useState([]);
+  const [loadingPlaylists, setLoadingPlaylists] = useState(true);
+  const [showAddPlaylist, setShowAddPlaylist] = useState(false);
+  const [activePlaylistId, setActivePlaylistId] = useState(null);
+
+  // Track search modal
   const [searchModalEtapa, setSearchModalEtapa] = useState(null);
 
   useEffect(() => {
     if (sessaoId) loadDados();
+    loadPlaylists();
   }, [sessaoId]);
 
   const loadDados = async () => {
@@ -50,7 +62,7 @@ export default function AdminRoteiroHarmonia() {
         id: genId(),
         numero: i + 1,
         nome,
-        track: null,
+        tracks: [],
       }));
       r = await base44.entities.RoteiroHarmonia.create({
         sessao_id: sessaoId,
@@ -61,8 +73,16 @@ export default function AdminRoteiroHarmonia() {
       });
     }
     setRoteiro(r);
-    setEtapas(r.etapas ? JSON.parse(r.etapas) : []);
+    const parsed = r.etapas ? JSON.parse(r.etapas) : [];
+    // Migrar tracks antigos (track -> tracks)
+    setEtapas(parsed.map((e) => ({ ...e, tracks: e.tracks || (e.track ? [e.track] : []) })));
     setLoading(false);
+  };
+
+  const loadPlaylists = async () => {
+    const data = await base44.entities.MinhaPlaylist.list("-created_date", 50);
+    setMinhasPlaylists(data);
+    setLoadingPlaylists(false);
   };
 
   const salvar = async () => {
@@ -74,23 +94,51 @@ export default function AdminRoteiroHarmonia() {
   };
 
   const handleRename = (id, novoNome) => {
-    setEtapas(prev => prev.map(e => e.id === id ? { ...e, nome: novoNome } : e));
+    setEtapas((prev) => prev.map((e) => (e.id === id ? { ...e, nome: novoNome } : e)));
   };
 
-  const handleSelectTrack = (etapaId, track) => {
-    setEtapas(prev => prev.map(e => e.id === etapaId ? { ...e, track } : e));
+  const handleConfirmTracks = (tracks) => {
+    setEtapas((prev) =>
+      prev.map((e) => (e.id === searchModalEtapa ? { ...e, tracks } : e))
+    );
+    setSearchModalEtapa(null);
+    setActivePlaylistId(null);
   };
 
-  const handleRemoveTrack = (etapaId) => {
-    setEtapas(prev => prev.map(e => e.id === etapaId ? { ...e, track: null } : e));
+  const handleRemoveTrack = (etapaId, trackId) => {
+    setEtapas((prev) =>
+      prev.map((e) =>
+        e.id === etapaId ? { ...e, tracks: (e.tracks || []).filter((t) => t.id !== trackId) } : e
+      )
+    );
   };
 
   const handleRemoveEtapa = (id) => {
-    setEtapas(prev => prev.filter(e => e.id !== id));
+    setEtapas((prev) => prev.filter((e) => e.id !== id));
   };
 
   const handleAddEtapa = () => {
-    setEtapas(prev => [...prev, { id: genId(), numero: prev.length + 1, nome: "Nova Etapa", track: null }]);
+    setEtapas((prev) => [...prev, { id: genId(), numero: prev.length + 1, nome: "Nova Etapa", tracks: [] }]);
+  };
+
+  const handleAddPlaylist = async (playlistData) => {
+    const exists = minhasPlaylists.some((p) => p.spotify_playlist_id === playlistData.spotify_playlist_id);
+    if (exists) return;
+    await base44.entities.MinhaPlaylist.create(playlistData);
+    await loadPlaylists();
+  };
+
+  const handleDeletePlaylist = async (playlist) => {
+    if (!confirm(`Remover a playlist "${playlist.spotify_playlist_name}"?`)) return;
+    await base44.entities.MinhaPlaylist.delete(playlist.id);
+    await loadPlaylists();
+  };
+
+  const handleSelectPlaylist = (playlist) => {
+    setActivePlaylistId(playlist.spotify_playlist_id);
+    // Abre o modal de busca direto na playlist selecionada, se houver etapa ativa
+    if (searchModalEtapa) return;
+    // Se não há etapa ativa, apenas destaca a playlist
   };
 
   if (loading) {
@@ -112,7 +160,7 @@ export default function AdminRoteiroHarmonia() {
     );
   }
 
-  const grau = sessao.grau || "Aprendiz";
+  const etapaAtiva = searchModalEtapa ? etapas.find((e) => e.id === searchModalEtapa) : null;
 
   return (
     <div className="space-y-6">
@@ -130,48 +178,67 @@ export default function AdminRoteiroHarmonia() {
             {sessao.tipo} {sessao.numero && `Nº ${sessao.numero}`} • {sessao.data} às {sessao.hora}
           </p>
         </div>
-        <Button onClick={salvar} disabled={saving} className="ml-auto bg-[#1DB954] hover:bg-[#1aa34a] text-white">
+        <Button onClick={salvar} disabled={saving} className="ml-auto bg-[#1B3A5F] text-white hover:bg-[#152d49]">
           {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
           Salvar Roteiro
         </Button>
       </div>
 
-      {/* Roteiro - Dark theme */}
-      <div className="rounded-2xl bg-[#1A1815] p-6 md:p-8">
-        <h2 className="text-center text-[#C6A97A] font-serif text-lg md:text-xl tracking-[0.2em] uppercase mb-6">
-          Etapas de {grau}
-        </h2>
+      {/* Layout: Sidebar + Roteiro */}
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+        <MinhasPlaylistsSidebar
+          playlists={minhasPlaylists}
+          loading={loadingPlaylists}
+          onAddPlaylist={() => setShowAddPlaylist(true)}
+          onDeletePlaylist={handleDeletePlaylist}
+          activePlaylistId={activePlaylistId}
+          onSelectPlaylist={handleSelectPlaylist}
+        />
 
-        <div className="space-y-2 max-w-3xl mx-auto">
-          {etapas.map((etapa, i) => (
-            <RoteiroEtapa
-              key={etapa.id}
-              etapa={etapa}
-              index={i}
-              onRename={handleRename}
-              onSelectTrack={(etapaId) => setSearchModalEtapa(etapaId)}
-              onRemoveTrack={handleRemoveTrack}
-              onRemove={handleRemoveEtapa}
-            />
-          ))}
+        {/* Roteiro - padrão do webapp */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="space-y-2">
+              {etapas.map((etapa, i) => (
+                <RoteiroEtapa
+                  key={etapa.id}
+                  etapa={etapa}
+                  index={i}
+                  onRename={handleRename}
+                  onAddTrack={(etapaId) => setSearchModalEtapa(etapaId)}
+                  onRemoveTrack={handleRemoveTrack}
+                  onRemove={handleRemoveEtapa}
+                />
+              ))}
 
-          {etapas.length === 0 && (
-            <p className="text-center text-[#5A5249] py-8">Nenhuma etapa. Adicione abaixo.</p>
-          )}
+              {etapas.length === 0 && (
+                <p className="text-center text-slate-400 py-8">Nenhuma etapa. Adicione abaixo.</p>
+              )}
 
-          <button
-            onClick={handleAddEtapa}
-            className="w-full py-3 rounded-xl border border-dashed border-[#3D3730] text-[#C6A97A] hover:bg-[#221F1B] transition-colors flex items-center justify-center gap-2 text-sm"
-          >
-            <Plus className="w-4 h-4" /> Adicionar Etapa
-          </button>
-        </div>
+              <button
+                onClick={handleAddEtapa}
+                className="w-full py-3 rounded-xl border border-dashed border-slate-300 text-[#1B3A5F] hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 text-sm font-medium"
+              >
+                <Plus className="w-4 h-4" /> Adicionar Etapa
+              </button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <TrackSearchModal
         open={searchModalEtapa !== null}
-        onClose={() => setSearchModalEtapa(null)}
-        onSelect={(track) => handleSelectTrack(searchModalEtapa, track)}
+        onClose={() => { setSearchModalEtapa(null); setActivePlaylistId(null); }}
+        selectedTracks={etapaAtiva?.tracks || []}
+        onConfirm={handleConfirmTracks}
+        initialPlaylistId={activePlaylistId}
+      />
+
+      <AddPlaylistModal
+        open={showAddPlaylist}
+        onClose={() => setShowAddPlaylist(false)}
+        onAdd={handleAddPlaylist}
+        existingIds={minhasPlaylists.map((p) => p.spotify_playlist_id)}
       />
     </div>
   );

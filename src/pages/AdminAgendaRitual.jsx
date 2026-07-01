@@ -94,9 +94,11 @@ export default function AdminAgendaRitual() {
             <p className="text-slate-500">{agendadas.length} sessões agendadas</p>
           </div>
         </div>
-        <Button onClick={() => setShowForm(!showForm)} className="bg-[#1B3A5F] text-white">
-          <Plus className="w-4 h-4 mr-2" /> Nova Sessão
-        </Button>
+        {!isMestreHarmonia && (
+          <Button onClick={() => setShowForm(!showForm)} className="bg-[#1B3A5F] text-white">
+            <Plus className="w-4 h-4 mr-2" /> Nova Sessão
+          </Button>
+        )}
       </div>
 
       {/* Formulário nova sessão */}
@@ -346,9 +348,11 @@ export default function AdminAgendaRitual() {
           <CardContent className="p-8 text-center text-slate-400">
             <Calendar className="w-12 h-12 mx-auto mb-3 opacity-30" />
             <p>Nenhuma sessão cadastrada.</p>
-            <Button onClick={() => setShowForm(true)} className="mt-3 bg-[#1B3A5F] text-white">
-              <Plus className="w-4 h-4 mr-2" /> Criar Primeira Sessão
-            </Button>
+            {!isMestreHarmonia && (
+              <Button onClick={() => setShowForm(true)} className="mt-3 bg-[#1B3A5F] text-white">
+                <Plus className="w-4 h-4 mr-2" /> Criar Primeira Sessão
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
