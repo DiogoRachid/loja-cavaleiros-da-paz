@@ -37,6 +37,9 @@ export default function AdminAgendaRitual() {
   const [editando, setEditando] = useState(null);
   const [formEdicao, setFormEdicao] = useState(FORM_VAZIO);
 
+  const admin = JSON.parse(sessionStorage.getItem("admin_data") || "{}");
+  const isMestreHarmonia = admin.cargo === "Mestre de Harmonia";
+
   useEffect(() => { loadDados(); }, []);
 
   const loadDados = async () => {
@@ -228,7 +231,7 @@ export default function AdminAgendaRitual() {
                         </div>
                       )}
                       <div className="flex gap-2 flex-wrap">
-                        <Link to={`${createPageUrl("PrepararReuniao")}?sessao=${s.id}`}>
+                        <Link to={isMestreHarmonia ? `/AdminRoteiroHarmonia?sessao=${s.id}` : `${createPageUrl("PrepararReuniao")}?sessao=${s.id}`}>
                           <Button size="sm" className="bg-[#C9A227] text-[#1B3A5F] font-semibold hover:bg-[#8B7019]">
                             <FileText className="w-3 h-3 mr-1" /> Preparar Reunião
                           </Button>
@@ -323,7 +326,7 @@ export default function AdminAgendaRitual() {
                         </div>
                       )}
                       <div className="flex gap-2 flex-wrap">
-                        <Link to={`${createPageUrl("PrepararReuniao")}?sessao=${s.id}`}>
+                        <Link to={isMestreHarmonia ? `/AdminRoteiroHarmonia?sessao=${s.id}` : `${createPageUrl("PrepararReuniao")}?sessao=${s.id}`}>
                           <Button size="sm" className="bg-[#C9A227] text-[#1B3A5F] font-semibold hover:bg-[#8B7019]">
                             <FileText className="w-3 h-3 mr-1" /> Preparar Reunião
                           </Button>

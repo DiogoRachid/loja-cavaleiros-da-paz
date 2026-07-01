@@ -10,7 +10,6 @@ Deno.serve(async (req) => {
     const clientId = Deno.env.get("SPOTIFY_CLIENT_ID");
     const clientSecret = Deno.env.get("SPOTIFY_CLIENT_SECRET");
 
-    // Get access token via client credentials
     if (!clientId || !clientSecret) {
       return Response.json({ error: "Credenciais Spotify não configuradas" }, { status: 500 });
     }
@@ -25,15 +24,15 @@ Deno.serve(async (req) => {
     });
     const tokenData = await tokenRes.json();
     if (!tokenData.access_token) {
-      console.error("Spotify token error:", JSON.stringify(tokenData));
       return Response.json({ error: "Falha ao autenticar no Spotify", details: tokenData }, { status: 500 });
     }
     const token = tokenData.access_token;
 
     if (action === "search") {
       const params = new URLSearchParams({ q: query, type: "playlist", limit: "10" });
-      const searchUrl = `https://api.spotify.com/v1/search?${params.toString()}`;
-      const res = await fetch(searchUrl, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`https://api.spotify.com/v1/search?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const data = await res.json();
       if (res.status !== 200) {
         return Response.json({ error: "Spotify API error", status: res.status, details: data }, { status: 500 });
@@ -50,22 +49,37 @@ Deno.serve(async (req) => {
       return Response.json({ playlists });
     }
 
+    if (action === "search_tracks") {
+      const searchUrl = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track`;
+      const res = await fetch(searchUrl, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.status !== 200) {
+        return Response.json({ error: "Spotify API error", status: res.status, details: data }, { status: 500 });
+      }
+      const tracks = (data.tracks?.items || []).filter(t => t !== null).map(t => ({
+        id: t.id,
+        name: t.name,
+        artists: t.artists?.map(a => a.name).join(", ") || "",
+        album: t.album?.name || "",
+        duration_ms: t.duration_ms,
+        preview_url: t.preview_url,
+        uri: t.uri,
+        image: t.album?.images?.[0]?.url || "",
+      }));
+      return Response.json({ tracks });
+    }
+
     if (action === "tracks") {
-      const res = await fetch(
-        `https://api.spotify.com/v1/playlists/${playlist_id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const data = await res.json();
       if (res.status !== 200) {
         return Response.json({ error: "Spotify tracks error", status: res.status, details: data }, { status: 500 });
       }
-      const rawItems = data.tracks?.items || [];
-      if (rawItems.length > 0) {
-        console.log("First raw item keys:", Object.keys(rawItems[0]), "track exists:", !!rawItems[0].track);
-      } else {
-        console.log("No items in tracks. tracks object keys:", Object.keys(data.tracks || {}));
-      }
-      const tracks = rawItems
+      const tracks = (data.tracks?.items || [])
         .filter(item => item && item.track)
         .map(item => ({
           id: item.track.id,

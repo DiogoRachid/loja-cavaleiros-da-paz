@@ -1,0 +1,29 @@
+{
+  "name": "RoteiroHarmonia",
+  "type": "object",
+  "properties": {
+    "sessao_id": {
+      "type": "string",
+      "description": "ID da sess\u00e3o"
+    },
+    "sessao_data": {
+      "type": "string",
+      "description": "Data da sess\u00e3o"
+    },
+    "sessao_tipo": {
+      "type": "string",
+      "description": "Tipo da sess\u00e3o"
+    },
+    "grau": {
+      "type": "string",
+      "description": "Grau da sess\u00e3o (Aprendiz, Companheiro, Mestre)"
+    },
+    "etapas": {
+      "type": "string",
+      "description": "JSON com array de etapas: [{id, numero, nome, track: {id, name, artists, album, uri, image, preview_url}}]"
+    }
+  },
+  "required": [
+    "sessao_id"
+  ]
+}
