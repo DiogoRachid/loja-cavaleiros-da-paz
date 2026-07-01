@@ -98,7 +98,11 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
 
       {showPlayer && tracks.find((t) => t.id === showPlayer) && (
         <div className="px-4 pb-3 ml-8">
-          <SpotifyPlayer trackId={showPlayer} />
+          {tracks.find((t) => t.id === showPlayer)?.is_mp3 ? (
+            <audio controls autoPlay src={tracks.find((t) => t.id === showPlayer).file_url} className="w-full h-10" />
+          ) : (
+            <SpotifyPlayer trackId={showPlayer} />
+          )}
         </div>
       )}
     </div>

@@ -1,0 +1,22 @@
+{
+  "name": "MinhaMp3",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string",
+      "description": "Nome da m\u00fasica"
+    },
+    "artista": {
+      "type": "string",
+      "description": "Artista (opcional)"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL do arquivo mp3"
+    }
+  },
+  "required": [
+    "nome",
+    "file_url"
+  ]
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Music, Loader2, ListMusic, Check, Plus } from "lucide-react";
+import { Search, Music, Loader2, ListMusic, Check, Plus, Upload } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { base44 } from "@/api/base44Client";
 
 function formatDuration(ms) {
+  if (!ms) return "";
   const min = Math.floor(ms / 60000);
   const sec = Math.floor((ms % 60000) / 1000);
   return `${min}:${sec.toString().padStart(2, "0")}`;
@@ -19,6 +20,7 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
   const [tracks, setTracks] = useState([]);
   const [myPlaylists, setMyPlaylists] = useState([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [myMp3s, setMyMp3s] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState([]);
 
@@ -40,6 +42,17 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
   useEffect(() => {
     if (open && tab === "playlist" && myPlaylists.length === 0) {
       loadMyPlaylists();
+    }
+  }, [open, tab]);
+
+  const loadMyMp3s = async () => {
+    const data = await base44.entities.MinhaMp3.list("-created_date", 100);
+    setMyMp3s(data);
+  };
+
+  useEffect(() => {
+    if (open && tab === "mp3" && myMp3s.length === 0) {
+      loadMyMp3s();
     }
   }, [open, tab]);
 
@@ -126,9 +139,10 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={setTab} className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="search"><Search className="w-3 h-3 mr-1" />Buscar música</TabsTrigger>
             <TabsTrigger value="playlist"><ListMusic className="w-3 h-3 mr-1" />Minhas Playlists</TabsTrigger>
+            <TabsTrigger value="mp3"><Upload className="w-3 h-3 mr-1" />Meus MP3s</TabsTrigger>
           </TabsList>
 
           <TabsContent value="search" className="flex-1 overflow-hidden flex flex-col gap-3">
@@ -193,6 +207,29 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
                 </div>
               </>
             )}
+          </TabsContent>
+          <TabsContent value="mp3" className="flex-1 overflow-hidden flex flex-col gap-3">
+            <div className="flex-1 overflow-y-auto space-y-2">
+              {myMp3s.length === 0 ? (
+                <p className="text-center text-slate-400 text-sm py-8">
+                  Nenhum MP3 enviado. Adicione pela barra lateral em "Meus MP3s".
+                </p>
+              ) : (
+                myMp3s.map((m) =>
+                  renderTrackRow({
+                    id: `mp3_${m.id}`,
+                    name: m.nome,
+                    artists: m.artista || "",
+                    album: "",
+                    duration_ms: 0,
+                    uri: "",
+                    image: "",
+                    is_mp3: true,
+                    file_url: m.file_url,
+                  })
+                )
+              )}
+            </div>
           </TabsContent>
         </Tabs>
 
