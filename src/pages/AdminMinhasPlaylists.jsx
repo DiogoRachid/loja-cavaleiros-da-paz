@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { ListMusic, Loader2, RefreshCw, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,13 @@ export default function AdminMinhasPlaylists() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [connecting, setConnecting] = useState(false);
+  const initedRef = useRef(false);
 
   const redirectUri = `${window.location.origin}/AdminMinhasPlaylists`;
 
   useEffect(() => {
+    if (initedRef.current) return;
+    initedRef.current = true;
     init();
   }, []);
 
@@ -22,8 +25,9 @@ export default function AdminMinhasPlaylists() {
     const code = urlParams.get("code");
 
     if (code) {
-      await base44.functions.invoke("spotifyAuth", { action: "exchange_code", code, redirect_uri: redirectUri });
+      // Remove o código da URL imediatamente para evitar reenvio (o código é de uso único)
       window.history.replaceState({}, "", window.location.pathname);
+      await base44.functions.invoke("spotifyAuth", { action: "exchange_code", code, redirect_uri: redirectUri });
     }
 
     const statusRes = await base44.functions.invoke("spotifyAuth", { action: "status" });
