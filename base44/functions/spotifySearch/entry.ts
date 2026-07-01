@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
         }
       }
 
-      const res = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}`, {
+      const res = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}?market=from_token`, {
         headers: { Authorization: `Bearer ${authToken}` }
       });
       const data = await res.json();
@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
       }
       if (!data.tracks) {
         return Response.json({
-          error: "Esta playlist pertence a outra conta Spotify e o app não tem permissão para acessar suas músicas (limitação do modo de desenvolvimento do Spotify).",
+          error: "O Spotify não permite listar as músicas desta playlist específica pela API (restrição do próprio Spotify para este tipo de playlist). Tente recriá-la como uma playlist comum na sua conta.",
           tracks: [],
         }, { status: 200 });
       }
