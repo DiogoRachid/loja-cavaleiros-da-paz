@@ -107,6 +107,12 @@ Deno.serve(async (req) => {
       if (res.status !== 200) {
         return Response.json({ error: "Spotify tracks error", status: res.status, details: data }, { status: 500 });
       }
+      if (!data.tracks) {
+        return Response.json({
+          error: "Esta playlist pertence a outra conta Spotify e o app não tem permissão para acessar suas músicas (limitação do modo de desenvolvimento do Spotify).",
+          tracks: [],
+        }, { status: 403 });
+      }
       const rawItems = data.items?.items || data.tracks?.items || [];
       const tracks = rawItems
         .map(entry => entry?.item?.name ? entry.item : (entry?.track || entry?.item?.track))

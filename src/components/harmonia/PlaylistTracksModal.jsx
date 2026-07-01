@@ -16,13 +16,16 @@ export default function PlaylistTracksModal({ open, onClose, playlistId, playlis
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [playingId, setPlayingId] = useState(null);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     if (open && playlistId) {
       setPlayingId(null);
+      setErrorMsg("");
       setLoading(true);
       base44.functions.invoke("spotifySearch", { action: "tracks", playlist_id: playlistId }).then((res) => {
         setTracks(res.data?.tracks || []);
+        setErrorMsg(res.data?.error || "");
         setLoading(false);
       });
     }
@@ -40,6 +43,8 @@ export default function PlaylistTracksModal({ open, onClose, playlistId, playlis
             <div className="flex items-center justify-center py-10">
               <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
             </div>
+          ) : errorMsg ? (
+            <p className="text-center text-red-500 text-sm py-8 px-4">{errorMsg}</p>
           ) : tracks.length === 0 ? (
             <p className="text-center text-slate-400 text-sm py-8">Nenhuma música encontrada.</p>
           ) : (

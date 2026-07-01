@@ -23,6 +23,7 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
   const [myMp3s, setMyMp3s] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState([]);
+  const [playlistError, setPlaylistError] = useState("");
 
   useEffect(() => {
     if (open) {
@@ -67,8 +68,10 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
   const loadPlaylistTracks = async (playlistId) => {
     setLoading(true);
     setSelectedPlaylist(playlistId);
+    setPlaylistError("");
     const res = await base44.functions.invoke("spotifySearch", { action: "tracks", playlist_id: playlistId });
     setTracks(res.data?.tracks || []);
+    setPlaylistError(res.data?.error || "");
     setLoading(false);
   };
 
@@ -199,11 +202,19 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
               </div>
             ) : (
               <>
-                <Button variant="outline" size="sm" onClick={() => { setSelectedPlaylist(null); setTracks([]); }} className="self-start">
+                <Button variant="outline" size="sm" onClick={() => { setSelectedPlaylist(null); setTracks([]); setPlaylistError(""); }} className="self-start">
                   ← Voltar para playlists
                 </Button>
                 <div className="flex-1 overflow-y-auto space-y-2">
-                  {tracks.map(renderTrackRow)}
+                  {loading ? (
+                    <div className="flex items-center justify-center py-10">
+                      <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+                    </div>
+                  ) : playlistError ? (
+                    <p className="text-center text-red-500 text-sm py-8 px-4">{playlistError}</p>
+                  ) : (
+                    tracks.map(renderTrackRow)
+                  )}
                 </div>
               </>
             )}
