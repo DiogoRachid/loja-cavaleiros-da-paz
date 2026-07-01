@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
             spotify_playlist_image: p.images?.[0]?.url || "",
             spotify_playlist_uri: p.uri,
             owner: p.owner?.display_name || "",
-            tracks_total: p.tracks?.total || 0,
+            tracks_total: p.items?.total ?? p.tracks?.total ?? 0,
           }))
         );
         url = data.next || null;

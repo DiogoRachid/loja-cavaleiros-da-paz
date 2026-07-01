@@ -3,8 +3,6 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { action, query, playlist_id } = await req.json();
     const clientId = Deno.env.get("SPOTIFY_CLIENT_ID");
@@ -72,24 +70,56 @@ Deno.serve(async (req) => {
     }
 
     if (action === "tracks") {
+      // Playlists particulares da biblioteca exigem o token do usuário conectado (não o client_credentials)
+      let authToken = token;
+      const existingTokens = await base44.asServiceRole.entities.SpotifyToken.list();
+      const tokenRecord = existingTokens[0];
+      if (tokenRecord) {
+        authToken = tokenRecord.access_token;
+        if (!tokenRecord.expires_at || Date.now() >= tokenRecord.expires_at - 60000) {
+          const refreshRes = await fetch("https://accounts.spotify.com/api/token", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              "Authorization": "Basic " + btoa(clientId + ":" + clientSecret),
+            },
+            body: new URLSearchParams({
+              grant_type: "refresh_token",
+              refresh_token: tokenRecord.refresh_token,
+            }),
+          });
+          const refreshData = await refreshRes.json();
+          if (refreshData.access_token) {
+            authToken = refreshData.access_token;
+            await base44.asServiceRole.entities.SpotifyToken.update(tokenRecord.id, {
+              access_token: authToken,
+              refresh_token: refreshData.refresh_token || tokenRecord.refresh_token,
+              expires_at: Date.now() + (refreshData.expires_in || 3600) * 1000,
+            });
+          }
+        }
+      }
+
       const res = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${authToken}` }
       });
       const data = await res.json();
       if (res.status !== 200) {
         return Response.json({ error: "Spotify tracks error", status: res.status, details: data }, { status: 500 });
       }
-      const tracks = (data.tracks?.items || [])
-        .filter(item => item && item.track)
-        .map(item => ({
-          id: item.track.id,
-          name: item.track.name,
-          artists: item.track.artists?.map(a => a.name).join(", ") || "",
-          album: item.track.album?.name || "",
-          duration_ms: item.track.duration_ms,
-          preview_url: item.track.preview_url,
-          uri: item.track.uri,
-          image: item.track.album?.images?.[0]?.url || "",
+      const rawItems = data.items?.items || data.tracks?.items || [];
+      const tracks = rawItems
+        .map(entry => entry?.item?.name ? entry.item : (entry?.track || entry?.item?.track))
+        .filter(track => track && track.name)
+        .map(track => ({
+          id: track.id,
+          name: track.name,
+          artists: track.artists?.map(a => a.name).join(", ") || "",
+          album: track.album?.name || "",
+          duration_ms: track.duration_ms,
+          preview_url: track.preview_url,
+          uri: track.uri,
+          image: track.album?.images?.[0]?.url || "",
         }));
       return Response.json({ tracks });
     }
