@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { ListMusic, Loader2, RefreshCw, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import PlaylistTracksModal from "@/components/harmonia/PlaylistTracksModal";
 
 export default function AdminMinhasPlaylists() {
   const [connected, setConnected] = useState(false);
@@ -11,6 +12,7 @@ export default function AdminMinhasPlaylists() {
   const [syncing, setSyncing] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const initedRef = useRef(false);
 
   const redirectUri = `${window.location.origin}/AdminMinhasPlaylists`;
@@ -151,7 +153,11 @@ export default function AdminMinhasPlaylists() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {playlists.map((p) => (
-            <Card key={p.id || p.spotify_playlist_id}>
+            <Card
+              key={p.id || p.spotify_playlist_id}
+              className="cursor-pointer hover:border-[#1B3A5F] transition-colors"
+              onClick={() => setSelectedPlaylist(p)}
+            >
               <CardContent className="p-4 flex items-center gap-3">
                 {p.spotify_playlist_image ? (
                   <img src={p.spotify_playlist_image} alt="" className="w-14 h-14 rounded object-cover flex-shrink-0" />
@@ -170,6 +176,13 @@ export default function AdminMinhasPlaylists() {
           ))}
         </div>
       )}
+
+      <PlaylistTracksModal
+        open={!!selectedPlaylist}
+        onClose={() => setSelectedPlaylist(null)}
+        playlistId={selectedPlaylist?.spotify_playlist_id}
+        playlistName={selectedPlaylist?.spotify_playlist_name}
+      />
     </div>
   );
 }
