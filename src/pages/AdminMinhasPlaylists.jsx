@@ -10,6 +10,7 @@ export default function AdminMinhasPlaylists() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [connecting, setConnecting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const initedRef = useRef(false);
 
   const redirectUri = `${window.location.origin}/AdminMinhasPlaylists`;
@@ -21,26 +22,35 @@ export default function AdminMinhasPlaylists() {
   }, []);
 
   const init = async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get("code");
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get("code");
 
-    if (code) {
-      // Remove o código da URL imediatamente para evitar reenvio (o código é de uso único)
-      window.history.replaceState({}, "", window.location.pathname);
-      await base44.functions.invoke("spotifyAuth", { action: "exchange_code", code, redirect_uri: redirectUri });
+      if (code) {
+        // Remove o código da URL imediatamente para evitar reenvio (o código é de uso único)
+        window.history.replaceState({}, "", window.location.pathname);
+        try {
+          await base44.functions.invoke("spotifyAuth", { action: "exchange_code", code, redirect_uri: redirectUri });
+        } catch (err) {
+          setErrorMsg("Não foi possível concluir a conexão com o Spotify. Tente clicar em conectar novamente.");
+        }
+      }
+
+      const statusRes = await base44.functions.invoke("spotifyAuth", { action: "status" });
+      const isConnected = !!statusRes.data?.connected;
+      setConnected(isConnected);
+
+      if (isConnected) {
+        await sincronizar();
+      } else {
+        const local = await base44.entities.MinhaPlaylist.list("-created_date", 50);
+        setPlaylists(local);
+      }
+    } catch (err) {
+      setErrorMsg("Erro ao carregar as playlists. Tente atualizar a página.");
+    } finally {
+      setLoading(false);
     }
-
-    const statusRes = await base44.functions.invoke("spotifyAuth", { action: "status" });
-    const isConnected = !!statusRes.data?.connected;
-    setConnected(isConnected);
-
-    if (isConnected) {
-      await sincronizar();
-    } else {
-      const local = await base44.entities.MinhaPlaylist.list("-created_date", 50);
-      setPlaylists(local);
-    }
-    setLoading(false);
   };
 
   const conectar = async () => {
@@ -61,18 +71,24 @@ export default function AdminMinhasPlaylists() {
 
   const sincronizar = async () => {
     setSyncing(true);
-    const res = await base44.functions.invoke("spotifyAuth", { action: "my_playlists" });
-    const spotifyPlaylists = res.data?.playlists || [];
+    setErrorMsg("");
+    try {
+      const res = await base44.functions.invoke("spotifyAuth", { action: "my_playlists" });
+      const spotifyPlaylists = res.data?.playlists || [];
 
-    const existentes = await base44.entities.MinhaPlaylist.list();
-    for (const p of existentes) {
-      await base44.entities.MinhaPlaylist.delete(p.id);
+      const existentes = await base44.entities.MinhaPlaylist.list();
+      for (const p of existentes) {
+        await base44.entities.MinhaPlaylist.delete(p.id);
+      }
+      if (spotifyPlaylists.length > 0) {
+        await base44.entities.MinhaPlaylist.bulkCreate(spotifyPlaylists);
+      }
+      setPlaylists(spotifyPlaylists);
+    } catch (err) {
+      setErrorMsg("Não foi possível sincronizar as playlists do Spotify.");
+    } finally {
+      setSyncing(false);
     }
-    if (spotifyPlaylists.length > 0) {
-      await base44.entities.MinhaPlaylist.bulkCreate(spotifyPlaylists);
-    }
-    setPlaylists(spotifyPlaylists);
-    setSyncing(false);
   };
 
   if (loading) {
@@ -108,6 +124,10 @@ export default function AdminMinhasPlaylists() {
           </div>
         )}
       </div>
+
+      {errorMsg && (
+        <div className="bg-red-50 text-red-600 text-sm rounded-lg p-3">{errorMsg}</div>
+      )}
 
       {!connected ? (
         <Card>
