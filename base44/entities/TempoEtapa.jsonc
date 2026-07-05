@@ -1,0 +1,47 @@
+{
+  "name": "TempoEtapa",
+  "type": "object",
+  "properties": {
+    "sessao_id": {
+      "type": "string",
+      "description": "ID da sess\u00e3o"
+    },
+    "sessao_data": {
+      "type": "string",
+      "description": "Data da sess\u00e3o"
+    },
+    "sessao_tipo": {
+      "type": "string",
+      "description": "Tipo da sess\u00e3o (Ordin\u00e1ria, Magna, etc.)"
+    },
+    "grau": {
+      "type": "string",
+      "description": "Grau da sess\u00e3o (Aprendiz, Companheiro, Mestre)"
+    },
+    "etapa_nome": {
+      "type": "string",
+      "description": "Nome da etapa cronometrada"
+    },
+    "hora_inicio": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora em que a etapa foi iniciada"
+    },
+    "hora_fim": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora em que a etapa foi encerrada"
+    },
+    "duracao_segundos": {
+      "type": "number",
+      "description": "Dura\u00e7\u00e3o da etapa em segundos"
+    }
+  },
+  "required": [
+    "sessao_id",
+    "etapa_nome",
+    "hora_inicio",
+    "hora_fim",
+    "duracao_segundos"
+  ]
+}

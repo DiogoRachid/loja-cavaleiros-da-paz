@@ -110,6 +110,17 @@ export default function AdminRoteiroHarmonia() {
     setSaving(false);
   };
 
+  const handleStopTimer = async (etapaNome, registro) => {
+    await base44.entities.TempoEtapa.create({
+      sessao_id: sessaoId,
+      sessao_data: sessao?.data || "",
+      sessao_tipo: sessao?.tipo || "",
+      grau: sessao?.grau || roteiro?.grau || "",
+      etapa_nome: etapaNome,
+      ...registro,
+    });
+  };
+
   const handleRename = (id, novoNome) => {
     setEtapas((prev) => prev.map((e) => (e.id === id ? { ...e, nome: novoNome } : e)));
   };
@@ -193,6 +204,7 @@ export default function AdminRoteiroHarmonia() {
                 onRemoveTrack={handleRemoveTrack}
                 onRemove={handleRemoveEtapa}
                 onChangePlaylist={handleChangePlaylist}
+                onStopTimer={handleStopTimer}
               />
             ))}
 

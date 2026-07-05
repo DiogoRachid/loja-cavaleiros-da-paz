@@ -4,7 +4,7 @@ import {
   BookOpen, Users, History, QrCode, LogOut, 
   Menu, X, Home, Library, BookMarked, BarChart,
   Crown, Calendar, DollarSign, FileText, Award,
-  Gavel, ClipboardList, Shield, Star, Heart, Music, ListMusic, Upload, Settings
+  Gavel, ClipboardList, Shield, Star, Heart, Music, ListMusic, Upload, Settings, Timer
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,7 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Agenda Ritual", page: "AdminAgendaRitual", icon: Calendar },
     { name: "Minhas Playlists", page: "AdminMinhasPlaylists", icon: ListMusic },
     { name: "Meus MP3s", page: "AdminMeusMp3s", icon: Upload },
+    { name: "Tempos das Etapas", page: "AdminEstatisticasHarmonia", icon: Timer },
     { name: "Configurações", page: "AdminConfigEtapasHarmonia", icon: Settings },
   ],
   "Bibliotecário": [
