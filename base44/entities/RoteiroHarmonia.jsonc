@@ -21,6 +21,14 @@
     "etapas": {
       "type": "string",
       "description": "JSON com array de etapas: [{id, numero, nome, track: {id, name, artists, album, uri, image, preview_url}}]"
+    },
+    "spotify_playlist_id": {
+      "type": "string",
+      "description": "ID da playlist do Spotify selecionada para este roteiro"
+    },
+    "spotify_playlist_name": {
+      "type": "string",
+      "description": "Nome da playlist do Spotify selecionada para este roteiro"
     }
   },
   "required": [
