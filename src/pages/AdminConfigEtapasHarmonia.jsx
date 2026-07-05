@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { ArrowLeft, Settings, Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import PlaylistSelector from "@/components/harmonia/PlaylistSelector";
 
@@ -17,6 +18,8 @@ const ETAPAS_PADRAO = [
   "Saída",
 ];
 
+const GRAUS = ["Aprendiz", "Companheiro", "Mestre"];
+
 export default function AdminConfigEtapasHarmonia() {
   const [configs, setConfigs] = useState({});
   const [loading, setLoading] = useState(true);
@@ -30,17 +33,19 @@ export default function AdminConfigEtapasHarmonia() {
     const registros = await base44.entities.ConfigEtapaHarmonia.list();
     const map = {};
     registros.forEach((r) => {
-      map[r.etapa_nome] = r;
+      map[`${r.grau}::${r.etapa_nome}`] = r;
     });
     setConfigs(map);
     setLoading(false);
   };
 
-  const handleChangePlaylist = (etapaNome, playlist) => {
+  const handleChangePlaylist = (grau, etapaNome, playlist) => {
+    const key = `${grau}::${etapaNome}`;
     setConfigs((prev) => ({
       ...prev,
-      [etapaNome]: {
-        ...prev[etapaNome],
+      [key]: {
+        ...prev[key],
+        grau,
         etapa_nome: etapaNome,
         playlist_id: playlist?.id || "",
         playlist_name: playlist?.name || "",
@@ -50,20 +55,24 @@ export default function AdminConfigEtapasHarmonia() {
 
   const salvar = async () => {
     setSaving(true);
-    for (const nome of ETAPAS_PADRAO) {
-      const config = configs[nome];
-      if (!config) continue;
-      if (config.id) {
-        await base44.entities.ConfigEtapaHarmonia.update(config.id, {
-          playlist_id: config.playlist_id,
-          playlist_name: config.playlist_name,
-        });
-      } else if (config.playlist_id) {
-        await base44.entities.ConfigEtapaHarmonia.create({
-          etapa_nome: nome,
-          playlist_id: config.playlist_id,
-          playlist_name: config.playlist_name,
-        });
+    for (const grau of GRAUS) {
+      for (const nome of ETAPAS_PADRAO) {
+        const key = `${grau}::${nome}`;
+        const config = configs[key];
+        if (!config) continue;
+        if (config.id) {
+          await base44.entities.ConfigEtapaHarmonia.update(config.id, {
+            playlist_id: config.playlist_id,
+            playlist_name: config.playlist_name,
+          });
+        } else if (config.playlist_id) {
+          await base44.entities.ConfigEtapaHarmonia.create({
+            grau,
+            etapa_nome: nome,
+            playlist_id: config.playlist_id,
+            playlist_name: config.playlist_name,
+          });
+        }
       }
     }
     await loadConfigs();
@@ -89,7 +98,7 @@ export default function AdminConfigEtapasHarmonia() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-[#1B3A5F]">Configurações do Roteiro</h1>
-          <p className="text-slate-500 text-sm">Vincule uma playlist padrão para cada etapa do roteiro</p>
+          <p className="text-slate-500 text-sm">Vincule uma playlist padrão para cada etapa, por grau da sessão</p>
         </div>
         <Button onClick={salvar} disabled={saving} className="ml-auto bg-[#1B3A5F] text-white hover:bg-[#152d49]">
           {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
@@ -97,19 +106,33 @@ export default function AdminConfigEtapasHarmonia() {
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="p-6 space-y-4">
-          {ETAPAS_PADRAO.map((nome) => (
-            <div key={nome} className="flex items-center flex-wrap gap-3 border-b border-slate-100 pb-4 last:border-0 last:pb-0">
-              <span className="text-[#1B3A5F] font-semibold text-sm w-32 flex-shrink-0">{nome}</span>
-              <PlaylistSelector
-                value={configs[nome]?.playlist_id}
-                onChange={(playlist) => handleChangePlaylist(nome, playlist)}
-              />
-            </div>
+      <Tabs defaultValue="Aprendiz">
+        <TabsList>
+          {GRAUS.map((g) => (
+            <TabsTrigger key={g} value={g}>{g}</TabsTrigger>
           ))}
-        </CardContent>
-      </Card>
+        </TabsList>
+        {GRAUS.map((grau) => (
+          <TabsContent key={grau} value={grau}>
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                {ETAPAS_PADRAO.map((nome) => {
+                  const key = `${grau}::${nome}`;
+                  return (
+                    <div key={nome} className="flex items-center flex-wrap gap-3 border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+                      <span className="text-[#1B3A5F] font-semibold text-sm w-32 flex-shrink-0">{nome}</span>
+                      <PlaylistSelector
+                        value={configs[key]?.playlist_id}
+                        onChange={(playlist) => handleChangePlaylist(grau, nome, playlist)}
+                      />
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 }

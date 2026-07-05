@@ -2,6 +2,15 @@
   "name": "ConfigEtapaHarmonia",
   "type": "object",
   "properties": {
+    "grau": {
+      "type": "string",
+      "enum": [
+        "Aprendiz",
+        "Companheiro",
+        "Mestre"
+      ],
+      "description": "Grau da sess\u00e3o para o qual esta configura\u00e7\u00e3o se aplica"
+    },
     "etapa_nome": {
       "type": "string",
       "description": "Nome da etapa do roteiro (ex: Entrada, Abertura)"
@@ -16,6 +25,7 @@
     }
   },
   "required": [
+    "grau",
     "etapa_nome"
   ]
 }

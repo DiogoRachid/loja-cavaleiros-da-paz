@@ -49,7 +49,7 @@ export default function AdminRoteiroHarmonia() {
 
     let r = roteiros[0];
     if (!r) {
-      const configs = await base44.entities.ConfigEtapaHarmonia.list();
+      const configs = await base44.entities.ConfigEtapaHarmonia.filter({ grau: s?.grau || "Aprendiz" });
       const configMap = {};
       configs.forEach((c) => { configMap[c.etapa_nome] = c; });
       const etapasIniciais = ETAPAS_PADRAO.map((nome, i) => ({
