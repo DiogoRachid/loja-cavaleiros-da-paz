@@ -2,7 +2,7 @@ export default function SpotifyPlayer({ playlistId, trackId }) {
   if (trackId) {
     return (
       <iframe
-        src={`https://open.spotify.com/embed/track/${trackId}?utm_source=generator&theme=0`}
+        src={`https://open.spotify.com/embed/track/${trackId}?utm_source=generator&theme=0&autoplay=1`}
         width="100%"
         height="80"
         frameBorder="0"
