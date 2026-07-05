@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Play, Square, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 function formatDuracao(segundos) {
   const s = Math.max(0, Math.floor(segundos));
@@ -16,98 +15,102 @@ function formatHora(iso) {
 }
 
 // onStop recebe { hora_inicio, hora_fim, duracao_segundos }
-// startSignal: incrementa para iniciar externamente; stopSignal: incrementa para parar externamente
-export default function EtapaCronometro({ etapaNome, onStop, startSignal = 0, stopSignal = 0 }) {
-  const [inicio, setInicio] = useState(null);
+// startSignal: incrementa para iniciar externamente ("Tocar Etapa")
+// stopSignal: incrementa para encerrar e salvar (outra etapa iniciou)
+// isPaused: quando true, o tempo pausa; ao voltar a false, retoma somando os tempos
+export default function EtapaCronometro({ etapaNome, onStop, startSignal = 0, stopSignal = 0, isPaused = false }) {
+  const [rodando, setRodando] = useState(false);
   const [decorrido, setDecorrido] = useState(0);
   const [salvando, setSalvando] = useState(false);
   const [ultimo, setUltimo] = useState(null);
-  const intervalRef = useRef(null);
-  const inicioRef = useRef(null);
 
+  const intervalRef = useRef(null);
+  const inicioRef = useRef(null); // ISO do primeiro start
+  const acumuladoRef = useRef(0); // segundos já acumulados (antes da atual retomada)
+  const trechoInicioRef = useRef(null); // timestamp (ms) do trecho atual em execução
+
+  // Controla o ticker: conta apenas enquanto rodando e não pausado
   useEffect(() => {
-    inicioRef.current = inicio;
-    if (inicio) {
+    clearInterval(intervalRef.current);
+    if (rodando && !isPaused) {
+      if (!trechoInicioRef.current) trechoInicioRef.current = Date.now();
       intervalRef.current = setInterval(() => {
-        setDecorrido(Math.floor((Date.now() - inicio) / 1000));
-      }, 1000);
+        const trecho = (Date.now() - trechoInicioRef.current) / 1000;
+        setDecorrido(acumuladoRef.current + trecho);
+      }, 500);
+    } else if (rodando && isPaused && trechoInicioRef.current) {
+      // Fecha o trecho atual, somando ao acumulado
+      acumuladoRef.current += (Date.now() - trechoInicioRef.current) / 1000;
+      trechoInicioRef.current = null;
+      setDecorrido(acumuladoRef.current);
     }
     return () => clearInterval(intervalRef.current);
-  }, [inicio]);
+  }, [rodando, isPaused]);
 
   const iniciar = () => {
-    setInicio(Date.now());
+    inicioRef.current = new Date().toISOString();
+    acumuladoRef.current = 0;
+    trechoInicioRef.current = null;
     setDecorrido(0);
+    setRodando(true);
   };
 
   const parar = async () => {
-    const inicioAtual = inicioRef.current;
-    if (!inicioAtual) return;
+    if (!inicioRef.current) return;
     clearInterval(intervalRef.current);
-    const fim = Date.now();
+    // Fecha trecho aberto, se houver
+    if (trechoInicioRef.current) {
+      acumuladoRef.current += (Date.now() - trechoInicioRef.current) / 1000;
+      trechoInicioRef.current = null;
+    }
     const registro = {
-      hora_inicio: new Date(inicioAtual).toISOString(),
-      hora_fim: new Date(fim).toISOString(),
-      duracao_segundos: Math.round((fim - inicioAtual) / 1000),
+      hora_inicio: inicioRef.current,
+      hora_fim: new Date().toISOString(),
+      duracao_segundos: Math.round(acumuladoRef.current),
     };
     setSalvando(true);
     await onStop(registro);
     setSalvando(false);
     setUltimo(registro);
-    setInicio(null);
+    setRodando(false);
+    inicioRef.current = null;
+    acumuladoRef.current = 0;
     setDecorrido(0);
   };
 
-  // Início externo (ex: "Tocar Etapa")
+  // Início externo ("Tocar Etapa")
   useEffect(() => {
-    if (startSignal > 0 && !inicioRef.current) {
-      iniciar();
-    }
+    if (startSignal > 0) iniciar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startSignal]);
 
-  // Parada externa (ex: outra etapa iniciou ou "Parar Etapa")
+  // Encerramento externo (outra etapa iniciou)
   useEffect(() => {
-    if (stopSignal > 0 && inicioRef.current) {
-      parar();
-    }
+    if (stopSignal > 0 && inicioRef.current) parar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stopSignal]);
 
   return (
     <div className="flex items-center flex-wrap gap-3 px-4 pb-3 sm:ml-8">
-      {inicio ? (
+      {rodando ? (
         <>
           <span className="font-mono text-lg font-bold text-[#1B3A5F] tabular-nums">
             {formatDuracao(decorrido)}
           </span>
-          <Button
-            size="sm"
-            className="bg-red-600 hover:bg-red-700 text-white text-xs h-7"
-            onClick={parar}
-            disabled={salvando}
-          >
-            {salvando ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Square className="w-3 h-3 mr-1" />}
-            Parar
-          </Button>
-          <span className="text-xs text-slate-400">Início às {formatHora(new Date(inicio).toISOString())}</span>
+          {salvando && <Loader2 className="w-4 h-4 animate-spin text-slate-400" />}
+          {isPaused ? (
+            <span className="text-xs text-amber-600 font-medium">Pausado</span>
+          ) : (
+            <span className="text-xs text-green-700 font-medium">Contando…</span>
+          )}
+          <span className="text-xs text-slate-400">Início às {formatHora(inicioRef.current)}</span>
         </>
       ) : (
-        <>
-          <Button
-            size="sm"
-            variant="outline"
-            className="border-green-600 text-green-700 hover:bg-green-600 hover:text-white text-xs h-7"
-            onClick={iniciar}
-          >
-            <Play className="w-3 h-3 mr-1" /> Iniciar Etapa
-          </Button>
-          {ultimo && (
-            <span className="text-xs text-green-700">
-              ✓ {formatHora(ultimo.hora_inicio)} • durou {formatDuracao(ultimo.duracao_segundos)}
-            </span>
-          )}
-        </>
+        ultimo && (
+          <span className="text-xs text-green-700">
+            ✓ {formatHora(ultimo.hora_inicio)} • durou {formatDuracao(ultimo.duracao_segundos)}
+          </span>
+        )
       )}
     </div>
   );
