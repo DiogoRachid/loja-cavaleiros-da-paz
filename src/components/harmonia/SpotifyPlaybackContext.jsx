@@ -51,6 +51,7 @@ export function SpotifyPlaybackProvider({ children }) {
   const [duration, setDuration] = useState(0);    // ms de duração da faixa atual
 
   // fila/sequência da etapa (repeat somente dentro da etapa)
+  const deviceActivatedRef = useRef(false); // device já foi ativado na API do Spotify
   const queueRef = useRef([]);          // array de uris
   const queueIndexRef = useRef(0);
   const queueOwnerRef = useRef(null);   // id da etapa dona da fila
@@ -87,6 +88,7 @@ export function SpotifyPlaybackProvider({ children }) {
         setReady(true);
       });
       player.addListener("not_ready", () => {
+        deviceActivatedRef.current = false;
         setReady(false);
       });
       player.addListener("player_state_changed", (state) => {
@@ -169,22 +171,23 @@ export function SpotifyPlaybackProvider({ children }) {
     // Ativa o áudio no elemento do SDK ANTES (política de autoplay dos navegadores)
     try { await playerRef.current?.activateElement?.(); } catch { /* ignore */ }
 
-    // Garante que a reprodução ocorra NESTE dispositivo. O device pode existir
-    // localmente mas ainda não estar registrado na API do Spotify (retorna 404),
-    // então tentamos transferir com algumas repetições até ser reconhecido.
+    // Transfere a reprodução para ESTE dispositivo somente na primeira vez —
+    // repetir a transferência a cada faixa pausa a reprodução ativa (play: false).
     const deviceId = deviceIdRef.current;
-    for (let i = 0; i < 8; i++) {
-      const res = await fetch(`https://api.spotify.com/v1/me/player`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ device_ids: [deviceId], play: false }),
-      }).catch(() => null);
-      // 204 (ok) ou 202 (aceito) = dispositivo reconhecido; 404 = ainda não pronto
-      if (res && res.status !== 404) break;
-      await new Promise((r) => setTimeout(r, 400));
+    if (!deviceActivatedRef.current) {
+      for (let i = 0; i < 8; i++) {
+        const res = await fetch(`https://api.spotify.com/v1/me/player`, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ device_ids: [deviceId], play: false }),
+        }).catch(() => null);
+        // 204 (ok) ou 202 (aceito) = dispositivo reconhecido; 404 = ainda não pronto
+        if (res && res.status !== 404) break;
+        await new Promise((r) => setTimeout(r, 400));
+      }
     }
 
     // Inicia a reprodução, com retry caso o device ainda esteja se registrando
@@ -197,7 +200,8 @@ export function SpotifyPlaybackProvider({ children }) {
         },
         body: JSON.stringify({ uris: [uri] }),
       }).catch(() => null);
-      if (res && res.status !== 404) break;
+      if (res && res.ok) { deviceActivatedRef.current = true; break; }
+      if (res && res.status !== 404 && res.status !== 502) break;
       await new Promise((r) => setTimeout(r, 400));
     }
     setCurrentUri(uri);
@@ -245,10 +249,6 @@ export function SpotifyPlaybackProvider({ children }) {
   const playEtapa = useCallback(async (ownerId, uris) => {
     const list = (uris || []).filter(Boolean);
     if (list.length === 0) return;
-    // Pausa a etapa anterior antes de trocar, evitando buffer residual do SDK
-    if (queueOwnerRef.current && queueOwnerRef.current !== ownerId) {
-      await playerRef.current?.pause().catch(() => {});
-    }
     queueRef.current = list;
     queueIndexRef.current = 0;
     queueOwnerRef.current = ownerId;
