@@ -197,6 +197,15 @@ export function SpotifyPlaybackProvider({ children }) {
     await playerRef.current?.pause();
   }, []);
 
+  // Pausa/retoma a etapa em reprodução sem limpar a fila (mantém o repeat)
+  const togglePauseEtapa = useCallback(async () => {
+    if (isPaused) {
+      await playerRef.current?.resume();
+    } else {
+      await playerRef.current?.pause();
+    }
+  }, [isPaused]);
+
   const stopEtapa = useCallback(async () => {
     queueRef.current = [];
     queueOwnerRef.current = null;
@@ -218,6 +227,7 @@ export function SpotifyPlaybackProvider({ children }) {
     pause,
     playEtapa,
     stopEtapa,
+    togglePauseEtapa,
     activeQueueOwner,
   };
 

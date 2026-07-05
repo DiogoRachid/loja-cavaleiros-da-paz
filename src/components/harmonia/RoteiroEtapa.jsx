@@ -78,14 +78,28 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
 
         {spotifyUris.length > 0 && (
           isEtapaPlaying ? (
-            <Button
-              size="sm"
-              variant="outline"
-              className="border-red-400 text-red-500 hover:bg-red-50 text-xs h-7 flex-shrink-0"
-              onClick={handlePararEtapa}
-            >
-              <Square className="w-3 h-3 mr-1" /> Parar Etapa
-            </Button>
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white text-xs h-7 flex-shrink-0"
+                onClick={() => playback?.togglePauseEtapa()}
+              >
+                {playback?.isPaused ? (
+                  <><Play className="w-3 h-3 mr-1" /> Continuar Etapa</>
+                ) : (
+                  <><Pause className="w-3 h-3 mr-1" /> Pausar Etapa</>
+                )}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-red-400 text-red-500 hover:bg-red-50 text-xs h-7 flex-shrink-0"
+                onClick={handlePararEtapa}
+              >
+                <Square className="w-3 h-3 mr-1" /> Parar Etapa
+              </Button>
+            </>
           ) : (
             <Button
               size="sm"
