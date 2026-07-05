@@ -18,10 +18,9 @@ const statusColors = {
 
 const tipoColors = {
   "Ordinária": "bg-slate-100 text-slate-700",
-  "Extraordinária": "bg-yellow-100 text-yellow-800",
   "Magna": "bg-purple-100 text-purple-800",
   "Pública": "bg-green-100 text-green-800",
-  "De Instrução": "bg-blue-100 text-blue-800",
+  "Instrução": "bg-blue-100 text-blue-800",
   "Fúnebre": "bg-gray-100 text-gray-700",
 };
 
@@ -123,7 +122,7 @@ export default function AdminAgendaRitual() {
                 <Select value={form.tipo} onValueChange={v => setForm({ ...form, tipo: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {["Ordinária","Extraordinária","Magna","Pública","De Instrução","Fúnebre"].map(t => (
+                    {["Ordinária","Magna","Pública","Instrução","Fúnebre"].map(t => (
                       <SelectItem key={t} value={t}>{t}</SelectItem>
                     ))}
                   </SelectContent>
@@ -183,12 +182,16 @@ export default function AdminAgendaRitual() {
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                     <Badge className={statusColors[s.status]}>{s.status}</Badge>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-500" onClick={e => abrirEdicao(s, e)}><Edit2 className="w-3 h-3" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500" onClick={e => excluir(s.id, e)}><Trash2 className="w-3 h-3" /></Button>
+                    {!isMestreHarmonia && (
+                      <>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-500" onClick={e => abrirEdicao(s, e)}><Edit2 className="w-3 h-3" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500" onClick={e => excluir(s.id, e)}><Trash2 className="w-3 h-3" /></Button>
+                      </>
+                    )}
                   </div>
                   </div>
 
-                  {editando === s.id && (
+                  {!isMestreHarmonia && editando === s.id && (
                     <div className="mt-4 pt-4 border-t space-y-4" onClick={e => e.stopPropagation()}>
                       <p className="text-sm font-semibold text-[#1B3A5F]">Editar Sessão</p>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -204,7 +207,7 @@ export default function AdminAgendaRitual() {
                         <div className="space-y-1"><Label>Tipo</Label>
                           <Select value={formEdicao.tipo} onValueChange={v => setFormEdicao({ ...formEdicao, tipo: v })}>
                             <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
-                            <SelectContent>{["Ordinária","Extraordinária","Magna","Pública","De Instrução","Fúnebre"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                            <SelectContent>{["Ordinária","Magna","Pública","Instrução","Fúnebre"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-1"><Label>Grau</Label>
@@ -278,12 +281,16 @@ export default function AdminAgendaRitual() {
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <Badge className={statusColors[s.status]}>{s.status}</Badge>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-500" onClick={e => abrirEdicao(s, e)}><Edit2 className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500" onClick={e => excluir(s.id, e)}><Trash2 className="w-3 h-3" /></Button>
+                      {!isMestreHarmonia && (
+                        <>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-500" onClick={e => abrirEdicao(s, e)}><Edit2 className="w-3 h-3" /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500" onClick={e => excluir(s.id, e)}><Trash2 className="w-3 h-3" /></Button>
+                        </>
+                      )}
                     </div>
                   </div>
 
-                  {editando === s.id && (
+                  {!isMestreHarmonia && editando === s.id && (
                     <div className="mt-4 pt-4 border-t space-y-4" onClick={e => e.stopPropagation()}>
                       <p className="text-sm font-semibold text-[#1B3A5F]">Editar Sessão</p>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -299,7 +306,7 @@ export default function AdminAgendaRitual() {
                         <div className="space-y-1"><Label>Tipo</Label>
                           <Select value={formEdicao.tipo} onValueChange={v => setFormEdicao({ ...formEdicao, tipo: v })}>
                             <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
-                            <SelectContent>{["Ordinária","Extraordinária","Magna","Pública","De Instrução","Fúnebre"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                            <SelectContent>{["Ordinária","Magna","Pública","Instrução","Fúnebre"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-1"><Label>Grau</Label>
