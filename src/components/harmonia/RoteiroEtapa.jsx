@@ -37,8 +37,14 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
   }, [isEtapaPlaying]);
 
   const handleTocarEtapa = () => {
-    playback?.activateElement(); // libera o áudio dentro do gesto de clique (autoplay do navegador)
-    playback?.playEtapa(etapa.id, spotifyUris);
+    if (spotifyUris.length > 0) {
+      playback?.activateElement(); // libera o áudio dentro do gesto de clique (autoplay do navegador)
+      playback?.playEtapa(etapa.id, spotifyUris);
+    } else {
+      // Etapa só com MP3: toca o primeiro MP3 da etapa
+      const primeiroMp3 = tracks.find((t) => t.is_mp3);
+      if (primeiroMp3) setMp3Player(primeiroMp3.id);
+    }
     setStartSignal((s) => s + 1);
   };
 
@@ -77,7 +83,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
           </button>
         )}
 
-        {spotifyUris.length > 0 && (
+        {tracks.length > 0 && (
           isEtapaPlaying ? (
             <>
               <Button
