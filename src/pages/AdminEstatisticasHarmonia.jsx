@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, Loader2, Clock, Timer } from "lucide-react";
+import { ArrowLeft, Loader2, Clock, Timer, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -31,6 +35,7 @@ export default function AdminEstatisticasHarmonia() {
   const [loading, setLoading] = useState(true);
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [filtroGrau, setFiltroGrau] = useState("todos");
+  const [excluir, setExcluir] = useState(null);
 
   useEffect(() => {
     loadDados();
@@ -40,6 +45,12 @@ export default function AdminEstatisticasHarmonia() {
     const r = await base44.entities.TempoEtapa.list("-hora_inicio", 500);
     setRegistros(r);
     setLoading(false);
+  };
+
+  const confirmarExclusao = async () => {
+    await base44.entities.TempoEtapa.delete(excluir.id);
+    setRegistros((prev) => prev.filter((r) => r.id !== excluir.id));
+    setExcluir(null);
   };
 
   const filtrados = registros.filter((r) =>
@@ -154,12 +165,38 @@ export default function AdminEstatisticasHarmonia() {
                   <span className="font-mono text-sm font-bold text-[#1B3A5F] tabular-nums">
                     {formatDuracao(r.duracao_segundos)}
                   </span>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7 text-slate-400 hover:text-red-500 hover:bg-red-50"
+                    onClick={() => setExcluir(r)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!excluir} onOpenChange={(o) => !o && setExcluir(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir registro de tempo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {excluir && `${excluir.etapa_nome} • ${formatDuracao(excluir.duracao_segundos)} • ${formatDataHora(excluir.hora_inicio)}`}
+              <br />Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmarExclusao} className="bg-red-600 hover:bg-red-700">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
