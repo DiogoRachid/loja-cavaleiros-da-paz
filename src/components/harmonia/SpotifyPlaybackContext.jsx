@@ -245,6 +245,10 @@ export function SpotifyPlaybackProvider({ children }) {
   const playEtapa = useCallback(async (ownerId, uris) => {
     const list = (uris || []).filter(Boolean);
     if (list.length === 0) return;
+    // Pausa a etapa anterior antes de trocar, evitando buffer residual do SDK
+    if (queueOwnerRef.current && queueOwnerRef.current !== ownerId) {
+      await playerRef.current?.pause().catch(() => {});
+    }
     queueRef.current = list;
     queueIndexRef.current = 0;
     queueOwnerRef.current = ownerId;
@@ -261,11 +265,19 @@ export function SpotifyPlaybackProvider({ children }) {
   // Pausa/retoma a etapa em reprodução sem limpar a fila (mantém o repeat)
   const togglePauseEtapa = useCallback(async () => {
     if (isPaused) {
-      await playerRef.current?.resume();
+      // Retoma tocando EXPLICITAMENTE a faixa atual da fila da etapa, garantindo
+      // que não se retome a faixa de uma etapa anterior que ficou em buffer no SDK.
+      const expectedUri = queueRef.current[queueIndexRef.current];
+      if (expectedUri && expectedUri !== currentUri) {
+        await playUri(expectedUri);
+      } else {
+        await playerRef.current?.resume();
+        setIsPaused(false);
+      }
     } else {
       await playerRef.current?.pause();
     }
-  }, [isPaused]);
+  }, [isPaused, currentUri, playUri]);
 
   const stopEtapa = useCallback(async () => {
     queueRef.current = [];
