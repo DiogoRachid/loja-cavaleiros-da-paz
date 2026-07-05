@@ -151,25 +151,40 @@ export function SpotifyPlaybackProvider({ children }) {
       return;
     }
     const token = tokenRef.current || (await fetchToken());
-    // Garante que a reprodução ocorra NESTE dispositivo (evita tocar em outro app/dispositivo, sem som aqui)
-    await fetch(`https://api.spotify.com/v1/me/player`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ device_ids: [deviceIdRef.current], play: false }),
-    }).catch(() => {});
-    await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceIdRef.current}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ uris: [uri] }),
-    });
-    // Ativa o áudio no elemento do SDK (política de autoplay dos navegadores)
+    // Ativa o áudio no elemento do SDK ANTES (política de autoplay dos navegadores)
     try { await playerRef.current?.activateElement?.(); } catch { /* ignore */ }
+
+    // Garante que a reprodução ocorra NESTE dispositivo. O device pode existir
+    // localmente mas ainda não estar registrado na API do Spotify (retorna 404),
+    // então tentamos transferir com algumas repetições até ser reconhecido.
+    const deviceId = deviceIdRef.current;
+    for (let i = 0; i < 8; i++) {
+      const res = await fetch(`https://api.spotify.com/v1/me/player`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ device_ids: [deviceId], play: false }),
+      }).catch(() => null);
+      // 204 (ok) ou 202 (aceito) = dispositivo reconhecido; 404 = ainda não pronto
+      if (res && res.status !== 404) break;
+      await new Promise((r) => setTimeout(r, 400));
+    }
+
+    // Inicia a reprodução, com retry caso o device ainda esteja se registrando
+    for (let i = 0; i < 8; i++) {
+      const res = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ uris: [uri] }),
+      }).catch(() => null);
+      if (res && res.status !== 404) break;
+      await new Promise((r) => setTimeout(r, 400));
+    }
     setCurrentUri(uri);
     setIsPaused(false);
   }, [init]);
