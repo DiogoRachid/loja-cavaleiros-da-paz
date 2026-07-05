@@ -55,6 +55,7 @@ export function SpotifyPlaybackProvider({ children }) {
   const queueIndexRef = useRef(0);
   const queueOwnerRef = useRef(null);   // id da etapa dona da fila
   const prevTrackEndedRef = useRef(false);
+  const lastPositionRef = useRef(0);      // última posição conhecida (para detectar fim real da faixa)
   const [activeQueueOwner, setActiveQueueOwner] = useState(null);
 
   const init = useCallback(async () => {
@@ -94,14 +95,19 @@ export function SpotifyPlaybackProvider({ children }) {
         setPosition(state.position || 0);
         setDuration(state.duration || 0);
 
-        // Detecta o fim de uma faixa para avançar a fila da etapa (repeat interno)
+        // Detecta o fim de uma faixa para avançar a fila da etapa (repeat interno).
+        // Só considera "fim real" se a faixa voltou a 0 vindo de perto do fim (>90% da duração),
+        // evitando falsos positivos no estado transitório do início da reprodução.
         if (queueRef.current.length > 0) {
-          const trackEnded = state.paused && state.position === 0;
+          const dur = state.duration || 0;
+          const wasNearEnd = dur > 0 && lastPositionRef.current >= dur * 0.9;
+          const trackEnded = state.paused && state.position === 0 && wasNearEnd;
           if (trackEnded && !prevTrackEndedRef.current) {
             advanceQueueRef.current?.();
           }
           prevTrackEndedRef.current = trackEnded;
         }
+        if (state.position > 0) lastPositionRef.current = state.position;
       });
       player.addListener("initialization_error", ({ message }) => setError(message));
       player.addListener("authentication_error", ({ message }) => setError(message));
@@ -200,6 +206,7 @@ export function SpotifyPlaybackProvider({ children }) {
     // repeat somente dentro da etapa: ao terminar a última, volta para a primeira
     queueIndexRef.current = (queueIndexRef.current + 1) % queueRef.current.length;
     prevTrackEndedRef.current = false;
+    lastPositionRef.current = 0;
     await playUri(queueRef.current[queueIndexRef.current]);
   }, [playUri]);
   advanceQueueRef.current = advanceQueue;
@@ -212,6 +219,7 @@ export function SpotifyPlaybackProvider({ children }) {
     queueIndexRef.current = 0;
     queueOwnerRef.current = ownerId;
     prevTrackEndedRef.current = false;
+    lastPositionRef.current = 0;
     setActiveQueueOwner(ownerId);
     await playUri(list[0]);
   }, [playUri]);
