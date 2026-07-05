@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import PlaylistSelector from "./PlaylistSelector";
 import EtapaCronometro from "./EtapaCronometro";
 import { useSpotifyPlayback } from "./SpotifyPlaybackContext";
+import TrackProgressBar from "./TrackProgressBar";
 
 function formatMs(ms) {
   const totalSec = Math.max(0, Math.floor((ms || 0) / 1000));
@@ -188,73 +189,60 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
               !track.is_mp3 && playback?.currentUri === track.uri && !playback?.isPaused;
             const isLoading =
               !track.is_mp3 && playback?.initializing && playback?.currentUri !== track.uri;
+            const isCurrentTrack = !track.is_mp3 && playback?.currentUri === track.uri;
             return (
-              <div key={track.id || ti} className="flex items-center gap-3 p-2 rounded-lg bg-slate-50">
-                {track.image ? (
-                  <img src={track.image} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
-                ) : (
-                  <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center flex-shrink-0">
-                    <Music className="w-3 h-3 text-slate-400" />
+              <div key={track.id || ti} className="p-2 rounded-lg bg-slate-50">
+                <div className="flex items-center gap-3">
+                  {track.image ? (
+                    <img src={track.image} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center flex-shrink-0">
+                      <Music className="w-3 h-3 text-slate-400" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[#1B3A5F] text-xs font-medium truncate">{track.name}</p>
+                    <p className="text-slate-400 text-[10px] truncate">{track.artists}</p>
+                  </div>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6 text-[#1B3A5F] hover:bg-slate-200"
+                    onClick={() => {
+                      if (track.is_mp3) {
+                        setMp3Player(mp3Player === track.id ? null : track.id);
+                      } else if (track.uri && playback) {
+                        playback.activateElement();
+                        playback.toggle(track.uri);
+                      }
+                    }}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (track.is_mp3 ? mp3Player === track.id : isSpotifyPlaying) ? (
+                      <Pause className="w-3 h-3" />
+                    ) : (
+                      <Play className="w-3 h-3" />
+                    )}
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6 text-red-400 hover:text-red-500 hover:bg-red-50"
+                    onClick={() => onRemoveTrack(etapa.id, track.id)}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+                {isCurrentTrack && (
+                  <div className="mt-1">
+                    <TrackProgressBar
+                      position={playback.position}
+                      duration={playback.duration || track.duration_ms}
+                      onSeek={(ms) => playback.seek(ms)}
+                    />
                   </div>
                 )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[#1B3A5F] text-xs font-medium truncate">{track.name}</p>
-                  {!track.is_mp3 && playback?.currentUri === track.uri ? (
-                    <>
-                      <p className="text-[#C9A227] text-[10px] font-mono tabular-nums">
-                        {formatMs(playback.position)} - {formatMs(playback.duration || track.duration_ms)}
-                      </p>
-                      <div
-                        className="mt-1 h-2 w-full rounded-full bg-slate-200 cursor-pointer relative"
-                        onClick={(e) => {
-                          const total = playback.duration || track.duration_ms || 0;
-                          if (!total) return;
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-                          playback.seek(ratio * total);
-                        }}
-                      >
-                        <div
-                          className="h-2 rounded-full bg-[#C9A227] transition-all"
-                          style={{
-                            width: `${Math.min(100, ((playback.position || 0) / (playback.duration || track.duration_ms || 1)) * 100)}%`,
-                          }}
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    <p className="text-slate-400 text-[10px] truncate">{track.artists}</p>
-                  )}
-                </div>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-6 w-6 text-[#1B3A5F] hover:bg-slate-200"
-                  onClick={() => {
-                    if (track.is_mp3) {
-                      setMp3Player(mp3Player === track.id ? null : track.id);
-                    } else if (track.uri && playback) {
-                      playback.activateElement();
-                      playback.toggle(track.uri);
-                    }
-                  }}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                  ) : (track.is_mp3 ? mp3Player === track.id : isSpotifyPlaying) ? (
-                    <Pause className="w-3 h-3" />
-                  ) : (
-                    <Play className="w-3 h-3" />
-                  )}
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-6 w-6 text-red-400 hover:text-red-500 hover:bg-red-50"
-                  onClick={() => onRemoveTrack(etapa.id, track.id)}
-                >
-                  <X className="w-3 h-3" />
-                </Button>
               </div>
             );
           })}
