@@ -56,6 +56,7 @@ export function SpotifyPlaybackProvider({ children }) {
   const queueOwnerRef = useRef(null);   // id da etapa dona da fila
   const prevTrackEndedRef = useRef(false);
   const lastPositionRef = useRef(0);      // última posição conhecida (para detectar fim real da faixa)
+  const pendingUriRef = useRef(null);     // uri que pedimos para tocar (aguardando o SDK confirmar)
   const [activeQueueOwner, setActiveQueueOwner] = useState(null);
 
   const init = useCallback(async () => {
@@ -90,8 +91,21 @@ export function SpotifyPlaybackProvider({ children }) {
       });
       player.addListener("player_state_changed", (state) => {
         if (!state) return;
+        const stateUri = state.track_window?.current_track?.uri || null;
+
+        // Se estamos aguardando o carregamento de uma nova faixa, ignora estados
+        // transitórios que ainda reportam a faixa ANTERIOR (evita pausa falsa e
+        // retomar a música errada ao trocar de playlist/etapa).
+        if (pendingUriRef.current) {
+          if (stateUri === pendingUriRef.current) {
+            pendingUriRef.current = null;   // nova faixa confirmada pelo SDK
+          } else {
+            return;
+          }
+        }
+
         setIsPaused(state.paused);
-        setCurrentUri(state.track_window?.current_track?.uri || null);
+        setCurrentUri(stateUri);
         setPosition(state.position || 0);
         setDuration(state.duration || 0);
 
@@ -151,6 +165,7 @@ export function SpotifyPlaybackProvider({ children }) {
       return;
     }
     const token = tokenRef.current || (await fetchToken());
+    pendingUriRef.current = uri;   // aguardando o SDK confirmar esta faixa
     // Ativa o áudio no elemento do SDK ANTES (política de autoplay dos navegadores)
     try { await playerRef.current?.activateElement?.(); } catch { /* ignore */ }
 
