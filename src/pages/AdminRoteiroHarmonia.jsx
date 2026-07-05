@@ -149,7 +149,7 @@ export default function AdminRoteiroHarmonia() {
         <div>
           <h1 className="text-xl font-bold text-[#1B3A5F]">Roteiro de Harmonia</h1>
           <p className="text-slate-500 text-sm">
-            {sessao.tipo} {sessao.numero && `Nº ${sessao.numero}`} • {sessao.data} às {sessao.hora}
+            {sessao.tipo} {sessao.numero && `Nº ${sessao.numero}`}{roteiro?.grau && ` • ${roteiro.grau}`} • {sessao.data} às {sessao.hora}
           </p>
         </div>
         <Button onClick={salvar} disabled={saving} className="ml-auto bg-[#1B3A5F] text-white hover:bg-[#152d49]">
