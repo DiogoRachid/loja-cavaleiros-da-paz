@@ -16,12 +16,12 @@ export default function PlaylistSelector({ value, onChange }) {
   };
 
   return (
-    <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-3">
-      <ListMusic className="w-5 h-5 text-[#1B3A5F] flex-shrink-0" />
-      <span className="text-sm font-medium text-slate-600 flex-shrink-0">Playlist do Roteiro:</span>
+    <div className="flex items-center gap-2">
+      <ListMusic className="w-4 h-4 text-slate-400 flex-shrink-0" />
+      <span className="text-xs text-slate-500 flex-shrink-0">Playlist da etapa:</span>
       <Select value={value || ""} onValueChange={handleChange}>
-        <SelectTrigger className="flex-1">
-          <SelectValue placeholder="Selecione uma playlist" />
+        <SelectTrigger className="h-8 text-xs max-w-[220px]">
+          <SelectValue placeholder="Selecionar playlist" />
         </SelectTrigger>
         <SelectContent>
           {playlists.map((p) => (

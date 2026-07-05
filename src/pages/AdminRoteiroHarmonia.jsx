@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import RoteiroEtapa from "@/components/harmonia/RoteiroEtapa";
 import TrackSearchModal from "@/components/harmonia/TrackSearchModal";
-import PlaylistSelector from "@/components/harmonia/PlaylistSelector";
 
 const ETAPAS_PADRAO = [
   "Entrada",
@@ -71,16 +70,14 @@ export default function AdminRoteiroHarmonia() {
     setLoading(false);
   };
 
-  const handleChangePlaylist = async (playlist) => {
-    setRoteiro((prev) => ({
-      ...prev,
-      spotify_playlist_id: playlist?.id || "",
-      spotify_playlist_name: playlist?.name || "",
-    }));
-    await base44.entities.RoteiroHarmonia.update(roteiro.id, {
-      spotify_playlist_id: playlist?.id || "",
-      spotify_playlist_name: playlist?.name || "",
-    });
+  const handleChangePlaylist = (etapaId, playlist) => {
+    setEtapas((prev) =>
+      prev.map((e) =>
+        e.id === etapaId
+          ? { ...e, playlist_id: playlist?.id || "", playlist_name: playlist?.name || "" }
+          : e
+      )
+    );
   };
 
   const salvar = async () => {
@@ -161,8 +158,6 @@ export default function AdminRoteiroHarmonia() {
         </Button>
       </div>
 
-      <PlaylistSelector value={roteiro?.spotify_playlist_id} onChange={handleChangePlaylist} />
-
       <Card>
         <CardContent className="p-6">
           <div className="space-y-2">
@@ -175,6 +170,7 @@ export default function AdminRoteiroHarmonia() {
                 onAddTrack={(etapaId) => setSearchModalEtapa(etapaId)}
                 onRemoveTrack={handleRemoveTrack}
                 onRemove={handleRemoveEtapa}
+                onChangePlaylist={handleChangePlaylist}
               />
             ))}
 
@@ -197,7 +193,7 @@ export default function AdminRoteiroHarmonia() {
         onClose={() => setSearchModalEtapa(null)}
         selectedTracks={etapaAtiva?.tracks || []}
         onConfirm={handleConfirmTracks}
-        initialPlaylistId={roteiro?.spotify_playlist_id || null}
+        initialPlaylistId={etapaAtiva?.playlist_id || null}
       />
     </div>
   );

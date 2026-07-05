@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Music, Plus, X, Play, Trash2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SpotifyPlayer from "./SpotifyPlayer";
+import PlaylistSelector from "./PlaylistSelector";
 
-export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRemoveTrack, onRemove }) {
+export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRemoveTrack, onRemove, onChangePlaylist }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(etapa.nome);
   const [showPlayer, setShowPlayer] = useState(null);
@@ -58,6 +59,13 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
         >
           <Trash2 className="w-3 h-3" />
         </Button>
+      </div>
+
+      <div className="px-4 pb-3 ml-8">
+        <PlaylistSelector
+          value={etapa.playlist_id}
+          onChange={(playlist) => onChangePlaylist(etapa.id, playlist)}
+        />
       </div>
 
       {tracks.length > 0 && (
