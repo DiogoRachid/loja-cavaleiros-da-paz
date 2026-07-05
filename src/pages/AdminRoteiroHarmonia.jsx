@@ -79,8 +79,9 @@ export default function AdminRoteiroHarmonia() {
     }
     setRoteiro(r);
     const parsed = r.etapas ? JSON.parse(r.etapas) : [];
+
     // Migrar tracks antigos e completar playlist a partir da config quando estiver vazia
-    setEtapas(parsed.map((e) => {
+    const migradas = parsed.map((e) => {
       const cfg = configMap[e.nome];
       return {
         ...e,
@@ -88,7 +89,22 @@ export default function AdminRoteiroHarmonia() {
         playlist_id: e.playlist_id || cfg?.playlist_id || "",
         playlist_name: e.playlist_name || cfg?.playlist_name || "",
       };
-    }));
+    });
+
+    // Sincroniza etapas novas adicionadas na configuração que ainda não estão no roteiro
+    const nomesExistentes = new Set(migradas.map((e) => e.nome));
+    const novas = nomesEtapas
+      .filter((nome) => !nomesExistentes.has(nome))
+      .map((nome) => ({
+        id: genId(),
+        nome,
+        tracks: [],
+        playlist_id: configMap[nome]?.playlist_id || "",
+        playlist_name: configMap[nome]?.playlist_name || "",
+      }));
+
+    const combinadas = [...migradas, ...novas].map((e, i) => ({ ...e, numero: i + 1 }));
+    setEtapas(combinadas);
     setLoading(false);
   };
 
