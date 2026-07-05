@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, Settings, Loader2, Save } from "lucide-react";
+import { ArrowLeft, Settings, Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import PlaylistSelector from "@/components/harmonia/PlaylistSelector";
 
@@ -19,9 +20,16 @@ const ETAPAS_PADRAO = [
 ];
 
 const GRAUS = ["Aprendiz", "Companheiro", "Mestre"];
+const TIPOS_SESSAO = ["Ordinária", "Magna", "Pública", "Instrução", "Fúnebre"];
+
+function key(grau, tipo, etapa) {
+  return `${grau}::${tipo}::${etapa}`;
+}
 
 export default function AdminConfigEtapasHarmonia() {
   const [configs, setConfigs] = useState({});
+  const [etapasPorGrupo, setEtapasPorGrupo] = useState({}); // `${grau}::${tipo}` -> [nomes]
+  const [novaEtapa, setNovaEtapa] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -32,20 +40,33 @@ export default function AdminConfigEtapasHarmonia() {
   const loadConfigs = async () => {
     const registros = await base44.entities.ConfigEtapaHarmonia.list();
     const map = {};
+    const grupos = {};
     registros.forEach((r) => {
-      map[`${r.grau}::${r.etapa_nome}`] = r;
+      map[key(r.grau, r.tipo_sessao, r.etapa_nome)] = r;
+    });
+    GRAUS.forEach((grau) => {
+      TIPOS_SESSAO.forEach((tipo) => {
+        const grupoKey = `${grau}::${tipo}`;
+        const existentes = registros
+          .filter((r) => r.grau === grau && r.tipo_sessao === tipo)
+          .sort((a, b) => (a.ordem || 0) - (b.ordem || 0))
+          .map((r) => r.etapa_nome);
+        grupos[grupoKey] = existentes.length > 0 ? existentes : [...ETAPAS_PADRAO];
+      });
     });
     setConfigs(map);
+    setEtapasPorGrupo(grupos);
     setLoading(false);
   };
 
-  const handleChangePlaylist = (grau, etapaNome, playlist) => {
-    const key = `${grau}::${etapaNome}`;
+  const handleChangePlaylist = (grau, tipo, etapaNome, playlist) => {
+    const k = key(grau, tipo, etapaNome);
     setConfigs((prev) => ({
       ...prev,
-      [key]: {
-        ...prev[key],
+      [k]: {
+        ...prev[k],
         grau,
+        tipo_sessao: tipo,
         etapa_nome: etapaNome,
         playlist_id: playlist?.id || "",
         playlist_name: playlist?.name || "",
@@ -53,25 +74,51 @@ export default function AdminConfigEtapasHarmonia() {
     }));
   };
 
+  const handleAddEtapa = (grau, tipo) => {
+    const grupoKey = `${grau}::${tipo}`;
+    const nome = (novaEtapa[grupoKey] || "").trim();
+    if (!nome) return;
+    setEtapasPorGrupo((prev) => ({
+      ...prev,
+      [grupoKey]: [...(prev[grupoKey] || []), nome],
+    }));
+    setNovaEtapa((prev) => ({ ...prev, [grupoKey]: "" }));
+  };
+
+  const handleRemoveEtapa = (grau, tipo, nome) => {
+    const grupoKey = `${grau}::${tipo}`;
+    setEtapasPorGrupo((prev) => ({
+      ...prev,
+      [grupoKey]: (prev[grupoKey] || []).filter((n) => n !== nome),
+    }));
+  };
+
   const salvar = async () => {
     setSaving(true);
     for (const grau of GRAUS) {
-      for (const nome of ETAPAS_PADRAO) {
-        const key = `${grau}::${nome}`;
-        const config = configs[key];
-        if (!config) continue;
-        if (config.id) {
-          await base44.entities.ConfigEtapaHarmonia.update(config.id, {
-            playlist_id: config.playlist_id,
-            playlist_name: config.playlist_name,
-          });
-        } else if (config.playlist_id) {
-          await base44.entities.ConfigEtapaHarmonia.create({
-            grau,
-            etapa_nome: nome,
-            playlist_id: config.playlist_id,
-            playlist_name: config.playlist_name,
-          });
+      for (const tipo of TIPOS_SESSAO) {
+        const grupoKey = `${grau}::${tipo}`;
+        const nomes = etapasPorGrupo[grupoKey] || [];
+        for (let i = 0; i < nomes.length; i++) {
+          const nome = nomes[i];
+          const k = key(grau, tipo, nome);
+          const config = configs[k];
+          if (config?.id) {
+            await base44.entities.ConfigEtapaHarmonia.update(config.id, {
+              ordem: i,
+              playlist_id: config.playlist_id || "",
+              playlist_name: config.playlist_name || "",
+            });
+          } else {
+            await base44.entities.ConfigEtapaHarmonia.create({
+              grau,
+              tipo_sessao: tipo,
+              etapa_nome: nome,
+              ordem: i,
+              playlist_id: config?.playlist_id || "",
+              playlist_name: config?.playlist_name || "",
+            });
+          }
         }
       }
     }
@@ -98,7 +145,7 @@ export default function AdminConfigEtapasHarmonia() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-[#1B3A5F]">Configurações do Roteiro</h1>
-          <p className="text-slate-500 text-sm">Vincule uma playlist padrão para cada etapa, por grau da sessão</p>
+          <p className="text-slate-500 text-sm">Vincule uma playlist padrão para cada etapa, por grau e tipo de sessão</p>
         </div>
         <Button onClick={salvar} disabled={saving} className="ml-auto bg-[#1B3A5F] text-white hover:bg-[#152d49]">
           {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
@@ -114,22 +161,61 @@ export default function AdminConfigEtapasHarmonia() {
         </TabsList>
         {GRAUS.map((grau) => (
           <TabsContent key={grau} value={grau}>
-            <Card>
-              <CardContent className="p-6 space-y-4">
-                {ETAPAS_PADRAO.map((nome) => {
-                  const key = `${grau}::${nome}`;
-                  return (
-                    <div key={nome} className="flex items-center flex-wrap gap-3 border-b border-slate-100 pb-4 last:border-0 last:pb-0">
-                      <span className="text-[#1B3A5F] font-semibold text-sm w-32 flex-shrink-0">{nome}</span>
-                      <PlaylistSelector
-                        value={configs[key]?.playlist_id}
-                        onChange={(playlist) => handleChangePlaylist(grau, nome, playlist)}
-                      />
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
+            <Tabs defaultValue={TIPOS_SESSAO[0]}>
+              <TabsList>
+                {TIPOS_SESSAO.map((tipo) => (
+                  <TabsTrigger key={tipo} value={tipo}>{tipo}</TabsTrigger>
+                ))}
+              </TabsList>
+              {TIPOS_SESSAO.map((tipo) => {
+                const grupoKey = `${grau}::${tipo}`;
+                const nomes = etapasPorGrupo[grupoKey] || [];
+                return (
+                  <TabsContent key={tipo} value={tipo}>
+                    <Card>
+                      <CardContent className="p-6 space-y-4">
+                        {nomes.map((nome) => {
+                          const k = key(grau, tipo, nome);
+                          return (
+                            <div key={nome} className="flex items-center flex-wrap gap-3 border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+                              <span className="text-[#1B3A5F] font-semibold text-sm w-32 flex-shrink-0">{nome}</span>
+                              <PlaylistSelector
+                                value={configs[k]?.playlist_id}
+                                onChange={(playlist) => handleChangePlaylist(grau, tipo, nome, playlist)}
+                              />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-red-500 hover:text-red-600 ml-auto"
+                                onClick={() => handleRemoveEtapa(grau, tipo, nome)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          );
+                        })}
+
+                        {nomes.length === 0 && (
+                          <p className="text-center text-slate-400 py-4">Nenhuma etapa cadastrada.</p>
+                        )}
+
+                        <div className="flex items-center gap-2 pt-2">
+                          <Input
+                            placeholder="Nome da nova etapa"
+                            value={novaEtapa[grupoKey] || ""}
+                            onChange={(e) => setNovaEtapa((prev) => ({ ...prev, [grupoKey]: e.target.value }))}
+                            className="h-9 text-sm"
+                          />
+                          <Button variant="outline" onClick={() => handleAddEtapa(grau, tipo)}>
+                            <Plus className="w-4 h-4 mr-1" /> Adicionar Etapa
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
           </TabsContent>
         ))}
       </Tabs>

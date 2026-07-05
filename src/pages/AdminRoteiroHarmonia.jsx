@@ -49,10 +49,17 @@ export default function AdminRoteiroHarmonia() {
 
     let r = roteiros[0];
     if (!r) {
-      const configs = await base44.entities.ConfigEtapaHarmonia.filter({ grau: s?.grau || "Aprendiz" });
+      const configs = await base44.entities.ConfigEtapaHarmonia.filter({
+        grau: s?.grau || "Aprendiz",
+        tipo_sessao: s?.tipo || "Ordinária",
+      });
+      const configsOrdenadas = configs.sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+      const nomesEtapas = configsOrdenadas.length > 0
+        ? configsOrdenadas.map((c) => c.etapa_nome)
+        : ETAPAS_PADRAO;
       const configMap = {};
-      configs.forEach((c) => { configMap[c.etapa_nome] = c; });
-      const etapasIniciais = ETAPAS_PADRAO.map((nome, i) => ({
+      configsOrdenadas.forEach((c) => { configMap[c.etapa_nome] = c; });
+      const etapasIniciais = nomesEtapas.map((nome, i) => ({
         id: genId(),
         numero: i + 1,
         nome,
