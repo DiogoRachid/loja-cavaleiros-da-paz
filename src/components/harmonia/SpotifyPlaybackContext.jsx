@@ -47,6 +47,8 @@ export function SpotifyPlaybackProvider({ children }) {
   const [initializing, setInitializing] = useState(false);
   const [currentUri, setCurrentUri] = useState(null);
   const [isPaused, setIsPaused] = useState(true);
+  const [position, setPosition] = useState(0);   // ms decorridos na faixa atual
+  const [duration, setDuration] = useState(0);    // ms de duração da faixa atual
 
   // fila/sequência da etapa (repeat somente dentro da etapa)
   const queueRef = useRef([]);          // array de uris
@@ -89,6 +91,8 @@ export function SpotifyPlaybackProvider({ children }) {
         if (!state) return;
         setIsPaused(state.paused);
         setCurrentUri(state.track_window?.current_track?.uri || null);
+        setPosition(state.position || 0);
+        setDuration(state.duration || 0);
 
         // Detecta o fim de uma faixa para avançar a fila da etapa (repeat interno)
         if (queueRef.current.length > 0) {
@@ -120,6 +124,15 @@ export function SpotifyPlaybackProvider({ children }) {
       if (playerRef.current) playerRef.current.disconnect();
     };
   }, []);
+
+  // Atualiza a posição da faixa a cada segundo enquanto está tocando
+  useEffect(() => {
+    if (isPaused) return;
+    const id = setInterval(() => {
+      setPosition((p) => (duration ? Math.min(p + 1000, duration) : p + 1000));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [isPaused, duration]);
 
   const playUri = useCallback(async (uri) => {
     if (!playerRef.current) await init();
@@ -197,6 +210,8 @@ export function SpotifyPlaybackProvider({ children }) {
     initializing,
     currentUri,
     isPaused,
+    position,
+    duration,
     init,
     playUri,
     toggle,

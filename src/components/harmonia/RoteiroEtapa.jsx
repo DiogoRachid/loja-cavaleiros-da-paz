@@ -1,20 +1,50 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Music, Plus, X, Play, Pause, Trash2, GripVertical, Loader2, Repeat, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PlaylistSelector from "./PlaylistSelector";
 import EtapaCronometro from "./EtapaCronometro";
 import { useSpotifyPlayback } from "./SpotifyPlaybackContext";
 
+function formatMs(ms) {
+  const totalSec = Math.max(0, Math.floor((ms || 0) / 1000));
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
 export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRemoveTrack, onRemove, onChangePlaylist, onStopTimer }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(etapa.nome);
   const [mp3Player, setMp3Player] = useState(null);
+  const [startSignal, setStartSignal] = useState(0);
+  const [stopSignal, setStopSignal] = useState(0);
   const playback = useSpotifyPlayback();
+  const wasPlayingRef = useRef(false);
 
   const num = String(index + 1).padStart(2, "0");
   const tracks = etapa.tracks || [];
   const spotifyUris = tracks.filter((t) => !t.is_mp3 && t.uri).map((t) => t.uri);
   const isEtapaPlaying = playback?.activeQueueOwner === etapa.id;
+
+  // Quando esta etapa deixa de ser a que está tocando (outra iniciou ou parou),
+  // para o cronômetro desta etapa automaticamente.
+  useEffect(() => {
+    if (wasPlayingRef.current && !isEtapaPlaying) {
+      setStopSignal((s) => s + 1);
+    }
+    wasPlayingRef.current = isEtapaPlaying;
+  }, [isEtapaPlaying]);
+
+  const handleTocarEtapa = () => {
+    playback?.playEtapa(etapa.id, spotifyUris);
+    setStartSignal((s) => s + 1);
+  };
+
+  const handlePararEtapa = () => {
+    playback?.stopEtapa();
+    setStopSignal((s) => s + 1);
+  };
 
   const handleSaveName = () => {
     onRename(etapa.id, name.trim() || `Etapa ${num}`);
@@ -52,7 +82,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
               size="sm"
               variant="outline"
               className="border-red-400 text-red-500 hover:bg-red-50 text-xs h-7 flex-shrink-0"
-              onClick={() => playback?.stopEtapa()}
+              onClick={handlePararEtapa}
             >
               <Square className="w-3 h-3 mr-1" /> Parar Etapa
             </Button>
@@ -61,7 +91,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
               size="sm"
               variant="outline"
               className="border-[#C9A227] text-[#C9A227] hover:bg-[#C9A227] hover:text-white text-xs h-7 flex-shrink-0"
-              onClick={() => playback?.playEtapa(etapa.id, spotifyUris)}
+              onClick={handleTocarEtapa}
             >
               <Repeat className="w-3 h-3 mr-1" /> Tocar Etapa
             </Button>
@@ -97,6 +127,8 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
       <EtapaCronometro
         etapaNome={etapa.nome}
         onStop={(registro) => onStopTimer(etapa.nome, registro)}
+        startSignal={startSignal}
+        stopSignal={stopSignal}
       />
 
       {tracks.length > 0 && (
@@ -117,7 +149,13 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-[#1B3A5F] text-xs font-medium truncate">{track.name}</p>
-                  <p className="text-slate-400 text-[10px] truncate">{track.artists}</p>
+                  {!track.is_mp3 && playback?.currentUri === track.uri ? (
+                    <p className="text-[#C9A227] text-[10px] font-mono tabular-nums">
+                      {formatMs(playback.position)} - {formatMs(playback.duration || track.duration_ms)}
+                    </p>
+                  ) : (
+                    <p className="text-slate-400 text-[10px] truncate">{track.artists}</p>
+                  )}
                 </div>
                 <Button
                   size="icon"

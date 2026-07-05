@@ -16,14 +16,17 @@ function formatHora(iso) {
 }
 
 // onStop recebe { hora_inicio, hora_fim, duracao_segundos }
-export default function EtapaCronometro({ etapaNome, onStop }) {
+// startSignal: incrementa para iniciar externamente; stopSignal: incrementa para parar externamente
+export default function EtapaCronometro({ etapaNome, onStop, startSignal = 0, stopSignal = 0 }) {
   const [inicio, setInicio] = useState(null);
   const [decorrido, setDecorrido] = useState(0);
   const [salvando, setSalvando] = useState(false);
   const [ultimo, setUltimo] = useState(null);
   const intervalRef = useRef(null);
+  const inicioRef = useRef(null);
 
   useEffect(() => {
+    inicioRef.current = inicio;
     if (inicio) {
       intervalRef.current = setInterval(() => {
         setDecorrido(Math.floor((Date.now() - inicio) / 1000));
@@ -38,12 +41,14 @@ export default function EtapaCronometro({ etapaNome, onStop }) {
   };
 
   const parar = async () => {
+    const inicioAtual = inicioRef.current;
+    if (!inicioAtual) return;
     clearInterval(intervalRef.current);
     const fim = Date.now();
     const registro = {
-      hora_inicio: new Date(inicio).toISOString(),
+      hora_inicio: new Date(inicioAtual).toISOString(),
       hora_fim: new Date(fim).toISOString(),
-      duracao_segundos: Math.round((fim - inicio) / 1000),
+      duracao_segundos: Math.round((fim - inicioAtual) / 1000),
     };
     setSalvando(true);
     await onStop(registro);
@@ -52,6 +57,22 @@ export default function EtapaCronometro({ etapaNome, onStop }) {
     setInicio(null);
     setDecorrido(0);
   };
+
+  // Início externo (ex: "Tocar Etapa")
+  useEffect(() => {
+    if (startSignal > 0 && !inicioRef.current) {
+      iniciar();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startSignal]);
+
+  // Parada externa (ex: outra etapa iniciou ou "Parar Etapa")
+  useEffect(() => {
+    if (stopSignal > 0 && inicioRef.current) {
+      parar();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stopSignal]);
 
   return (
     <div className="flex items-center flex-wrap gap-3 px-4 pb-3 sm:ml-8">
