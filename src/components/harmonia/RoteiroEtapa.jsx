@@ -165,9 +165,28 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
                 <div className="flex-1 min-w-0">
                   <p className="text-[#1B3A5F] text-xs font-medium truncate">{track.name}</p>
                   {!track.is_mp3 && playback?.currentUri === track.uri ? (
-                    <p className="text-[#C9A227] text-[10px] font-mono tabular-nums">
-                      {formatMs(playback.position)} - {formatMs(playback.duration || track.duration_ms)}
-                    </p>
+                    <>
+                      <p className="text-[#C9A227] text-[10px] font-mono tabular-nums">
+                        {formatMs(playback.position)} - {formatMs(playback.duration || track.duration_ms)}
+                      </p>
+                      <div
+                        className="mt-1 h-2 w-full rounded-full bg-slate-200 cursor-pointer relative"
+                        onClick={(e) => {
+                          const total = playback.duration || track.duration_ms || 0;
+                          if (!total) return;
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+                          playback.seek(ratio * total);
+                        }}
+                      >
+                        <div
+                          className="h-2 rounded-full bg-[#C9A227] transition-all"
+                          style={{
+                            width: `${Math.min(100, ((playback.position || 0) / (playback.duration || track.duration_ms || 1)) * 100)}%`,
+                          }}
+                        />
+                      </div>
+                    </>
                   ) : (
                     <p className="text-slate-400 text-[10px] truncate">{track.artists}</p>
                   )}

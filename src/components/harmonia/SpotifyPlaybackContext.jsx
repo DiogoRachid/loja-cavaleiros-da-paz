@@ -145,6 +145,15 @@ export function SpotifyPlaybackProvider({ children }) {
       return;
     }
     const token = tokenRef.current || (await fetchToken());
+    // Garante que a reprodução ocorra NESTE dispositivo (evita tocar em outro app/dispositivo, sem som aqui)
+    await fetch(`https://api.spotify.com/v1/me/player`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ device_ids: [deviceIdRef.current], play: false }),
+    }).catch(() => {});
     await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceIdRef.current}`, {
       method: "PUT",
       headers: {
@@ -153,9 +162,18 @@ export function SpotifyPlaybackProvider({ children }) {
       },
       body: JSON.stringify({ uris: [uri] }),
     });
+    // Ativa o áudio no elemento do SDK (política de autoplay dos navegadores)
+    try { await playerRef.current?.activateElement?.(); } catch { /* ignore */ }
     setCurrentUri(uri);
     setIsPaused(false);
   }, [init]);
+
+  // Avança/retrocede manualmente dentro da faixa atual
+  const seek = useCallback(async (ms) => {
+    const target = Math.max(0, Math.floor(ms || 0));
+    await playerRef.current?.seek(target);
+    setPosition(target);
+  }, []);
 
   const toggle = useCallback(async (uri) => {
     // reprodução individual sai da fila da etapa
@@ -228,6 +246,7 @@ export function SpotifyPlaybackProvider({ children }) {
     playEtapa,
     stopEtapa,
     togglePauseEtapa,
+    seek,
     activeQueueOwner,
   };
 
