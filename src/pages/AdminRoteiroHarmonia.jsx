@@ -49,11 +49,16 @@ export default function AdminRoteiroHarmonia() {
 
     let r = roteiros[0];
     if (!r) {
+      const configs = await base44.entities.ConfigEtapaHarmonia.list();
+      const configMap = {};
+      configs.forEach((c) => { configMap[c.etapa_nome] = c; });
       const etapasIniciais = ETAPAS_PADRAO.map((nome, i) => ({
         id: genId(),
         numero: i + 1,
         nome,
         tracks: [],
+        playlist_id: configMap[nome]?.playlist_id || "",
+        playlist_name: configMap[nome]?.playlist_name || "",
       }));
       r = await base44.entities.RoteiroHarmonia.create({
         sessao_id: sessaoId,

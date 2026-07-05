@@ -1,0 +1,21 @@
+{
+  "name": "ConfigEtapaHarmonia",
+  "type": "object",
+  "properties": {
+    "etapa_nome": {
+      "type": "string",
+      "description": "Nome da etapa do roteiro (ex: Entrada, Abertura)"
+    },
+    "playlist_id": {
+      "type": "string",
+      "description": "ID da playlist Spotify vinculada por padr\u00e3o a esta etapa"
+    },
+    "playlist_name": {
+      "type": "string",
+      "description": "Nome da playlist vinculada"
+    }
+  },
+  "required": [
+    "etapa_nome"
+  ]
+}
