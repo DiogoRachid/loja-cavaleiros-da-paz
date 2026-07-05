@@ -15,12 +15,12 @@ export default function AdminMestreHarmonia() {
   useEffect(() => { loadDados(); }, []);
 
   const loadDados = async () => {
-    const [s, p] = await Promise.all([
+    const [s, r] = await Promise.all([
       base44.entities.Sessao.filter({ status: "Agendada" }),
-      base44.entities.PlaylistSessao.list("-created_date", 50),
+      base44.entities.RoteiroHarmonia.list("-created_date", 50),
     ]);
     setSessoes(s);
-    setPlaylists(p);
+    setPlaylists(r);
     setLoading(false);
   };
 
@@ -63,7 +63,7 @@ export default function AdminMestreHarmonia() {
               <ListMusic className="w-5 h-5 text-white" />
             </div>
             <p className="text-2xl font-bold text-slate-800">{sessoesMontadas.length}</p>
-            <p className="text-sm text-slate-500 mt-1">Sessões com Playlist</p>
+            <p className="text-sm text-slate-500 mt-1">Sessões com Roteiro</p>
           </CardContent>
         </Card>
         <Card>
@@ -72,7 +72,7 @@ export default function AdminMestreHarmonia() {
               <Headphones className="w-5 h-5 text-white" />
             </div>
             <p className="text-2xl font-bold text-slate-800">{playlists.length}</p>
-            <p className="text-sm text-slate-500 mt-1">Playlists Vinculadas</p>
+            <p className="text-sm text-slate-500 mt-1">Roteiros Criados</p>
           </CardContent>
         </Card>
       </div>
@@ -88,9 +88,8 @@ export default function AdminMestreHarmonia() {
             <div className="space-y-3">
               {proximasSessoes.map(s => {
                 const temPlaylist = playlists.some(p => p.sessao_id === s.id);
-                const qtdPlaylists = playlists.filter(p => p.sessao_id === s.id).length;
                 return (
-                  <Link key={s.id} to={`/AdminPlaylistSessao?sessao=${s.id}`}>
+                  <Link key={s.id} to={`/AdminRoteiroHarmonia?sessao=${s.id}`}>
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-[#1B3A5F] flex flex-col items-center justify-center flex-shrink-0">
@@ -107,10 +106,10 @@ export default function AdminMestreHarmonia() {
                       <div className="flex items-center gap-2">
                         {temPlaylist ? (
                           <Badge className="bg-green-100 text-green-800">
-                            <Music className="w-3 h-3 mr-1" />{qtdPlaylists} playlist{qtdPlaylists > 1 ? "s" : ""}
+                            <Music className="w-3 h-3 mr-1" />Roteiro pronto
                           </Badge>
                         ) : (
-                          <Badge className="bg-amber-100 text-amber-800">Sem playlist</Badge>
+                          <Badge className="bg-amber-100 text-amber-800">Sem roteiro</Badge>
                         )}
                       </div>
                     </div>

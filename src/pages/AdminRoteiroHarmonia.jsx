@@ -47,18 +47,20 @@ export default function AdminRoteiroHarmonia() {
     const s = sessoes[0] || null;
     setSessao(s);
 
+    // Sempre puxa a configuração de etapas/playlists do grau + tipo da sessão
+    const configs = await base44.entities.ConfigEtapaHarmonia.filter({
+      grau: s?.grau || "Aprendiz",
+      tipo_sessao: s?.tipo || "Ordinária",
+    });
+    const configsOrdenadas = configs.sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+    const nomesEtapas = configsOrdenadas.length > 0
+      ? configsOrdenadas.map((c) => c.etapa_nome)
+      : ETAPAS_PADRAO;
+    const configMap = {};
+    configsOrdenadas.forEach((c) => { configMap[c.etapa_nome] = c; });
+
     let r = roteiros[0];
     if (!r) {
-      const configs = await base44.entities.ConfigEtapaHarmonia.filter({
-        grau: s?.grau || "Aprendiz",
-        tipo_sessao: s?.tipo || "Ordinária",
-      });
-      const configsOrdenadas = configs.sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
-      const nomesEtapas = configsOrdenadas.length > 0
-        ? configsOrdenadas.map((c) => c.etapa_nome)
-        : ETAPAS_PADRAO;
-      const configMap = {};
-      configsOrdenadas.forEach((c) => { configMap[c.etapa_nome] = c; });
       const etapasIniciais = nomesEtapas.map((nome, i) => ({
         id: genId(),
         numero: i + 1,
@@ -77,8 +79,16 @@ export default function AdminRoteiroHarmonia() {
     }
     setRoteiro(r);
     const parsed = r.etapas ? JSON.parse(r.etapas) : [];
-    // Migrar tracks antigos (track -> tracks)
-    setEtapas(parsed.map((e) => ({ ...e, tracks: e.tracks || (e.track ? [e.track] : []) })));
+    // Migrar tracks antigos e completar playlist a partir da config quando estiver vazia
+    setEtapas(parsed.map((e) => {
+      const cfg = configMap[e.nome];
+      return {
+        ...e,
+        tracks: e.tracks || (e.track ? [e.track] : []),
+        playlist_id: e.playlist_id || cfg?.playlist_id || "",
+        playlist_name: e.playlist_name || cfg?.playlist_name || "",
+      };
+    }));
     setLoading(false);
   };
 

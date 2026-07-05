@@ -11,7 +11,6 @@ import PrepararReuniao from './pages/PrepararReuniao';
 import AdminHospitaleiro from './pages/AdminHospitaleiro';
 import AdminHistoricoContatos from './pages/AdminHistoricoContatos';
 import AdminMestreHarmonia from './pages/AdminMestreHarmonia';
-import AdminPlaylistSessao from './pages/AdminPlaylistSessao';
 import AdminRoteiroHarmonia from './pages/AdminRoteiroHarmonia';
 import AdminMinhasPlaylists from './pages/AdminMinhasPlaylists';
 import AdminMeusMp3s from './pages/AdminMeusMp3s';
@@ -73,7 +72,6 @@ const AuthenticatedApp = () => {
       <Route path="/AdminHospitaleiro" element={<LayoutWrapper currentPageName="AdminHospitaleiro"><AdminHospitaleiro /></LayoutWrapper>} />
       <Route path="/AdminHistoricoContatos" element={<LayoutWrapper currentPageName="AdminHistoricoContatos"><AdminHistoricoContatos /></LayoutWrapper>} />
       <Route path="/AdminMestreHarmonia" element={<LayoutWrapper currentPageName="AdminMestreHarmonia"><AdminMestreHarmonia /></LayoutWrapper>} />
-      <Route path="/AdminPlaylistSessao" element={<LayoutWrapper currentPageName="AdminPlaylistSessao"><AdminPlaylistSessao /></LayoutWrapper>} />
       <Route path="/AdminRoteiroHarmonia" element={<LayoutWrapper currentPageName="AdminRoteiroHarmonia"><AdminRoteiroHarmonia /></LayoutWrapper>} />
       <Route path="/AdminMinhasPlaylists" element={<LayoutWrapper currentPageName="AdminMinhasPlaylists"><AdminMinhasPlaylists /></LayoutWrapper>} />
       <Route path="/AdminMeusMp3s" element={<LayoutWrapper currentPageName="AdminMeusMp3s"><AdminMeusMp3s /></LayoutWrapper>} />
