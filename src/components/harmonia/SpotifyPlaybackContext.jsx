@@ -168,6 +168,11 @@ export function SpotifyPlaybackProvider({ children }) {
     setIsPaused(false);
   }, [init]);
 
+  // Libera o áudio do SDK — DEVE ser chamado sincronamente dentro de um clique do usuário
+  const activateElement = useCallback(() => {
+    try { playerRef.current?.activateElement?.(); } catch { /* ignore */ }
+  }, []);
+
   // Avança/retrocede manualmente dentro da faixa atual
   const seek = useCallback(async (ms) => {
     const target = Math.max(0, Math.floor(ms || 0));
@@ -247,6 +252,7 @@ export function SpotifyPlaybackProvider({ children }) {
     stopEtapa,
     togglePauseEtapa,
     seek,
+    activateElement,
     activeQueueOwner,
   };
 

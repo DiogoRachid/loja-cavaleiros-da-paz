@@ -37,6 +37,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
   }, [isEtapaPlaying]);
 
   const handleTocarEtapa = () => {
+    playback?.activateElement(); // libera o áudio dentro do gesto de clique (autoplay do navegador)
     playback?.playEtapa(etapa.id, spotifyUris);
     setStartSignal((s) => s + 1);
   };
@@ -199,6 +200,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
                     if (track.is_mp3) {
                       setMp3Player(mp3Player === track.id ? null : track.id);
                     } else if (track.uri && playback) {
+                      playback.activateElement();
                       playback.toggle(track.uri);
                     }
                   }}
