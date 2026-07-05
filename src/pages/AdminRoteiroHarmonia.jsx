@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import RoteiroEtapa from "@/components/harmonia/RoteiroEtapa";
 import TrackSearchModal from "@/components/harmonia/TrackSearchModal";
+import { SpotifyPlaybackProvider } from "@/components/harmonia/SpotifyPlaybackContext";
 
 const ETAPAS_PADRAO = [
   "Entrada",
@@ -186,6 +187,7 @@ export default function AdminRoteiroHarmonia() {
   const etapaAtiva = searchModalEtapa ? etapas.find((e) => e.id === searchModalEtapa) : null;
 
   return (
+    <SpotifyPlaybackProvider>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3 flex-wrap">
@@ -246,5 +248,6 @@ export default function AdminRoteiroHarmonia() {
         initialPlaylistId={etapaAtiva?.playlist_id || null}
       />
     </div>
+    </SpotifyPlaybackProvider>
   );
 }

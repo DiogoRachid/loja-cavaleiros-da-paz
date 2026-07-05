@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import { Check, Loader2, Music } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Check, Loader2, Music, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
-import SpotifyPlayer from "./SpotifyPlayer";
 
 function formatDuration(ms) {
   const min = Math.floor(ms / 60000);
@@ -15,7 +13,6 @@ export default function TrackSelector({ playlistId, selectedTracks, onSave, onCa
   const [tracks, setTracks] = useState([]);
   const [selected, setSelected] = useState(selectedTracks || []);
   const [loading, setLoading] = useState(true);
-  const [playingTrack, setPlayingTrack] = useState(null);
 
   useEffect(() => { loadTracks(); }, [playlistId]);
 
@@ -52,10 +49,6 @@ export default function TrackSelector({ playlistId, selectedTracks, onSave, onCa
         </div>
       </div>
 
-      {playingTrack && (
-        <SpotifyPlayer trackId={playingTrack} />
-      )}
-
       <div className="space-y-1 max-h-[400px] overflow-y-auto">
         {tracks.map((t, i) => {
           const isSelected = selected.includes(t.id);
@@ -84,17 +77,15 @@ export default function TrackSelector({ playlistId, selectedTracks, onSave, onCa
                 <p className="text-xs text-slate-500 truncate">{t.artists}</p>
               </div>
               <span className="text-xs text-slate-400 flex-shrink-0">{formatDuration(t.duration_ms)}</span>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 px-2 text-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPlayingTrack(playingTrack === t.id ? null : t.id);
-                }}
+              <a
+                href={`https://open.spotify.com/track/${t.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="h-7 w-7 flex items-center justify-center rounded text-[#1B3A5F] hover:bg-slate-200 flex-shrink-0"
               >
-                {playingTrack === t.id ? "⏸" : "▶"}
-              </Button>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
           );
         })}

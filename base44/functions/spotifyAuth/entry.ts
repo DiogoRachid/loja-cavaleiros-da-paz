@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
     const { action, code, redirect_uri } = await req.json();
 
     if (action === "authorize_url") {
-      const scope = "playlist-read-private playlist-read-collaborative";
+      const scope = "playlist-read-private playlist-read-collaborative streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state";
       const params = new URLSearchParams({
         client_id: clientId,
         response_type: "code",
@@ -66,6 +66,44 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.entities.SpotifyToken.create(payload);
       }
       return Response.json({ success: true });
+    }
+
+    if (action === "get_token") {
+      const existing = await base44.asServiceRole.entities.SpotifyToken.list();
+      const tokenRecord = existing[0];
+      if (!tokenRecord) {
+        return Response.json({ error: "Spotify não conectado" }, { status: 400 });
+      }
+
+      let accessToken = tokenRecord.access_token;
+      let expiresAt = tokenRecord.expires_at;
+
+      if (!tokenRecord.expires_at || Date.now() >= tokenRecord.expires_at - 60000) {
+        const refreshRes = await fetch("https://accounts.spotify.com/api/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": "Basic " + btoa(clientId + ":" + clientSecret),
+          },
+          body: new URLSearchParams({
+            grant_type: "refresh_token",
+            refresh_token: tokenRecord.refresh_token,
+          }),
+        });
+        const refreshData = await refreshRes.json();
+        if (!refreshData.access_token) {
+          return Response.json({ error: "Falha ao renovar token", details: refreshData }, { status: 500 });
+        }
+        accessToken = refreshData.access_token;
+        expiresAt = Date.now() + (refreshData.expires_in || 3600) * 1000;
+        await base44.asServiceRole.entities.SpotifyToken.update(tokenRecord.id, {
+          access_token: accessToken,
+          refresh_token: refreshData.refresh_token || tokenRecord.refresh_token,
+          expires_at: expiresAt,
+        });
+      }
+
+      return Response.json({ access_token: accessToken, expires_at: expiresAt });
     }
 
     if (action === "my_playlists") {
