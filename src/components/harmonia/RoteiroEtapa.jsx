@@ -38,11 +38,25 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
     wasPlayingRef.current = isEtapaPlaying;
   }, [isEtapaPlaying]);
 
+  // Para o MP3 desta etapa quando outra etapa MP3 começa a tocar
+  useEffect(() => {
+    const handleOtherMp3 = (e) => {
+      if (e.detail?.etapaId !== etapa.id) {
+        setMp3Player(null);
+        setMp3EtapaPlaying(false);
+      }
+    };
+    window.addEventListener("harmonia-mp3-play", handleOtherMp3);
+    return () => window.removeEventListener("harmonia-mp3-play", handleOtherMp3);
+  }, [etapa.id]);
+
   const handleTocarEtapa = () => {
     if (spotifyUris.length > 0) {
       playback?.activateElement(); // libera o áudio dentro do gesto de clique (autoplay do navegador)
       playback?.playEtapa(etapa.id, spotifyUris);
     } else {
+      // Avisa outras etapas MP3 para pararem, evitando dois áudios simultâneos
+      window.dispatchEvent(new CustomEvent("harmonia-mp3-play", { detail: { etapaId: etapa.id } }));
       // Etapa só com MP3: toca o primeiro MP3 da etapa
       const primeiroMp3 = tracks.find((t) => t.is_mp3);
       if (primeiroMp3) setMp3Player(primeiroMp3.id);
@@ -96,46 +110,46 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
             <>
               {spotifyUris.length > 0 && (
                 <Button
-                  size="sm"
+                  size="icon"
                   variant="outline"
-                  className="border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white text-xs h-7 flex-shrink-0"
+                  title={playback?.isPaused ? "Continuar Etapa" : "Pausar Etapa"}
+                  className="border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white h-7 w-7 flex-shrink-0"
                   onClick={() => playback?.togglePauseEtapa()}
                 >
-                  {playback?.isPaused ? (
-                    <><Play className="w-3 h-3 mr-1" /> Continuar Etapa</>
-                  ) : (
-                    <><Pause className="w-3 h-3 mr-1" /> Pausar Etapa</>
-                  )}
+                  {playback?.isPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
                 </Button>
               )}
               <Button
-                size="sm"
+                size="icon"
                 variant="outline"
-                className="border-red-400 text-red-500 hover:bg-red-50 text-xs h-7 flex-shrink-0"
+                title="Parar Etapa"
+                className="border-red-400 text-red-500 hover:bg-red-50 h-7 w-7 flex-shrink-0"
                 onClick={handlePararEtapa}
               >
-                <Square className="w-3 h-3 mr-1" /> Parar Etapa
+                <Square className="w-3 h-3" />
               </Button>
             </>
           ) : (
             <Button
-              size="sm"
+              size="icon"
               variant="outline"
-              className="border-[#C9A227] text-[#C9A227] hover:bg-[#C9A227] hover:text-white text-xs h-7 flex-shrink-0"
+              title="Tocar Etapa"
+              className="border-[#C9A227] text-[#C9A227] hover:bg-[#C9A227] hover:text-white h-7 w-7 flex-shrink-0"
               onClick={handleTocarEtapa}
             >
-              <Repeat className="w-3 h-3 mr-1" /> Tocar Etapa
+              <Repeat className="w-3 h-3" />
             </Button>
           )
         )}
 
         <Button
-          size="sm"
+          size="icon"
           variant="outline"
-          className="border-[#1B3A5F] text-[#1B3A5F] hover:bg-[#1B3A5F] hover:text-white text-xs h-7 flex-shrink-0"
+          title="Adicionar Música"
+          className="border-[#1B3A5F] text-[#1B3A5F] hover:bg-[#1B3A5F] hover:text-white h-7 w-7 flex-shrink-0"
           onClick={() => onAddTrack(etapa.id)}
         >
-          <Music className="w-3 h-3 mr-1" /> Adicionar Música
+          <Music className="w-3 h-3" />
         </Button>
 
         <Button
