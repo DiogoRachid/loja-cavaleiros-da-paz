@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Music, Plus, X, Play, Pause, Trash2, GripVertical, Loader2 } from "lucide-react";
+import { Music, Plus, X, Play, Pause, Trash2, GripVertical, Loader2, Repeat, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PlaylistSelector from "./PlaylistSelector";
 import EtapaCronometro from "./EtapaCronometro";
@@ -13,6 +13,8 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
 
   const num = String(index + 1).padStart(2, "0");
   const tracks = etapa.tracks || [];
+  const spotifyUris = tracks.filter((t) => !t.is_mp3 && t.uri).map((t) => t.uri);
+  const isEtapaPlaying = playback?.activeQueueOwner === etapa.id;
 
   const handleSaveName = () => {
     onRename(etapa.id, name.trim() || `Etapa ${num}`);
@@ -42,6 +44,28 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
           >
             {etapa.nome}
           </button>
+        )}
+
+        {spotifyUris.length > 0 && (
+          isEtapaPlaying ? (
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-red-400 text-red-500 hover:bg-red-50 text-xs h-7 flex-shrink-0"
+              onClick={() => playback?.stopEtapa()}
+            >
+              <Square className="w-3 h-3 mr-1" /> Parar Etapa
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-[#C9A227] text-[#C9A227] hover:bg-[#C9A227] hover:text-white text-xs h-7 flex-shrink-0"
+              onClick={() => playback?.playEtapa(etapa.id, spotifyUris)}
+            >
+              <Repeat className="w-3 h-3 mr-1" /> Tocar Etapa
+            </Button>
+          )
         )}
 
         <Button

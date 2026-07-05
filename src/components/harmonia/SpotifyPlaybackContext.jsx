@@ -48,6 +48,13 @@ export function SpotifyPlaybackProvider({ children }) {
   const [currentUri, setCurrentUri] = useState(null);
   const [isPaused, setIsPaused] = useState(true);
 
+  // fila/sequência da etapa (repeat somente dentro da etapa)
+  const queueRef = useRef([]);          // array de uris
+  const queueIndexRef = useRef(0);
+  const queueOwnerRef = useRef(null);   // id da etapa dona da fila
+  const prevTrackEndedRef = useRef(false);
+  const [activeQueueOwner, setActiveQueueOwner] = useState(null);
+
   const init = useCallback(async () => {
     if (playerRef.current || initializing) return;
     setInitializing(true);
@@ -82,6 +89,15 @@ export function SpotifyPlaybackProvider({ children }) {
         if (!state) return;
         setIsPaused(state.paused);
         setCurrentUri(state.track_window?.current_track?.uri || null);
+
+        // Detecta o fim de uma faixa para avançar a fila da etapa (repeat interno)
+        if (queueRef.current.length > 0) {
+          const trackEnded = state.paused && state.position === 0;
+          if (trackEnded && !prevTrackEndedRef.current) {
+            advanceQueueRef.current?.();
+          }
+          prevTrackEndedRef.current = trackEnded;
+        }
       });
       player.addListener("initialization_error", ({ message }) => setError(message));
       player.addListener("authentication_error", ({ message }) => setError(message));
@@ -129,6 +145,10 @@ export function SpotifyPlaybackProvider({ children }) {
   }, [init]);
 
   const toggle = useCallback(async (uri) => {
+    // reprodução individual sai da fila da etapa
+    queueRef.current = [];
+    queueOwnerRef.current = null;
+    setActiveQueueOwner(null);
     if (currentUri === uri && !isPaused) {
       await playerRef.current?.pause();
     } else if (currentUri === uri && isPaused) {
@@ -138,7 +158,36 @@ export function SpotifyPlaybackProvider({ children }) {
     }
   }, [currentUri, isPaused, playUri]);
 
+  const advanceQueueRef = useRef(null);
+  const advanceQueue = useCallback(async () => {
+    if (queueRef.current.length === 0) return;
+    // repeat somente dentro da etapa: ao terminar a última, volta para a primeira
+    queueIndexRef.current = (queueIndexRef.current + 1) % queueRef.current.length;
+    prevTrackEndedRef.current = false;
+    await playUri(queueRef.current[queueIndexRef.current]);
+  }, [playUri]);
+  advanceQueueRef.current = advanceQueue;
+
+  // Toca todas as músicas de uma etapa em sequência, repetindo dentro da etapa
+  const playEtapa = useCallback(async (ownerId, uris) => {
+    const list = (uris || []).filter(Boolean);
+    if (list.length === 0) return;
+    queueRef.current = list;
+    queueIndexRef.current = 0;
+    queueOwnerRef.current = ownerId;
+    prevTrackEndedRef.current = false;
+    setActiveQueueOwner(ownerId);
+    await playUri(list[0]);
+  }, [playUri]);
+
   const pause = useCallback(async () => {
+    await playerRef.current?.pause();
+  }, []);
+
+  const stopEtapa = useCallback(async () => {
+    queueRef.current = [];
+    queueOwnerRef.current = null;
+    setActiveQueueOwner(null);
     await playerRef.current?.pause();
   }, []);
 
@@ -152,6 +201,9 @@ export function SpotifyPlaybackProvider({ children }) {
     playUri,
     toggle,
     pause,
+    playEtapa,
+    stopEtapa,
+    activeQueueOwner,
   };
 
   return (
