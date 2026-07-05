@@ -22,10 +22,12 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
   const playback = useSpotifyPlayback();
   const wasPlayingRef = useRef(false);
 
+  const [mp3EtapaPlaying, setMp3EtapaPlaying] = useState(false);
+
   const num = String(index + 1).padStart(2, "0");
   const tracks = etapa.tracks || [];
   const spotifyUris = tracks.filter((t) => !t.is_mp3 && t.uri).map((t) => t.uri);
-  const isEtapaPlaying = playback?.activeQueueOwner === etapa.id;
+  const isEtapaPlaying = playback?.activeQueueOwner === etapa.id || mp3EtapaPlaying;
 
   // Quando esta etapa deixa de ser a que está tocando (outra iniciou ou parou),
   // para o cronômetro desta etapa automaticamente.
@@ -44,12 +46,18 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
       // Etapa só com MP3: toca o primeiro MP3 da etapa
       const primeiroMp3 = tracks.find((t) => t.is_mp3);
       if (primeiroMp3) setMp3Player(primeiroMp3.id);
+      setMp3EtapaPlaying(true);
     }
     setStartSignal((s) => s + 1);
   };
 
   const handlePararEtapa = () => {
-    playback?.stopEtapa();
+    if (spotifyUris.length > 0) {
+      playback?.stopEtapa();
+    } else {
+      setMp3Player(null);
+      setMp3EtapaPlaying(false);
+    }
     setStopSignal((s) => s + 1);
   };
 
@@ -86,18 +94,20 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
         {tracks.length > 0 && (
           isEtapaPlaying ? (
             <>
-              <Button
-                size="sm"
-                variant="outline"
-                className="border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white text-xs h-7 flex-shrink-0"
-                onClick={() => playback?.togglePauseEtapa()}
-              >
-                {playback?.isPaused ? (
-                  <><Play className="w-3 h-3 mr-1" /> Continuar Etapa</>
-                ) : (
-                  <><Pause className="w-3 h-3 mr-1" /> Pausar Etapa</>
-                )}
-              </Button>
+              {spotifyUris.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white text-xs h-7 flex-shrink-0"
+                  onClick={() => playback?.togglePauseEtapa()}
+                >
+                  {playback?.isPaused ? (
+                    <><Play className="w-3 h-3 mr-1" /> Continuar Etapa</>
+                  ) : (
+                    <><Pause className="w-3 h-3 mr-1" /> Pausar Etapa</>
+                  )}
+                </Button>
+              )}
               <Button
                 size="sm"
                 variant="outline"
