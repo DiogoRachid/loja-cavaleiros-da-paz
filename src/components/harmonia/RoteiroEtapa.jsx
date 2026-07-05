@@ -160,7 +160,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
         onStop={(registro) => onStopTimer(etapa.nome, registro)}
         startSignal={startSignal}
         stopSignal={stopSignal}
-        isPaused={isEtapaPlaying && !!playback?.isPaused}
+        isPaused={spotifyUris.length > 0 && playback?.activeQueueOwner === etapa.id && !!playback?.isPaused}
       />
 
       {tracks.length > 0 && (
