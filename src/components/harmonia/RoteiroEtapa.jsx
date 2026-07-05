@@ -38,25 +38,29 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
     wasPlayingRef.current = isEtapaPlaying;
   }, [isEtapaPlaying]);
 
-  // Para o MP3 desta etapa quando outra etapa MP3 começa a tocar
+  // Para o áudio desta etapa quando qualquer outra etapa começa a tocar
   useEffect(() => {
-    const handleOtherMp3 = (e) => {
+    const handleOtherPlay = (e) => {
       if (e.detail?.etapaId !== etapa.id) {
         setMp3Player(null);
         setMp3EtapaPlaying(false);
+        // Se esta etapa era a que tocava no Spotify, para o Spotify também
+        if (playback?.activeQueueOwner === etapa.id) {
+          playback?.stopEtapa();
+        }
       }
     };
-    window.addEventListener("harmonia-mp3-play", handleOtherMp3);
-    return () => window.removeEventListener("harmonia-mp3-play", handleOtherMp3);
-  }, [etapa.id]);
+    window.addEventListener("harmonia-etapa-play", handleOtherPlay);
+    return () => window.removeEventListener("harmonia-etapa-play", handleOtherPlay);
+  }, [etapa.id, playback]);
 
   const handleTocarEtapa = () => {
+    // Avisa todas as outras etapas para pararem seu áudio (MP3 ou Spotify), evitando sobreposição
+    window.dispatchEvent(new CustomEvent("harmonia-etapa-play", { detail: { etapaId: etapa.id } }));
     if (spotifyUris.length > 0) {
       playback?.activateElement(); // libera o áudio dentro do gesto de clique (autoplay do navegador)
       playback?.playEtapa(etapa.id, spotifyUris);
     } else {
-      // Avisa outras etapas MP3 para pararem, evitando dois áudios simultâneos
-      window.dispatchEvent(new CustomEvent("harmonia-mp3-play", { detail: { etapaId: etapa.id } }));
       // Etapa só com MP3: toca o primeiro MP3 da etapa
       const primeiroMp3 = tracks.find((t) => t.is_mp3);
       if (primeiroMp3) setMp3Player(primeiroMp3.id);
