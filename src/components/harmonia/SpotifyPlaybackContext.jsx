@@ -51,6 +51,9 @@ export function SpotifyPlaybackProvider({ children }) {
   const [duration, setDuration] = useState(0);    // ms de duração da faixa atual
 
   // fila/sequência da etapa (repeat somente dentro da etapa)
+  const BASE_VOLUME = 0.8;
+  const FADE_MS = 5000; // duração da transição entre músicas
+  const fadeIntervalRef = useRef(null);
   const deviceActivatedRef = useRef(false); // device já foi ativado na API do Spotify
   const queueRef = useRef([]);          // array de uris
   const queueIndexRef = useRef(0);
@@ -156,7 +159,40 @@ export function SpotifyPlaybackProvider({ children }) {
     return () => clearInterval(id);
   }, [isPaused, duration]);
 
-  const playUri = useCallback(async (uri) => {
+  const clearFade = useCallback(() => {
+    if (fadeIntervalRef.current) {
+      clearInterval(fadeIntervalRef.current);
+      fadeIntervalRef.current = null;
+    }
+  }, []);
+
+  // Sobe o volume gradualmente de 0 até o normal (fade-in da nova faixa)
+  const fadeIn = useCallback(() => {
+    clearFade();
+    let v = 0;
+    playerRef.current?.setVolume(0);
+    const step = BASE_VOLUME / (FADE_MS / 200);
+    fadeIntervalRef.current = setInterval(() => {
+      v = Math.min(BASE_VOLUME, v + step);
+      playerRef.current?.setVolume(v);
+      if (v >= BASE_VOLUME) clearFade();
+    }, 200);
+  }, [clearFade]);
+
+  // Fade-out: nos últimos 5s da faixa em fila, reduz o volume proporcionalmente
+  useEffect(() => {
+    if (isPaused || !duration || queueRef.current.length === 0) return;
+    const remaining = duration - position;
+    if (fadeIntervalRef.current) return; // fade-in em andamento tem prioridade
+    if (remaining <= FADE_MS && remaining >= 0) {
+      playerRef.current?.setVolume(Math.max(0, BASE_VOLUME * (remaining / FADE_MS)));
+    } else {
+      // fora da zona de transição, garante volume normal (ex.: após seek para trás)
+      playerRef.current?.setVolume(BASE_VOLUME);
+    }
+  }, [position, duration, isPaused]);
+
+  const playUri = useCallback(async (uri, withFadeIn = false) => {
     if (!playerRef.current) await init();
     // aguarda o device ficar pronto
     for (let i = 0; i < 30 && !deviceIdRef.current; i++) {
@@ -168,6 +204,13 @@ export function SpotifyPlaybackProvider({ children }) {
     }
     const token = tokenRef.current || (await fetchToken());
     pendingUriRef.current = uri;   // aguardando o SDK confirmar esta faixa
+    // Prepara o volume: com fade-in começa mudo e sobe; sem fade, volume normal
+    clearFade();
+    if (withFadeIn) {
+      await playerRef.current?.setVolume(0).catch(() => {});
+    } else {
+      await playerRef.current?.setVolume(BASE_VOLUME).catch(() => {});
+    }
     // Ativa o áudio no elemento do SDK ANTES (política de autoplay dos navegadores)
     try { await playerRef.current?.activateElement?.(); } catch { /* ignore */ }
 
@@ -204,9 +247,10 @@ export function SpotifyPlaybackProvider({ children }) {
       if (res && res.status !== 404 && res.status !== 502) break;
       await new Promise((r) => setTimeout(r, 400));
     }
+    if (withFadeIn) fadeIn();
     setCurrentUri(uri);
     setIsPaused(false);
-  }, [init]);
+  }, [init, clearFade, fadeIn]);
 
   // Libera o áudio do SDK — DEVE ser chamado sincronamente dentro de um clique do usuário
   const activateElement = useCallback(() => {
@@ -241,7 +285,7 @@ export function SpotifyPlaybackProvider({ children }) {
     queueIndexRef.current = (queueIndexRef.current + 1) % queueRef.current.length;
     prevTrackEndedRef.current = false;
     lastPositionRef.current = 0;
-    await playUri(queueRef.current[queueIndexRef.current]);
+    await playUri(queueRef.current[queueIndexRef.current], true); // com fade-in de 5s
   }, [playUri]);
   advanceQueueRef.current = advanceQueue;
 
