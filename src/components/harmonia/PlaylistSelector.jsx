@@ -16,11 +16,11 @@ export default function PlaylistSelector({ value, onChange }) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
       <ListMusic className="w-4 h-4 text-slate-400 flex-shrink-0" />
       <span className="text-xs text-slate-500 flex-shrink-0">Playlist da etapa:</span>
       <Select value={value || ""} onValueChange={handleChange}>
-        <SelectTrigger className="h-8 text-xs max-w-[220px]">
+        <SelectTrigger className="h-8 text-xs w-full sm:w-[220px]">
           <SelectValue placeholder="Selecionar playlist" />
         </SelectTrigger>
         <SelectContent>
