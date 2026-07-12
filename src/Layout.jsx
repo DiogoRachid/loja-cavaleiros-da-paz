@@ -62,8 +62,7 @@ const ADMIN_LINKS_BY_CARGO = {
   "Mestre de Harmonia": [
     { name: "Painel Harmonia", page: "AdminMestreHarmonia", icon: Music },
     { name: "Agenda Ritual", page: "AdminAgendaRitual", icon: Calendar },
-    { name: "Minhas Playlists", page: "AdminMinhasPlaylists", icon: ListMusic },
-    { name: "Meus MP3s", page: "AdminMeusMp3s", icon: Upload },
+    { name: "Pastas de Músicas", page: "AdminMeusMp3s", icon: ListMusic },
     { name: "Tempos das Etapas", page: "AdminEstatisticasHarmonia", icon: Timer },
     { name: "Configurações", page: "AdminConfigEtapasHarmonia", icon: Settings },
   ],
