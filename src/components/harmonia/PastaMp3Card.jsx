@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FolderOpen, Music, Plus, Trash2, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import AudioPlayer from "@/components/harmonia/AudioPlayer";
 
 export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMusica, onMoveMusica, onDeletePasta }) {
   const [expanded, setExpanded] = useState(false);
@@ -79,7 +80,7 @@ export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMus
                       {m.artista && <p className="text-xs text-slate-400 break-words">{m.artista}</p>}
                     </div>
                   </div>
-                  <audio controls src={m.file_url} className="h-8 w-full sm:w-56" />
+                  <AudioPlayer src={m.file_url} />
                   <Button
                     size="icon"
                     variant="ghost"
