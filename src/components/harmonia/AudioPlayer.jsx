@@ -25,7 +25,7 @@ export default function AudioPlayer({ src }) {
   const toggle = () => {
     const a = audioRef.current;
     if (!a) return;
-    if (playing) { a.pause(); } else { a.play(); }
+    if (playing) { a.pause(); } else { a.play().catch(() => setPlaying(false)); }
   };
 
   const seek = ([v]) => {
