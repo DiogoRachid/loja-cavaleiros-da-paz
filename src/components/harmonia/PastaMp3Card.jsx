@@ -3,7 +3,7 @@ import { FolderOpen, Music, Plus, Trash2, X, ChevronDown, ChevronUp } from "luci
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMusica, onDeletePasta }) {
+export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMusica, onMoveMusica, onDeletePasta }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -47,9 +47,30 @@ export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMus
                 Nenhuma música vinculada. Use "Adicionar Músicas".
               </p>
             ) : (
-              musicas.map((m) => (
+              musicas.map((m, i) => (
                 <div key={m.id} className="flex flex-col sm:flex-row sm:items-center gap-2 p-2 rounded-lg bg-slate-50">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <span className="text-[#1B3A5F] text-xs font-bold w-6 text-right flex-shrink-0">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <div className="flex flex-col flex-shrink-0">
+                      <button
+                        title="Mover para cima"
+                        disabled={i === 0}
+                        className="text-slate-400 hover:text-[#1B3A5F] disabled:opacity-20 disabled:cursor-default"
+                        onClick={() => onMoveMusica(pasta, m, -1)}
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        title="Mover para baixo"
+                        disabled={i === musicas.length - 1}
+                        className="text-slate-400 hover:text-[#1B3A5F] disabled:opacity-20 disabled:cursor-default"
+                        onClick={() => onMoveMusica(pasta, m, 1)}
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                    </div>
                     <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center flex-shrink-0">
                       <Music className="w-3 h-3 text-slate-400" />
                     </div>

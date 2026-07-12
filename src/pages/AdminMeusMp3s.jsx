@@ -97,6 +97,25 @@ export default function AdminMeusMp3s() {
     ]);
   };
 
+  const handleMoveMusica = async (pasta, mp3, dir) => {
+    const lista = vinculos
+      .filter((v) => v.pasta_id === pasta.id)
+      .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+    const idx = lista.findIndex((v) => v.mp3_id === mp3.id);
+    const alvo = idx + dir;
+    if (idx === -1 || alvo < 0 || alvo >= lista.length) return;
+    const nova = [...lista];
+    [nova[idx], nova[alvo]] = [nova[alvo], nova[idx]];
+    const updates = nova.map((v, i) => ({ id: v.id, ordem: i }));
+    setVinculos((prev) =>
+      prev.map((v) => {
+        const u = updates.find((x) => x.id === v.id);
+        return u ? { ...v, ordem: u.ordem } : v;
+      })
+    );
+    await base44.entities.PastaMusica.bulkUpdate(updates);
+  };
+
   const handleRemoveMusica = async (pasta, mp3) => {
     const vinculo = vinculos.find((v) => v.pasta_id === pasta.id && v.mp3_id === mp3.id);
     if (!vinculo) return;
@@ -176,6 +195,7 @@ export default function AdminMeusMp3s() {
               musicas={musicasDaPasta(p)}
               onAddMusicas={setModalPasta}
               onRemoveMusica={handleRemoveMusica}
+              onMoveMusica={handleMoveMusica}
               onDeletePasta={handleDeletePasta}
             />
           ))}
