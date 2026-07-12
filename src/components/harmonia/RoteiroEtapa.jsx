@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Music, X, Play, Pause, Trash2, GripVertical, Repeat, Square } from "lucide-react";
+import { Music, X, Play, Pause, Trash2, GripVertical, Repeat, Square, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 import PastaSelector from "./PastaSelector";
@@ -7,7 +7,7 @@ import EtapaCronometro from "./EtapaCronometro";
 import { useMp3Playback } from "./Mp3PlaybackContext";
 import TrackProgressBar from "./TrackProgressBar";
 
-export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRemoveTrack, onRemove, onChangePlaylist, onStopTimer }) {
+export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRemoveTrack, onMoveTrack, onRemove, onChangePlaylist, onStopTimer }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(etapa.nome);
   const [startSignal, setStartSignal] = useState(0);
@@ -167,6 +167,27 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
             return (
               <div key={track.id || ti} className="p-2 rounded-lg bg-slate-50">
                 <div className="flex items-center gap-3">
+                  <span className="text-[#1B3A5F] text-[10px] font-bold w-5 text-right flex-shrink-0">
+                    {String(ti + 1).padStart(2, "0")}
+                  </span>
+                  <div className="flex flex-col flex-shrink-0">
+                    <button
+                      title="Mover para cima"
+                      disabled={ti === 0}
+                      className="text-slate-400 hover:text-[#1B3A5F] disabled:opacity-20 disabled:cursor-default"
+                      onClick={() => onMoveTrack(etapa.id, track.id, -1)}
+                    >
+                      <ChevronUp className="w-3 h-3" />
+                    </button>
+                    <button
+                      title="Mover para baixo"
+                      disabled={ti === tracks.length - 1}
+                      className="text-slate-400 hover:text-[#1B3A5F] disabled:opacity-20 disabled:cursor-default"
+                      onClick={() => onMoveTrack(etapa.id, track.id, 1)}
+                    >
+                      <ChevronDown className="w-3 h-3" />
+                    </button>
+                  </div>
                   <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center flex-shrink-0">
                     <Music className="w-3 h-3 text-slate-400" />
                   </div>

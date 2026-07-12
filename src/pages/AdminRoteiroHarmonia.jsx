@@ -149,6 +149,20 @@ export default function AdminRoteiroHarmonia() {
     setSearchModalEtapa(null);
   };
 
+  const handleMoveTrack = (etapaId, trackId, dir) => {
+    setEtapas((prev) =>
+      prev.map((e) => {
+        if (e.id !== etapaId) return e;
+        const tracks = [...(e.tracks || [])];
+        const idx = tracks.findIndex((t) => t.id === trackId);
+        const alvo = idx + dir;
+        if (idx === -1 || alvo < 0 || alvo >= tracks.length) return e;
+        [tracks[idx], tracks[alvo]] = [tracks[alvo], tracks[idx]];
+        return { ...e, tracks };
+      })
+    );
+  };
+
   const handleRemoveTrack = (etapaId, trackId) => {
     setEtapas((prev) =>
       prev.map((e) =>
@@ -220,6 +234,7 @@ export default function AdminRoteiroHarmonia() {
                 onRename={handleRename}
                 onAddTrack={(etapaId) => setSearchModalEtapa(etapaId)}
                 onRemoveTrack={handleRemoveTrack}
+                onMoveTrack={handleMoveTrack}
                 onRemove={handleRemoveEtapa}
                 onChangePlaylist={handleChangePlaylist}
                 onStopTimer={handleStopTimer}
