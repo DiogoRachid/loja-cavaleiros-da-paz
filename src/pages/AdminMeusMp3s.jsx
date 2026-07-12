@@ -82,6 +82,18 @@ export default function AdminMeusMp3s() {
     setVinculos((prev) => prev.filter((v) => v.mp3_id !== mp3.id));
   };
 
+  const handleTogglePasta = async (mp3, pasta) => {
+    const existente = vinculos.find((v) => v.pasta_id === pasta.id && v.mp3_id === mp3.id);
+    if (existente) {
+      await base44.entities.PastaMusica.delete(existente.id);
+      setVinculos((prev) => prev.filter((v) => v.id !== existente.id));
+    } else {
+      const ordem = vinculos.filter((v) => v.pasta_id === pasta.id).length;
+      const novo = await base44.entities.PastaMusica.create({ pasta_id: pasta.id, mp3_id: mp3.id, ordem });
+      setVinculos((prev) => [...prev, novo]);
+    }
+  };
+
   const handleConfirmMusicas = async (ids) => {
     const pasta = modalPasta;
     setModalPasta(null);
@@ -185,7 +197,14 @@ export default function AdminMeusMp3s() {
         </div>
       )}
 
-      <BibliotecaMp3 mp3s={mp3s} onUpload={handleUpload} onDelete={handleDeleteMp3} />
+      <BibliotecaMp3
+        mp3s={mp3s}
+        pastas={pastas}
+        vinculos={vinculos}
+        onUpload={handleUpload}
+        onDelete={handleDeleteMp3}
+        onTogglePasta={handleTogglePasta}
+      />
 
       <Card>
         <CardContent className="p-4 flex items-center gap-2">

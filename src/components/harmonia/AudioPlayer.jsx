@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
 const fmt = (s) => {
@@ -14,6 +14,8 @@ export default function AudioPlayer({ src }) {
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [muted, setMuted] = useState(false);
 
   useEffect(() => {
     setPlaying(false);
@@ -33,8 +35,21 @@ export default function AudioPlayer({ src }) {
     setCurrent(v);
   };
 
+  const changeVolume = ([v]) => {
+    setVolume(v);
+    setMuted(v === 0);
+    if (audioRef.current) audioRef.current.volume = v;
+  };
+
+  const toggleMute = () => {
+    const novo = !muted;
+    setMuted(novo);
+    if (audioRef.current) audioRef.current.volume = novo ? 0 : (volume || 1);
+    if (!novo && volume === 0) setVolume(1);
+  };
+
   return (
-    <div className="flex items-center gap-3 w-full sm:w-[340px] bg-white border border-slate-200 rounded-full px-3 py-2 flex-shrink-0">
+    <div className="flex items-center gap-2 w-full sm:w-[400px] bg-white border border-slate-200 rounded-full px-3 py-2 flex-shrink-0">
       <audio
         ref={audioRef}
         src={src}
@@ -60,6 +75,16 @@ export default function AudioPlayer({ src }) {
         className="flex-1 cursor-pointer"
       />
       <span className="text-[11px] text-slate-500 tabular-nums flex-shrink-0 w-9">{fmt(duration)}</span>
+      <button onClick={toggleMute} className="text-slate-500 hover:text-slate-700 flex-shrink-0">
+        {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+      </button>
+      <Slider
+        value={[muted ? 0 : volume]}
+        max={1}
+        step={0.05}
+        onValueChange={changeVolume}
+        className="w-16 cursor-pointer flex-shrink-0 hidden sm:flex"
+      />
     </div>
   );
 }
