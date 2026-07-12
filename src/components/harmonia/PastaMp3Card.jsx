@@ -74,7 +74,10 @@ export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMus
                     <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center flex-shrink-0">
                       <Music className="w-3 h-3 text-slate-400" />
                     </div>
-                    <p className="text-sm text-slate-800 truncate">{m.nome}</p>
+                    <div className="min-w-0">
+                      <p className="text-sm text-slate-800 break-words">{m.nome}</p>
+                      {m.artista && <p className="text-xs text-slate-400 break-words">{m.artista}</p>}
+                    </div>
                   </div>
                   <audio controls src={m.file_url} className="h-8 w-full sm:w-56" />
                   <Button

@@ -192,8 +192,8 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
                     <Music className="w-3 h-3 text-slate-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[#1B3A5F] text-xs font-medium truncate">{track.name}</p>
-                    <p className="text-slate-400 text-[10px] truncate">{track.artists}</p>
+                    <p className="text-[#1B3A5F] text-xs font-medium break-words">{track.name}</p>
+                    {track.artists && <p className="text-slate-400 text-[10px] break-words">{track.artists}</p>}
                   </div>
                   {track.file_url && (
                     <Button
