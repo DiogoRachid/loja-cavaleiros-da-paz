@@ -13,19 +13,6 @@
     "file_url": {
       "type": "string",
       "description": "URL do arquivo mp3"
-    },
-    "pasta_id": {
-      "type": "string",
-      "description": "ID da pasta de m\u00fasicas \u00e0 qual pertence"
-    },
-    "pasta_nome": {
-      "type": "string",
-      "description": "Nome da pasta (para exibi\u00e7\u00e3o r\u00e1pida)"
-    },
-    "ordem": {
-      "type": "number",
-      "default": 0,
-      "description": "Ordem de reprodu\u00e7\u00e3o dentro da pasta"
     }
   },
   "required": [

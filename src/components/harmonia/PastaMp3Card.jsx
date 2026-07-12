@@ -1,22 +1,10 @@
-import { useState, useRef } from "react";
-import { FolderOpen, Music, Upload, Trash2, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
+import { FolderOpen, Music, Plus, Trash2, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function PastaMp3Card({ pasta, mp3s, onUpload, onDeleteMp3, onDeletePasta }) {
+export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMusica, onDeletePasta }) {
   const [expanded, setExpanded] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef(null);
-
-  const handleFiles = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    setUploading(true);
-    await onUpload(pasta, files);
-    setUploading(false);
-    setExpanded(true);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
 
   return (
     <Card>
@@ -27,37 +15,26 @@ export default function PastaMp3Card({ pasta, mp3s, onUpload, onDeleteMp3, onDel
           </div>
           <button className="flex-1 min-w-0 text-left" onClick={() => setExpanded(!expanded)}>
             <p className="font-semibold text-slate-800 text-sm truncate">{pasta.nome}</p>
-            <p className="text-xs text-slate-500">{mp3s.length} música{mp3s.length !== 1 ? "s" : ""}</p>
+            <p className="text-xs text-slate-500">{musicas.length} música{musicas.length !== 1 ? "s" : ""}</p>
           </button>
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept="audio/mp3,audio/mpeg,audio/wav,audio/x-m4a,audio/mp4"
-            className="hidden"
-            onChange={handleFiles}
-          />
           <Button
             size="sm"
             variant="outline"
-            disabled={uploading}
             className="border-[#1B3A5F] text-[#1B3A5F] hover:bg-[#1B3A5F] hover:text-white"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => onAddMusicas(pasta)}
           >
-            {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />}
-            Enviar MP3s
+            <Plus className="w-4 h-4 mr-1" />
+            Adicionar Músicas
           </Button>
-          {onDeletePasta && (
-            <Button
-              size="icon"
-              variant="ghost"
-              className="text-red-400 hover:text-red-500 hover:bg-red-50"
-              onClick={() => onDeletePasta(pasta)}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          )}
+          <Button
+            size="icon"
+            variant="ghost"
+            className="text-red-400 hover:text-red-500 hover:bg-red-50"
+            onClick={() => onDeletePasta(pasta)}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
           <Button size="icon" variant="ghost" onClick={() => setExpanded(!expanded)}>
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </Button>
@@ -65,10 +42,12 @@ export default function PastaMp3Card({ pasta, mp3s, onUpload, onDeleteMp3, onDel
 
         {expanded && (
           <div className="mt-4 space-y-2">
-            {mp3s.length === 0 ? (
-              <p className="text-center text-slate-400 text-sm py-4">Nenhuma música nesta pasta.</p>
+            {musicas.length === 0 ? (
+              <p className="text-center text-slate-400 text-sm py-4">
+                Nenhuma música vinculada. Use "Adicionar Músicas".
+              </p>
             ) : (
-              mp3s.map((m) => (
+              musicas.map((m) => (
                 <div key={m.id} className="flex flex-col sm:flex-row sm:items-center gap-2 p-2 rounded-lg bg-slate-50">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center flex-shrink-0">
@@ -80,10 +59,11 @@ export default function PastaMp3Card({ pasta, mp3s, onUpload, onDeleteMp3, onDel
                   <Button
                     size="icon"
                     variant="ghost"
+                    title="Remover da pasta (o arquivo continua na biblioteca)"
                     className="h-7 w-7 text-red-400 hover:text-red-500 hover:bg-red-50 flex-shrink-0"
-                    onClick={() => onDeleteMp3(m)}
+                    onClick={() => onRemoveMusica(pasta, m)}
                   >
-                    <Trash2 className="w-3 h-3" />
+                    <X className="w-3 h-3" />
                   </Button>
                 </div>
               ))

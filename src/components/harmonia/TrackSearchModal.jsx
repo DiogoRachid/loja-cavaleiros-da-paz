@@ -22,6 +22,7 @@ function mp3ToTrack(m) {
 export default function TrackSearchModal({ open, onClose, selectedTracks = [], onConfirm, initialPastaId }) {
   const [pastas, setPastas] = useState([]);
   const [mp3s, setMp3s] = useState([]);
+  const [vinculos, setVinculos] = useState([]);
   const [pastaFiltro, setPastaFiltro] = useState(TODAS);
   const [busca, setBusca] = useState("");
   const [selected, setSelected] = useState([]);
@@ -33,10 +34,12 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
       setPastaFiltro(initialPastaId || TODAS);
       Promise.all([
         base44.entities.PastaMp3.list("nome", 100),
-        base44.entities.MinhaMp3.list("ordem", 500),
-      ]).then(([p, m]) => {
+        base44.entities.MinhaMp3.list("nome", 500),
+        base44.entities.PastaMusica.list("ordem", 1000),
+      ]).then(([p, m, v]) => {
         setPastas(p);
         setMp3s(m);
+        setVinculos(v);
       });
     }
   }, [open, initialPastaId]);
@@ -63,7 +66,7 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
   const isSelected = (trackId) => selected.some((t) => t.id === trackId);
 
   const listagem = mp3s.filter((m) => {
-    if (pastaFiltro !== TODAS && m.pasta_id !== pastaFiltro) return false;
+    if (pastaFiltro !== TODAS && !vinculos.some((v) => v.pasta_id === pastaFiltro && v.mp3_id === m.id)) return false;
     if (busca.trim() && !`${m.nome} ${m.artista || ""}`.toLowerCase().includes(busca.toLowerCase())) return false;
     return true;
   });
@@ -126,7 +129,7 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-slate-800 text-sm truncate">{m.nome}</p>
                       <p className="text-xs text-slate-500 truncate">
-                        {m.artista ? `${m.artista} • ` : ""}{m.pasta_nome || "Sem pasta"}
+                        {[m.artista, ...pastas.filter((p) => vinculos.some((v) => v.pasta_id === p.id && v.mp3_id === m.id)).map((p) => p.nome)].filter(Boolean).join(" • ") || "Sem pasta"}
                       </p>
                     </div>
                     <div

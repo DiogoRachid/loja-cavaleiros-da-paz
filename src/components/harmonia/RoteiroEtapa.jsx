@@ -30,16 +30,22 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
 
   const handleTocarEtapa = async () => {
     let fila = playableTracks;
-    // Sem músicas avulsas: toca todas as músicas da pasta vinculada
+    // Sem músicas avulsas: toca todas as músicas vinculadas à pasta
     if (fila.length === 0 && etapa.playlist_id) {
-      const mp3s = await base44.entities.MinhaMp3.filter({ pasta_id: etapa.playlist_id }, "ordem", 200);
-      fila = mp3s.map((m) => ({
-        id: `mp3_${m.id}`,
-        name: m.nome,
-        artists: m.artista || "",
-        file_url: m.file_url,
-        is_mp3: true,
-      }));
+      const [vinculos, mp3s] = await Promise.all([
+        base44.entities.PastaMusica.filter({ pasta_id: etapa.playlist_id }, "ordem", 200),
+        base44.entities.MinhaMp3.list("nome", 500),
+      ]);
+      fila = vinculos
+        .map((v) => mp3s.find((m) => m.id === v.mp3_id))
+        .filter(Boolean)
+        .map((m) => ({
+          id: `mp3_${m.id}`,
+          name: m.nome,
+          artists: m.artista || "",
+          file_url: m.file_url,
+          is_mp3: true,
+        }));
     }
     if (fila.length === 0) return;
     playback?.playEtapa(etapa.id, fila);
