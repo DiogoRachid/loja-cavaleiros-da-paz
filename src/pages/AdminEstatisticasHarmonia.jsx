@@ -36,6 +36,8 @@ export default function AdminEstatisticasHarmonia() {
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [filtroGrau, setFiltroGrau] = useState("todos");
   const [excluir, setExcluir] = useState(null);
+  const [confirmarApagarTudo, setConfirmarApagarTudo] = useState(false);
+  const [apagandoTudo, setApagandoTudo] = useState(false);
 
   useEffect(() => {
     loadDados();
@@ -51,6 +53,17 @@ export default function AdminEstatisticasHarmonia() {
     await base44.entities.TempoEtapa.delete(excluir.id);
     setRegistros((prev) => prev.filter((r) => r.id !== excluir.id));
     setExcluir(null);
+  };
+
+  const apagarTodoHistorico = async () => {
+    setApagandoTudo(true);
+    let res = await base44.entities.TempoEtapa.deleteMany({ etapa_nome: { $exists: true } });
+    while (res?.has_more) {
+      res = await base44.entities.TempoEtapa.deleteMany({ etapa_nome: { $exists: true } });
+    }
+    setRegistros([]);
+    setApagandoTudo(false);
+    setConfirmarApagarTudo(false);
   };
 
   const filtrados = registros.filter((r) =>
@@ -95,6 +108,15 @@ export default function AdminEstatisticasHarmonia() {
           <h1 className="text-xl font-bold text-[#1B3A5F]">Tempos das Etapas</h1>
           <p className="text-slate-500 text-sm">Tempo médio decorrido por etapa e histórico</p>
         </div>
+        {registros.length > 0 && (
+          <Button
+            variant="outline"
+            className="ml-auto border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+            onClick={() => setConfirmarApagarTudo(true)}
+          >
+            <Trash2 className="w-4 h-4 mr-2" /> Apagar Todo Histórico
+          </Button>
+        )}
       </div>
 
       {/* Filtros */}
@@ -193,6 +215,29 @@ export default function AdminEstatisticasHarmonia() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={confirmarExclusao} className="bg-red-600 hover:bg-red-700">
               Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={confirmarApagarTudo} onOpenChange={(o) => !o && !apagandoTudo && setConfirmarApagarTudo(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apagar todo o histórico de tempos?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Todos os {registros.length} registros de tempo serão excluídos permanentemente.
+              <br />Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={apagandoTudo}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); apagarTodoHistorico(); }}
+              disabled={apagandoTudo}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {apagandoTudo ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Apagar Tudo
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
