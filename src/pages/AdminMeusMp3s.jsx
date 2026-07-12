@@ -16,6 +16,7 @@ export default function AdminMeusMp3s() {
   const [loading, setLoading] = useState(true);
   const [criando, setCriando] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [avisoDuplicadas, setAvisoDuplicadas] = useState("");
   const [modalPasta, setModalPasta] = useState(null);
 
   useEffect(() => {
@@ -46,15 +47,30 @@ export default function AdminMeusMp3s() {
 
   const handleUpload = async (files) => {
     setErrorMsg("");
+    setAvisoDuplicadas("");
+    const duplicadas = [];
+    const nomesExistentes = new Set(mp3s.map((m) => m.nome.trim().toLowerCase()));
     try {
       for (const file of files) {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
         const nome = file.name.replace(/\.(mp3|mpeg|wav|m4a)$/i, "");
+        if (nomesExistentes.has(nome.trim().toLowerCase())) {
+          duplicadas.push(nome);
+          continue;
+        }
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
         const novo = await base44.entities.MinhaMp3.create({ nome, file_url });
+        nomesExistentes.add(nome.trim().toLowerCase());
         setMp3s((prev) => [...prev, novo].sort((a, b) => a.nome.localeCompare(b.nome)));
       }
     } catch (err) {
       setErrorMsg("Não foi possível enviar um dos arquivos. Tente novamente.");
+    }
+    if (duplicadas.length > 0) {
+      setAvisoDuplicadas(
+        duplicadas.length === 1
+          ? `A música "${duplicadas[0]}" já está presente na biblioteca e não foi enviada novamente.`
+          : `As músicas ${duplicadas.map((n) => `"${n}"`).join(", ")} já estão presentes na biblioteca e não foram enviadas novamente.`
+      );
     }
   };
 
@@ -160,6 +176,13 @@ export default function AdminMeusMp3s() {
 
       {errorMsg && (
         <div className="bg-red-50 text-red-600 text-sm rounded-lg p-3">{errorMsg}</div>
+      )}
+
+      {avisoDuplicadas && (
+        <div className="bg-amber-50 text-amber-700 text-sm rounded-lg p-3 flex items-start justify-between gap-3">
+          <span>{avisoDuplicadas}</span>
+          <button className="font-bold flex-shrink-0" onClick={() => setAvisoDuplicadas("")}>✕</button>
+        </div>
       )}
 
       <BibliotecaMp3 mp3s={mp3s} onUpload={handleUpload} onDelete={handleDeleteMp3} />
