@@ -3,7 +3,7 @@ import { FolderOpen } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
 
-export default function PastaSelector({ value, onChange }) {
+export default function PastaSelector({ value, valueName, onChange }) {
   const [pastas, setPastas] = useState([]);
 
   useEffect(() => {
@@ -24,6 +24,9 @@ export default function PastaSelector({ value, onChange }) {
           <SelectValue placeholder="Selecionar pasta" />
         </SelectTrigger>
         <SelectContent>
+          {value && !pastas.some((p) => p.id === value) && (
+            <SelectItem value={value}>{valueName || "Pasta antiga (removida)"}</SelectItem>
+          )}
           {pastas.map((p) => (
             <SelectItem key={p.id} value={p.id}>
               {p.nome}

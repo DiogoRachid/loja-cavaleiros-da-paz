@@ -181,6 +181,7 @@ export default function AdminConfigEtapasHarmonia() {
                               <span className="text-[#1B3A5F] font-semibold text-sm w-32 flex-shrink-0">{nome}</span>
                               <PastaSelector
                                 value={configs[k]?.playlist_id}
+                                valueName={configs[k]?.playlist_name}
                                 onChange={(playlist) => handleChangePlaylist(grau, tipo, nome, playlist)}
                               />
                               <Button
