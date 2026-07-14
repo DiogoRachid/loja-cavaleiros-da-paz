@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Music, X, Play, Pause, Trash2, GripVertical, Repeat, Square, ChevronUp, ChevronDown } from "lucide-react";
+import { Music, X, Play, Pause, Trash2, GripVertical, Repeat, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { base44 } from "@/api/base44Client";
 import PastaSelector from "./PastaSelector";
 import EtapaCronometro from "./EtapaCronometro";
 import { useMp3Playback } from "./Mp3PlaybackContext";
@@ -28,41 +27,17 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
     wasPlayingRef.current = isEtapaPlaying;
   }, [isEtapaPlaying]);
 
-  const handleTocarEtapa = async () => {
-    let fila = playableTracks;
-    // Sem músicas avulsas: toca todas as músicas vinculadas à pasta
-    if (fila.length === 0 && etapa.playlist_id) {
-      const [vinculos, mp3s] = await Promise.all([
-        base44.entities.PastaMusica.filter({ pasta_id: etapa.playlist_id }, "ordem", 200),
-        base44.entities.MinhaMp3.list("nome", 500),
-      ]);
-      fila = vinculos
-        .map((v) => mp3s.find((m) => m.id === v.mp3_id))
-        .filter(Boolean)
-        .map((m) => ({
-          id: `mp3_${m.id}`,
-          name: m.nome,
-          artists: m.artista || "",
-          file_url: m.file_url,
-          is_mp3: true,
-        }));
-    }
-    if (fila.length === 0) return;
-    playback?.playEtapa(etapa.id, fila);
+  const handleRepeatFrom = (trackIndex) => {
+    const playableIndex = playableTracks.findIndex((track) => track.id === tracks[trackIndex]?.id);
+    if (playableIndex === -1) return;
+    playback?.playEtapa(etapa.id, playableTracks, playableIndex);
     setStartSignal((s) => s + 1);
-  };
-
-  const handlePararEtapa = () => {
-    playback?.stopEtapa();
-    setStopSignal((s) => s + 1);
   };
 
   const handleSaveName = () => {
     onRename(etapa.id, name.trim() || `Etapa ${num}`);
     setEditing(false);
   };
-
-  const podeTocar = playableTracks.length > 0 || !!etapa.playlist_id;
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white hover:border-[#C9A227] transition-colors group">
@@ -87,41 +62,6 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
           >
             {etapa.nome}
           </button>
-        )}
-
-        {podeTocar && (
-          isEtapaPlaying ? (
-            <>
-              <Button
-                size="icon"
-                variant="outline"
-                title={playback?.isPaused ? "Continuar Etapa" : "Pausar Etapa"}
-                className="border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white h-7 w-7 flex-shrink-0"
-                onClick={() => playback?.togglePauseEtapa()}
-              >
-                {playback?.isPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                title="Parar Etapa"
-                className="border-red-400 text-red-500 hover:bg-red-50 h-7 w-7 flex-shrink-0"
-                onClick={handlePararEtapa}
-              >
-                <Square className="w-3 h-3" />
-              </Button>
-            </>
-          ) : (
-            <Button
-              size="icon"
-              variant="outline"
-              title="Tocar Etapa"
-              className="border-[#C9A227] text-[#C9A227] hover:bg-[#C9A227] hover:text-white h-7 w-7 flex-shrink-0"
-              onClick={handleTocarEtapa}
-            >
-              <Repeat className="w-3 h-3" />
-            </Button>
-          )
         )}
 
         <Button
@@ -196,20 +136,36 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
                     {track.artists && <p className="text-slate-400 text-[10px] break-words">{track.artists}</p>}
                   </div>
                   {track.file_url && (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-6 w-6 text-[#1B3A5F] hover:bg-slate-200"
-                      onClick={() => playback?.toggle(track)}
-                    >
-                      {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                    </Button>
+                    <>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        title="Tocar ou pausar música"
+                        className="h-6 w-6 text-[#1B3A5F] hover:bg-slate-200"
+                        onClick={() => playback?.toggle(track)}
+                      >
+                        {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        title="Repetir lista a partir desta música"
+                        className="h-6 w-6 text-[#C9A227] hover:bg-amber-50"
+                        onClick={() => handleRepeatFrom(ti)}
+                      >
+                        <Repeat className="w-3 h-3" />
+                      </Button>
+                    </>
                   )}
                   <Button
                     size="icon"
                     variant="ghost"
                     className="h-6 w-6 text-red-400 hover:text-red-500 hover:bg-red-50"
-                    onClick={() => onRemoveTrack(etapa.id, track.id)}
+                    onClick={() => {
+                      if (window.confirm(`Remover a música \"${track.name}\" desta etapa?`)) {
+                        onRemoveTrack(etapa.id, track.id);
+                      }
+                    }}
                   >
                     <X className="w-3 h-3" />
                   </Button>

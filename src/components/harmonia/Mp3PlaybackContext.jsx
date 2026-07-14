@@ -154,13 +154,13 @@ export function Mp3PlaybackProvider({ children }) {
     };
   }, []);
 
-  const playEtapa = (etapaId, tracks) => {
+  const playEtapa = (etapaId, tracks, startIndex = 0) => {
     const fila = (tracks || []).filter((t) => t.file_url);
     if (fila.length === 0) return;
     loopRef.current = true;
     queueRef.current = fila;
     setActiveQueueOwner(etapaId);
-    playTrackAt(0);
+    playTrackAt(Math.min(Math.max(startIndex, 0), fila.length - 1));
   };
 
   const stopEtapa = () => stopAll();

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
+import AudioPlayer from "@/components/harmonia/AudioPlayer";
 
 const TODAS = "__todas__";
 
@@ -122,7 +123,7 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
                   className={`cursor-pointer transition-colors ${sel ? "border-[#C9A227] bg-amber-50" : "hover:border-[#1B3A5F]"}`}
                   onClick={() => toggleTrack(track)}
                 >
-                  <CardContent className="p-3 flex items-center gap-3">
+                  <CardContent className="p-3 flex flex-col sm:flex-row sm:items-center gap-3">
                     <div className="w-10 h-10 rounded bg-slate-200 flex items-center justify-center flex-shrink-0">
                       <Music className="w-4 h-4 text-slate-400" />
                     </div>
@@ -131,6 +132,9 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
                       <p className="text-xs text-slate-500 truncate">
                         {[m.artista, ...pastas.filter((p) => vinculos.some((v) => v.pasta_id === p.id && v.mp3_id === m.id)).map((p) => p.nome)].filter(Boolean).join(" • ") || "Sem pasta"}
                       </p>
+                    </div>
+                    <div onClick={(e) => e.stopPropagation()} className="max-w-full">
+                      <AudioPlayer src={m.file_url} />
                     </div>
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
