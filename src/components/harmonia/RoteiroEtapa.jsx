@@ -100,75 +100,79 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
       />
 
       {tracks.length > 0 && (
-        <div className="px-4 pb-3 pt-1 space-y-2 ml-8">
+        <div className="px-2 sm:px-4 pb-3 pt-1 space-y-2 sm:ml-8">
           {tracks.map((track, ti) => {
             const isCurrentTrack = playback?.currentTrackId === track.id;
             const isPlaying = isCurrentTrack && !playback?.isPaused;
             return (
-              <div key={track.id || ti} className="p-2 rounded-lg bg-slate-50">
-                <div className="flex items-center gap-3">
-                  <span className="text-[#1B3A5F] text-[10px] font-bold w-5 text-right flex-shrink-0">
-                    {String(ti + 1).padStart(2, "0")}
-                  </span>
-                  <div className="flex flex-col flex-shrink-0">
-                    <button
-                      title="Mover para cima"
-                      disabled={ti === 0}
-                      className="text-slate-400 hover:text-[#1B3A5F] disabled:opacity-20 disabled:cursor-default"
-                      onClick={() => onMoveTrack(etapa.id, track.id, -1)}
-                    >
-                      <ChevronUp className="w-3 h-3" />
-                    </button>
-                    <button
-                      title="Mover para baixo"
-                      disabled={ti === tracks.length - 1}
-                      className="text-slate-400 hover:text-[#1B3A5F] disabled:opacity-20 disabled:cursor-default"
-                      onClick={() => onMoveTrack(etapa.id, track.id, 1)}
-                    >
-                      <ChevronDown className="w-3 h-3" />
-                    </button>
-                  </div>
-                  <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center flex-shrink-0">
-                    <Music className="w-3 h-3 text-slate-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[#1B3A5F] text-xs font-medium break-words">{track.name}</p>
-                    {track.artists && <p className="text-slate-400 text-[10px] break-words">{track.artists}</p>}
-                  </div>
-                  {track.file_url && (
-                    <>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        title="Tocar ou pausar música"
-                        className="h-6 w-6 text-[#1B3A5F] hover:bg-slate-200"
-                        onClick={() => playback?.toggle(track)}
+              <div key={track.id || ti} className="p-3 rounded-lg bg-slate-50">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                  <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-1 min-w-0 w-full">
+                    <span className="text-[#1B3A5F] text-[10px] font-bold w-5 text-right flex-shrink-0 pt-2 sm:pt-0">
+                      {String(ti + 1).padStart(2, "0")}
+                    </span>
+                    <div className="flex flex-col flex-shrink-0 pt-0.5 sm:pt-0">
+                      <button
+                        title="Mover para cima"
+                        disabled={ti === 0}
+                        className="p-1 text-slate-400 hover:text-[#1B3A5F] disabled:opacity-20 disabled:cursor-default"
+                        onClick={() => onMoveTrack(etapa.id, track.id, -1)}
                       >
-                        {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        title="Repetir lista a partir desta música"
-                        className="h-6 w-6 text-[#C9A227] hover:bg-amber-50"
-                        onClick={() => handleRepeatFrom(ti)}
+                        <ChevronUp className="w-3 h-3" />
+                      </button>
+                      <button
+                        title="Mover para baixo"
+                        disabled={ti === tracks.length - 1}
+                        className="p-1 text-slate-400 hover:text-[#1B3A5F] disabled:opacity-20 disabled:cursor-default"
+                        onClick={() => onMoveTrack(etapa.id, track.id, 1)}
                       >
-                        <Repeat className="w-3 h-3" />
-                      </Button>
-                    </>
-                  )}
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-6 w-6 text-red-400 hover:text-red-500 hover:bg-red-50"
-                    onClick={() => {
-                      if (window.confirm(`Remover a música \"${track.name}\" desta etapa?`)) {
-                        onRemoveTrack(etapa.id, track.id);
-                      }
-                    }}
-                  >
-                    <X className="w-3 h-3" />
-                  </Button>
+                        <ChevronDown className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <div className="w-9 h-9 rounded bg-slate-200 flex items-center justify-center flex-shrink-0">
+                      <Music className="w-4 h-4 text-slate-400" />
+                    </div>
+                    <div className="flex-1 min-w-0 pr-1">
+                      <p className="text-[#1B3A5F] text-sm font-medium break-words leading-5">{track.name}</p>
+                      {track.artists && <p className="text-slate-400 text-xs break-words mt-0.5">{track.artists}</p>}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end gap-1 pl-16 sm:pl-0 border-t border-slate-200 pt-2 sm:border-0 sm:pt-0 flex-shrink-0">
+                    {track.file_url && (
+                      <>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          title="Tocar ou pausar música"
+                          className="h-9 w-9 sm:h-7 sm:w-7 text-[#1B3A5F] hover:bg-slate-200"
+                          onClick={() => playback?.toggle(track)}
+                        >
+                          {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          title="Repetir lista a partir desta música"
+                          className="h-9 w-9 sm:h-7 sm:w-7 text-[#C9A227] hover:bg-amber-50"
+                          onClick={() => handleRepeatFrom(ti)}
+                        >
+                          <Repeat className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-9 w-9 sm:h-7 sm:w-7 text-red-400 hover:text-red-500 hover:bg-red-50"
+                      onClick={() => {
+                        if (window.confirm(`Remover a música \"${track.name}\" desta etapa?`)) {
+                          onRemoveTrack(etapa.id, track.id);
+                        }
+                      }}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
                 {isCurrentTrack && (
                   <div className="mt-1">
@@ -186,7 +190,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
       )}
 
       {playback?.error && (
-        <p className="px-4 pb-2 ml-8 text-[10px] text-red-500">{playback.error}</p>
+        <p className="px-3 sm:px-4 pb-2 sm:ml-8 text-xs text-red-500">{playback.error}</p>
       )}
     </div>
   );
