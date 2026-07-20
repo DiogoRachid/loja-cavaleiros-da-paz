@@ -35,8 +35,8 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
       setPastaFiltro(initialPastaId || TODAS);
       Promise.all([
         base44.entities.PastaMp3.list("nome", 100),
-        base44.entities.MinhaMp3.list("nome", 500),
-        base44.entities.PastaMusica.list("ordem", 1000),
+        base44.entities.MinhaMp3.list("nome", 5000),
+        base44.entities.PastaMusica.list("ordem", 5000),
       ]).then(([p, m, v]) => {
         setPastas(p);
         setMp3s(m);
