@@ -105,21 +105,21 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
             const isCurrentTrack = playback?.currentTrackId === track.id;
             const isPlaying = isCurrentTrack && !playback?.isPaused;
             return (
-              <div key={track.id || ti} className={`mx-auto flex min-h-[400px] w-full max-w-[440px] flex-col justify-center rounded-xl bg-[#253251] px-6 py-8 sm:px-8 text-white shadow-lg transition-shadow ${isCurrentTrack ? "ring-2 ring-[#D6B45E] shadow-xl" : ""}`}>
+              <div key={track.id || ti} className={`mx-auto flex min-h-[300px] w-full max-w-[360px] flex-col justify-center rounded-xl bg-[#253251] px-5 py-5 text-white shadow-lg transition-shadow ${isCurrentTrack ? "ring-2 ring-[#D6B45E] shadow-xl" : ""}`}>
                 <div className="text-center">
-                  <span className="block text-6xl sm:text-7xl font-bold tracking-tight text-white">
+                  <span className="block text-5xl font-bold tracking-tight text-white">
                     {String(ti + 1).padStart(2, "0")}
                   </span>
-                  <p className="mt-5 text-lg sm:text-xl font-semibold break-words leading-7 text-white">{track.name}</p>
-                  {track.artists && <p className="mt-2 text-base break-words text-slate-300">{track.artists}</p>}
-                  <div className="mt-4 space-y-1 text-sm sm:text-base text-slate-400">
+                  <p className="mt-3 text-base font-semibold break-words leading-6 text-white">{track.name}</p>
+                  {track.artists && <p className="mt-1 text-sm break-words text-slate-300">{track.artists}</p>}
+                  <div className="mt-3 space-y-0.5 text-xs text-slate-400">
                     <p>Tocar ou pausar música</p>
                     <p>Repetir lista a partir desta música</p>
                     <p>Remover música</p>
                   </div>
                 </div>
 
-                <div className="mt-7 flex items-center justify-center gap-3 sm:gap-4">
+                <div className="mt-4 flex items-center justify-center gap-2">
                   <Button
                     size="icon"
                     variant="ghost"
@@ -135,10 +135,10 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
                       size="icon"
                       variant="ghost"
                       title="Tocar ou pausar música"
-                      className="h-16 w-16 rounded-full border-4 border-[#D6B45E] text-[#D6B45E] hover:bg-[#D6B45E] hover:text-[#253251]"
+                      className="h-12 w-12 rounded-full border-[3px] border-[#D6B45E] text-[#D6B45E] hover:bg-[#D6B45E] hover:text-[#253251]"
                       onClick={() => playback?.toggle(track)}
                     >
-                      {isPlaying ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7 ml-1" />}
+                      {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
                     </Button>
                   )}
                   <Button
@@ -177,7 +177,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
                   </Button>
                 </div>
 
-                <div className="mt-7">
+                <div className="mt-4">
                   <TrackProgressBar
                     position={isCurrentTrack ? playback.position : 0}
                     duration={isCurrentTrack ? playback.duration : 0}
