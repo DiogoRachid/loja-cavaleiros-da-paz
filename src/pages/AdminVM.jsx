@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Crown, Users, Calendar, DollarSign, Award, BarChart, TrendingUp, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,9 +21,9 @@ export default function AdminVM() {
   const loadDados = async () => {
     await autoRealizarSessoes();
     const [irmaos, sessoes, mensalidades] = await Promise.all([
-      base44.entities.Irmao.filter({ ativo: true }),
-      base44.entities.Sessao.list("-data", 5),
-      base44.entities.Mensalidade.filter({ status: "Atrasado" }),
+      db.Irmao.filter({ ativo: true }),
+      db.Sessao.list("-data", 5),
+      db.Mensalidade.filter({ status: "Atrasado" }),
     ]);
     const regulares = irmaos.filter(i => i.situacao === "Regular").length;
     setStats({

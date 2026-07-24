@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { BarChart2, Download, TrendingUp, AlertCircle, CheckCircle, DollarSign } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,8 +17,8 @@ export default function AdminRelatorioFinanceiro() {
 
   const loadDados = async () => {
     const [m, ir] = await Promise.all([
-      base44.entities.Mensalidade.list("-created_date", 200),
-      base44.entities.Irmao.filter({ ativo: true }),
+      db.Mensalidade.list("-created_date", 200),
+      db.Irmao.filter({ ativo: true }),
     ]);
     setMensalidades(m);
     setIrmaos(ir);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { User, DollarSign, Calendar, BookOpen, CheckCircle, AlertCircle, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,11 +22,11 @@ export default function IrmaoPortal() {
     if (!ir.id) return;
     setIrmao(ir);
     const [m, p, s, e, mc] = await Promise.all([
-      base44.entities.Mensalidade.filter({ irmao_id: ir.id }),
-      base44.entities.Presenca.filter({ irmao_id: ir.id }),
-      base44.entities.Sessao.filter({ status: "Agendada" }),
-      base44.entities.Emprestimo.filter({ irmao_id: ir.id, status: "Ativo" }),
-      base44.entities.MembroComissao.filter({ irmao_id: ir.id, ativo: true }),
+      db.Mensalidade.filter({ irmao_id: ir.id }),
+      db.Presenca.filter({ irmao_id: ir.id }),
+      db.Sessao.filter({ status: "Agendada" }),
+      db.Emprestimo.filter({ irmao_id: ir.id, status: "Ativo" }),
+      db.MembroComissao.filter({ irmao_id: ir.id, ativo: true }),
     ]);
     setMensalidades(m.sort((a, b) => b.competencia?.localeCompare(a.competencia)));
     setPresencas(p);

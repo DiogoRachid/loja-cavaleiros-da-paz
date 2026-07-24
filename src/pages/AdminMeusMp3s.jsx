@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { FolderPlus, ListMusic, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,9 +26,9 @@ export default function AdminMeusMp3s() {
 
   const load = async () => {
     const [p, m, v] = await Promise.all([
-      base44.entities.PastaMp3.list("nome", 100),
-      base44.entities.MinhaMp3.list("nome", 5000),
-      base44.entities.PastaMusica.list("ordem", 5000),
+      db.PastaMp3.list("nome", 100),
+      db.MinhaMp3.list("nome", 5000),
+      db.PastaMusica.list("ordem", 5000),
     ]);
     setPastas(p);
     setMp3s(m);
@@ -39,7 +40,7 @@ export default function AdminMeusMp3s() {
     const nome = novaPasta.trim();
     if (!nome) return;
     setCriando(true);
-    const nova = await base44.entities.PastaMp3.create({ nome });
+    const nova = await db.PastaMp3.create({ nome });
     setPastas((prev) => [...prev, nova].sort((a, b) => a.nome.localeCompare(b.nome)));
     setNovaPasta("");
     setCriando(false);
@@ -58,7 +59,7 @@ export default function AdminMeusMp3s() {
           continue;
         }
         const { file_url } = await base44.integrations.Core.UploadFile({ file });
-        const novo = await base44.entities.MinhaMp3.create({ nome, file_url });
+        const novo = await db.MinhaMp3.create({ nome, file_url });
         nomesExistentes.add(nome.trim().toLowerCase());
         setMp3s((prev) => [...prev, novo].sort((a, b) => a.nome.localeCompare(b.nome)));
       }
@@ -76,8 +77,8 @@ export default function AdminMeusMp3s() {
 
   const handleDeleteMp3 = async (mp3) => {
     if (!confirm(`Excluir a música "${mp3.nome}" da biblioteca? Ela será removida de todas as pastas.`)) return;
-    await base44.entities.MinhaMp3.delete(mp3.id);
-    await base44.entities.PastaMusica.deleteMany({ mp3_id: mp3.id });
+    await db.MinhaMp3.delete(mp3.id);
+    await db.PastaMusica.deleteMany({ mp3_id: mp3.id });
     setMp3s((prev) => prev.filter((m) => m.id !== mp3.id));
     setVinculos((prev) => prev.filter((v) => v.mp3_id !== mp3.id));
   };
@@ -85,11 +86,11 @@ export default function AdminMeusMp3s() {
   const handleTogglePasta = async (mp3, pasta) => {
     const existente = vinculos.find((v) => v.pasta_id === pasta.id && v.mp3_id === mp3.id);
     if (existente) {
-      await base44.entities.PastaMusica.delete(existente.id);
+      await db.PastaMusica.delete(existente.id);
       setVinculos((prev) => prev.filter((v) => v.id !== existente.id));
     } else {
       const ordem = vinculos.filter((v) => v.pasta_id === pasta.id).length;
-      const novo = await base44.entities.PastaMusica.create({ pasta_id: pasta.id, mp3_id: mp3.id, ordem });
+      const novo = await db.PastaMusica.create({ pasta_id: pasta.id, mp3_id: mp3.id, ordem });
       setVinculos((prev) => [...prev, novo]);
     }
   };
@@ -103,14 +104,14 @@ export default function AdminMeusMp3s() {
     // Remove os desmarcados
     const remover = atuais.filter((v) => !ids.includes(v.mp3_id));
     for (const v of remover) {
-      await base44.entities.PastaMusica.delete(v.id);
+      await db.PastaMusica.delete(v.id);
     }
 
     // Adiciona os novos
     const adicionar = ids.filter((id) => !atuaisIds.includes(id));
     let novos = [];
     if (adicionar.length > 0) {
-      novos = await base44.entities.PastaMusica.bulkCreate(
+      novos = await db.PastaMusica.bulkCreate(
         adicionar.map((mp3Id, i) => ({
           pasta_id: pasta.id,
           mp3_id: mp3Id,
@@ -141,20 +142,20 @@ export default function AdminMeusMp3s() {
         return u ? { ...v, ordem: u.ordem } : v;
       })
     );
-    await base44.entities.PastaMusica.bulkUpdate(updates);
+    await db.PastaMusica.bulkUpdate(updates);
   };
 
   const handleRemoveMusica = async (pasta, mp3) => {
     const vinculo = vinculos.find((v) => v.pasta_id === pasta.id && v.mp3_id === mp3.id);
     if (!vinculo) return;
-    await base44.entities.PastaMusica.delete(vinculo.id);
+    await db.PastaMusica.delete(vinculo.id);
     setVinculos((prev) => prev.filter((v) => v.id !== vinculo.id));
   };
 
   const handleDeletePasta = async (pasta) => {
     if (!confirm(`Excluir a pasta "${pasta.nome}"? As músicas continuam na biblioteca.`)) return;
-    await base44.entities.PastaMusica.deleteMany({ pasta_id: pasta.id });
-    await base44.entities.PastaMp3.delete(pasta.id);
+    await db.PastaMusica.deleteMany({ pasta_id: pasta.id });
+    await db.PastaMp3.delete(pasta.id);
     setVinculos((prev) => prev.filter((v) => v.pasta_id !== pasta.id));
     setPastas((prev) => prev.filter((p) => p.id !== pasta.id));
   };

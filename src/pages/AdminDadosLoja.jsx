@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Settings, Save, Building2, Phone, Mail, Calendar, DollarSign } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ export default function AdminDadosLoja() {
   useEffect(() => { loadDados(); }, []);
 
   const loadDados = async () => {
-    const data = await base44.entities.DadosLoja.list();
+    const data = await db.DadosLoja.list();
     if (data.length > 0) {
       setForm({ ...FORM_VAZIO, ...data[0] });
       setLojaId(data[0].id);
@@ -31,8 +32,8 @@ export default function AdminDadosLoja() {
   const salvar = async () => {
     setSaving(true);
     const dados = { ...form, valor_mensalidade: parseFloat(form.valor_mensalidade) || 0 };
-    if (lojaId) await base44.entities.DadosLoja.update(lojaId, dados);
-    else { const novo = await base44.entities.DadosLoja.create(dados); setLojaId(novo.id); }
+    if (lojaId) await db.DadosLoja.update(lojaId, dados);
+    else { const novo = await db.DadosLoja.create(dados); setLojaId(novo.id); }
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);

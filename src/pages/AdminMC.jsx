@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Star, Shield, ClipboardList, Calendar, CheckSquare, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,8 +20,8 @@ export default function AdminMC() {
   const loadDados = async () => {
     await autoRealizarSessoes();
     const [autoridades, sessoes] = await Promise.all([
-      base44.entities.Autoridade.filter({ ativa: true }),
-      base44.entities.Sessao.filter({ status: "Agendada" }),
+      db.Autoridade.filter({ ativa: true }),
+      db.Sessao.filter({ status: "Agendada" }),
     ]);
     setStats({ autoridades: autoridades.length, sessoes: sessoes.length });
     setProximasSessoes(sessoes.slice(0, 3));

@@ -1,4 +1,5 @@
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Check, Search } from "lucide-react";
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,7 +21,7 @@ export default function ListaMensalidades({ mensalidades, centros, onAtualizar }
   const [filtroComp, setFiltroComp] = useState("");
 
   const registrarPagamento = async (m) => {
-    await base44.entities.Mensalidade.update(m.id, {
+    await db.Mensalidade.update(m.id, {
       status: "Pago",
       data_pagamento: new Date().toISOString().split("T")[0],
     });

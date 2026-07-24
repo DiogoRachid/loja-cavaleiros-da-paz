@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Shield, Plus, Edit2, Trash2, X, Save, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ export default function AdminAutoridades() {
   useEffect(() => { loadAutoridades(); }, []);
 
   const loadAutoridades = async () => {
-    const data = await base44.entities.Autoridade.list("ordem_protocolar", 500);
+    const data = await db.Autoridade.list("ordem_protocolar", 500);
     setAutoridades(data);
   };
 
@@ -30,8 +31,8 @@ export default function AdminAutoridades() {
   const salvar = async () => {
     setSaving(true);
     const dados = { ...form, ordem_protocolar: Number(form.ordem_protocolar) || 0 };
-    if (editando) await base44.entities.Autoridade.update(editando, dados);
-    else await base44.entities.Autoridade.create(dados);
+    if (editando) await db.Autoridade.update(editando, dados);
+    else await db.Autoridade.create(dados);
     await loadAutoridades();
     setShowForm(false);
     setSaving(false);
@@ -40,7 +41,7 @@ export default function AdminAutoridades() {
   const excluir = async (id) => {
     if (!confirm("Excluir esta autoridade?")) return;
     try {
-      await base44.entities.Autoridade.delete(id);
+      await db.Autoridade.delete(id);
     } catch (e) {
       // Já foi removida externamente — apenas atualiza a lista
     }

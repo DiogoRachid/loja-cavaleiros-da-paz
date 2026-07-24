@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { BarChart2, Users, Calendar, DollarSign, TrendingUp, FileText, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,11 +26,11 @@ export default function AdminRelatorios() {
 
   const loadDados = async () => {
     const [ir, s, m, p, loja] = await Promise.all([
-      base44.entities.Irmao.list(),
-      base44.entities.Sessao.list(),
-      base44.entities.Mensalidade.list("-created_date", 200),
-      base44.entities.Presenca.list(),
-      base44.entities.DadosLoja.list(),
+      db.Irmao.list(),
+      db.Sessao.list(),
+      db.Mensalidade.list("-created_date", 200),
+      db.Presenca.list(),
+      db.DadosLoja.list(),
     ]);
     setIrmaos(ir);
     setSessoes(s);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { ArrowLeft, Loader2, Clock, Timer, Trash2 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -44,22 +45,22 @@ export default function AdminEstatisticasHarmonia() {
   }, []);
 
   const loadDados = async () => {
-    const r = await base44.entities.TempoEtapa.list("-hora_inicio", 500);
+    const r = await db.TempoEtapa.list("-hora_inicio", 500);
     setRegistros(r);
     setLoading(false);
   };
 
   const confirmarExclusao = async () => {
-    await base44.entities.TempoEtapa.delete(excluir.id);
+    await db.TempoEtapa.delete(excluir.id);
     setRegistros((prev) => prev.filter((r) => r.id !== excluir.id));
     setExcluir(null);
   };
 
   const apagarTodoHistorico = async () => {
     setApagandoTudo(true);
-    let res = await base44.entities.TempoEtapa.deleteMany({ etapa_nome: { $exists: true } });
+    let res = await db.TempoEtapa.deleteMany({ etapa_nome: { $exists: true } });
     while (res?.has_more) {
-      res = await base44.entities.TempoEtapa.deleteMany({ etapa_nome: { $exists: true } });
+      res = await db.TempoEtapa.deleteMany({ etapa_nome: { $exists: true } });
     }
     setRegistros([]);
     setApagandoTudo(false);

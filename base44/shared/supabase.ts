@@ -64,6 +64,15 @@ export async function listar(tabela, { filtro, sort, limit } = {}) {
   return await request("GET", tabela + "?" + q.join("&"));
 }
 
+// Lista os nomes das colunas de uma tabela (via OpenAPI do PostgREST).
+let _openapi = null;
+export async function colunas(tabela) {
+  assertTabela(tabela);
+  if (!_openapi) _openapi = await request("GET", "");
+  const def = _openapi?.definitions?.[tabela];
+  return Object.keys(def?.properties || {});
+}
+
 export async function obter(tabela, id) {
   assertTabela(tabela);
   const linhas = await request("GET", tabela + "?select=*&id=eq." + encodeURIComponent(id));

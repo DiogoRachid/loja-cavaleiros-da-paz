@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Users, Plus, Edit2, Trash2, X, Save, ChevronDown, ChevronUp, UserPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,9 +28,9 @@ export default function AdminComissoes() {
 
   const loadDados = async () => {
     const [c, m, ir] = await Promise.all([
-      base44.entities.Comissao.list(),
-      base44.entities.MembroComissao.filter({ ativo: true }),
-      base44.entities.Irmao.filter({ ativo: true }),
+      db.Comissao.list(),
+      db.MembroComissao.filter({ ativo: true }),
+      db.Irmao.filter({ ativo: true }),
     ]);
     setComissoes(c);
     setMembros(m);
@@ -58,12 +59,12 @@ export default function AdminComissoes() {
     let comissaoId = editando;
 
     if (editando) {
-      await base44.entities.Comissao.update(editando, form);
+      await db.Comissao.update(editando, form);
       // Remover membros antigos e recriar
       const antigos = getMembros(editando);
-      await Promise.all(antigos.map(m => base44.entities.MembroComissao.delete(m.id)));
+      await Promise.all(antigos.map(m => db.MembroComissao.delete(m.id)));
     } else {
-      const nova = await base44.entities.Comissao.create(form);
+      const nova = await db.Comissao.create(form);
       comissaoId = nova.id;
     }
 
@@ -71,7 +72,7 @@ export default function AdminComissoes() {
     for (const irmaoId of membrosForm) {
       if (!irmaoId) continue;
       const irmao = irmaos.find(i => i.id === irmaoId);
-      await base44.entities.MembroComissao.create({
+      await db.MembroComissao.create({
         comissao_id: comissaoId,
         comissao_nome: form.nome,
         irmao_id: irmaoId,
@@ -90,13 +91,13 @@ export default function AdminComissoes() {
   const excluir = async (id) => {
     if (!confirm("Excluir comissão e seus membros?")) return;
     const mc = getMembros(id);
-    await Promise.all(mc.map(m => base44.entities.MembroComissao.delete(m.id)));
-    await base44.entities.Comissao.delete(id);
+    await Promise.all(mc.map(m => db.MembroComissao.delete(m.id)));
+    await db.Comissao.delete(id);
     await loadDados();
   };
 
   const removerMembro = async (id) => {
-    await base44.entities.MembroComissao.delete(id);
+    await db.MembroComissao.delete(id);
     await loadDados();
   };
 
@@ -105,7 +106,7 @@ export default function AdminComissoes() {
     const mc = getMembros(comissaoId);
     if (mc.length >= 3) return;
     const irmao = irmaos.find(i => i.id === novoMembroId);
-    await base44.entities.MembroComissao.create({
+    await db.MembroComissao.create({
       comissao_id: comissaoId,
       comissao_nome: comissaoNome,
       irmao_id: novoMembroId,

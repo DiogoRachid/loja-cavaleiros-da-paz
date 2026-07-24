@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import AudioPlayer from "@/components/harmonia/AudioPlayer";
 
 const TODAS = "__todas__";
@@ -34,9 +34,9 @@ export default function TrackSearchModal({ open, onClose, selectedTracks = [], o
       setBusca("");
       setPastaFiltro(initialPastaId || TODAS);
       Promise.all([
-        base44.entities.PastaMp3.list("nome", 100),
-        base44.entities.MinhaMp3.list("nome", 5000),
-        base44.entities.PastaMusica.list("ordem", 5000),
+        db.PastaMp3.list("nome", 100),
+        db.MinhaMp3.list("nome", 5000),
+        db.PastaMusica.list("ordem", 5000),
       ]).then(([p, m, v]) => {
         setPastas(p);
         setMp3s(m);

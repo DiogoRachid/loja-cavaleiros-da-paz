@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { createPageUrl } from "@/utils";
 import {
   Book, Search, Loader2, Star, Calendar, MessageSquare, 
@@ -56,8 +57,8 @@ export default function IrmaoAcervo() {
 
   const loadData = async () => {
     const [itemsData, avs] = await Promise.all([
-      base44.entities.Item.filter({ ativo: true }, "nome"),
-      base44.entities.Avaliacao.filter({ item_id: { "$ne": null } }, "-data_avaliacao")
+      db.Item.filter({ ativo: true }, "nome"),
+      db.Avaliacao.filter({ item_id: { "$ne": null } }, "-data_avaliacao")
     ]);
     setItems(itemsData);
     setAvaliacoes(avs);
@@ -77,7 +78,7 @@ export default function IrmaoAcervo() {
 
     setEnviandoAvaliacao(true);
     try {
-      await base44.entities.Avaliacao.create({
+      await db.Avaliacao.create({
         item_id: itemSelecionado.id,
         irmao_id: irmao.id,
         irmao_nome: irmao.nome_completo,

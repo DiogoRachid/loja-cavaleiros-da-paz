@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2, Upload, Check, FileText } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 
 export default function ItemForm({ item, onSave, onCancel }) {
   const [saving, setSaving] = useState(false);

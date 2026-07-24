@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Calendar, CheckCircle, Clock, MapPin, FileText, Users, Plus, X, Save, Edit2, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +43,7 @@ export default function AdminAgendaRitual() {
   useEffect(() => { loadDados(); }, []);
 
   const loadDados = async () => {
-    const data = await base44.entities.Sessao.list("-data", 30);
+    const data = await db.Sessao.list("-data", 30);
     setSessoes(data);
   };
 
@@ -54,7 +55,7 @@ export default function AdminAgendaRitual() {
 
   const salvarEdicao = async () => {
     setSaving(true);
-    await base44.entities.Sessao.update(editando, formEdicao);
+    await db.Sessao.update(editando, formEdicao);
     await loadDados();
     setEditando(null);
     setSaving(false);
@@ -63,7 +64,7 @@ export default function AdminAgendaRitual() {
   const excluir = async (id, e) => {
     e.stopPropagation();
     if (!confirm("Deseja excluir esta sessão?")) return;
-    await base44.entities.Sessao.delete(id);
+    await db.Sessao.delete(id);
     if (selecionada?.id === id) setSelecionada(null);
     await loadDados();
   };
@@ -71,7 +72,7 @@ export default function AdminAgendaRitual() {
   const salvarSessao = async () => {
     if (!form.data || !form.hora || !form.tipo) return;
     setSaving(true);
-    await base44.entities.Sessao.create(form);
+    await db.Sessao.create(form);
     await loadDados();
     setShowForm(false);
     setForm(FORM_VAZIO);

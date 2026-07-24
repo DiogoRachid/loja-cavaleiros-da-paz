@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Plus, X, Save, Settings } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,7 @@ export default function GerenciarCentrosCusto({ centros, onAtualizar }) {
   const criar = async () => {
     if (!novoNome.trim()) return;
     setSaving(true);
-    await base44.entities.CentroCusto.create({
+    await db.CentroCusto.create({
       nome: novoNome.trim(),
       ativo: true,
       ordem: centros.length + 1,
@@ -27,12 +28,12 @@ export default function GerenciarCentrosCusto({ centros, onAtualizar }) {
   };
 
   const toggleAtivo = async (c) => {
-    await base44.entities.CentroCusto.update(c.id, { ativo: !c.ativo });
+    await db.CentroCusto.update(c.id, { ativo: !c.ativo });
     onAtualizar();
   };
 
   const excluir = async (id) => {
-    await base44.entities.CentroCusto.delete(id);
+    await db.CentroCusto.delete(id);
     onAtualizar();
   };
 

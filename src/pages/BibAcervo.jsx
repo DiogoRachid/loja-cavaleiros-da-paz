@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { 
   Plus, Search, Filter, BookOpen, FileText, Newspaper, 
   Archive, Edit, Trash2, Eye, Loader2, QrCode
@@ -58,7 +59,7 @@ export default function BibAcervo() {
 
   const loadItens = async () => {
     try {
-      const data = await base44.entities.Item.list("-created_date");
+      const data = await db.Item.list("-created_date");
       setItens(data);
     } catch (error) {
       console.error("Erro ao carregar itens:", error);
@@ -68,11 +69,11 @@ export default function BibAcervo() {
 
   const handleSave = async (itemData) => {
     if (selectedItem) {
-      await base44.entities.Item.update(selectedItem.id, itemData);
+      await db.Item.update(selectedItem.id, itemData);
     } else {
       // Gerar código QR único
       const codigoQR = `LCP25-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-      await base44.entities.Item.create({ ...itemData, codigo_qr: codigoQR });
+      await db.Item.create({ ...itemData, codigo_qr: codigoQR });
     }
     await loadItens();
     setFormOpen(false);
@@ -81,7 +82,7 @@ export default function BibAcervo() {
 
   const handleDelete = async () => {
     if (selectedItem) {
-      await base44.entities.Item.update(selectedItem.id, { ativo: false });
+      await db.Item.update(selectedItem.id, { ativo: false });
       await loadItens();
     }
     setDeleteDialogOpen(false);

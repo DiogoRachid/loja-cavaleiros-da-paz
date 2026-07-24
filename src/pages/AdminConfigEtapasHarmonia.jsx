@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { ArrowLeft, Settings, Loader2, Save, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,7 +39,7 @@ export default function AdminConfigEtapasHarmonia() {
   }, []);
 
   const loadConfigs = async () => {
-    const registros = await base44.entities.ConfigEtapaHarmonia.list();
+    const registros = await db.ConfigEtapaHarmonia.list();
     const map = {};
     const grupos = {};
     registros.forEach((r) => {
@@ -104,13 +105,13 @@ export default function AdminConfigEtapasHarmonia() {
           const k = key(grau, tipo, nome);
           const config = configs[k];
           if (config?.id) {
-            await base44.entities.ConfigEtapaHarmonia.update(config.id, {
+            await db.ConfigEtapaHarmonia.update(config.id, {
               ordem: i,
               playlist_id: config.playlist_id || "",
               playlist_name: config.playlist_name || "",
             });
           } else {
-            await base44.entities.ConfigEtapaHarmonia.create({
+            await db.ConfigEtapaHarmonia.create({
               grau,
               tipo_sessao: tipo,
               etapa_nome: nome,

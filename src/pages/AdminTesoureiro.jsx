@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { DollarSign, TrendingUp, AlertCircle, CheckCircle, FileText, BarChart } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +17,7 @@ export default function AdminTesoureiro() {
   }, []);
 
   const loadDados = async () => {
-    const mensalidades = await base44.entities.Mensalidade.list("-created_date", 50);
+    const mensalidades = await db.Mensalidade.list("-created_date", 50);
     const pagos = mensalidades.filter(m => m.status === "Pago");
     const pendentes = mensalidades.filter(m => m.status === "Pendente");
     const atrasados = mensalidades.filter(m => m.status === "Atrasado");

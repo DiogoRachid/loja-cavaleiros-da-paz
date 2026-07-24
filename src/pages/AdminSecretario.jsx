@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { FileText, Users, ClipboardList, Award, UserPlus, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +17,7 @@ export default function AdminSecretario() {
   }, []);
 
   const loadDados = async () => {
-    const irmaos = await base44.entities.Irmao.filter({ ativo: true });
+    const irmaos = await db.Irmao.filter({ ativo: true });
     setStats({
       total: irmaos.length,
       aprendizes: irmaos.filter(i => i.grau === "Aprendiz").length,

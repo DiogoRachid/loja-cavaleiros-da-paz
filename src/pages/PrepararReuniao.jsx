@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { FileText, Users, Shield, ClipboardList, Printer, Save, ChevronLeft, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -89,9 +90,9 @@ export default function PrepararReuniao() {
   const loadDados = async () => {
     setLoading(true);
     const [irms, auts, loja] = await Promise.all([
-      base44.entities.Irmao.filter({ ativo: true }),
-      base44.entities.Autoridade.filter({ ativa: true }),
-      base44.entities.DadosLoja.list(),
+      db.Irmao.filter({ ativo: true }),
+      db.Autoridade.filter({ ativa: true }),
+      db.DadosLoja.list(),
     ]);
     setIrmaos(irms);
     setAutoridades(auts);
@@ -99,8 +100,8 @@ export default function PrepararReuniao() {
 
     if (sessaoId) {
       const [sess, quadro] = await Promise.all([
-        base44.entities.Sessao.filter({ id: sessaoId }),
-        base44.entities.QuadroOficiais.filter({ exercicio: new Date().getFullYear().toString() }),
+        db.Sessao.filter({ id: sessaoId }),
+        db.QuadroOficiais.filter({ exercicio: new Date().getFullYear().toString() }),
       ]);
       if (sess.length > 0) setSessao(sess[0]);
 
@@ -159,7 +160,7 @@ export default function PrepararReuniao() {
       roteiro,
       savedAt: agora,
     };
-    await base44.entities.Sessao.update(sessaoId, { preparacao_json: JSON.stringify(dados) });
+    await db.Sessao.update(sessaoId, { preparacao_json: JSON.stringify(dados) });
     setSavedAt(agora);
     setSaving(false);
   };

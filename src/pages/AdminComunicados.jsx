@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { MessageSquare, Send, Users, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,8 +25,8 @@ export default function AdminComunicados() {
 
   const loadDados = async () => {
     const [ir, s] = await Promise.all([
-      base44.entities.Irmao.filter({ ativo: true }),
-      base44.entities.Sessao.filter({ status: "Agendada" }),
+      db.Irmao.filter({ ativo: true }),
+      db.Sessao.filter({ status: "Agendada" }),
     ]);
     setIrmaos(ir);
     setSessoes(s);

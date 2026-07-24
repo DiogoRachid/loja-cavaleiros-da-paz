@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Save, RefreshCw, ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,8 +45,8 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
   const carregarCompetencia = async () => {
     if (!competencia) return;
     setCarregando(true);
-    const dados = await base44.entities.Mensalidade.filter({ competencia });
-    const dadosLoja = await base44.entities.DadosLoja.list();
+    const dados = await db.Mensalidade.filter({ competencia });
+    const dadosLoja = await db.DadosLoja.list();
     const valorPadrao = dadosLoja[0]?.valor_mensalidade || 0;
 
     setLinhas(irmaos.map(ir => {
@@ -139,9 +140,9 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
         registrado_por: admin.nome_completo || "",
       };
       if (linha.existente_id) {
-        await base44.entities.Mensalidade.update(linha.existente_id, payload);
+        await db.Mensalidade.update(linha.existente_id, payload);
       } else {
-        await base44.entities.Mensalidade.create(payload);
+        await db.Mensalidade.create(payload);
       }
     }
     setSaving(false);

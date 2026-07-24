@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Music, Calendar, ListMusic, Headphones } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,8 +17,8 @@ export default function AdminMestreHarmonia() {
 
   const loadDados = async () => {
     const [s, r] = await Promise.all([
-      base44.entities.Sessao.filter({ status: "Agendada" }),
-      base44.entities.RoteiroHarmonia.list("-created_date", 50),
+      db.Sessao.filter({ status: "Agendada" }),
+      db.RoteiroHarmonia.list("-created_date", 50),
     ]);
     setSessoes(s);
     setPlaylists(r);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { ArrowLeft, Plus, Save, Loader2, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,14 +43,14 @@ export default function AdminRoteiroHarmonia() {
 
   const loadDados = async () => {
     const [sessoes, roteiros] = await Promise.all([
-      base44.entities.Sessao.filter({ id: sessaoId }),
-      base44.entities.RoteiroHarmonia.filter({ sessao_id: sessaoId }),
+      db.Sessao.filter({ id: sessaoId }),
+      db.RoteiroHarmonia.filter({ sessao_id: sessaoId }),
     ]);
     const s = sessoes[0] || null;
     setSessao(s);
 
     // Sempre puxa a configuração de etapas/playlists do grau + tipo da sessão
-    const configs = await base44.entities.ConfigEtapaHarmonia.filter({
+    const configs = await db.ConfigEtapaHarmonia.filter({
       grau: s?.grau || "Aprendiz",
       tipo_sessao: s?.tipo || "Ordinária",
     });
@@ -70,7 +71,7 @@ export default function AdminRoteiroHarmonia() {
         playlist_id: configMap[nome]?.playlist_id || "",
         playlist_name: configMap[nome]?.playlist_name || "",
       }));
-      r = await base44.entities.RoteiroHarmonia.create({
+      r = await db.RoteiroHarmonia.create({
         sessao_id: sessaoId,
         sessao_data: s?.data || "",
         sessao_tipo: s?.tipo || "",
@@ -121,14 +122,14 @@ export default function AdminRoteiroHarmonia() {
 
   const salvar = async () => {
     setSaving(true);
-    await base44.entities.RoteiroHarmonia.update(roteiro.id, {
+    await db.RoteiroHarmonia.update(roteiro.id, {
       etapas: JSON.stringify(etapas),
     });
     setSaving(false);
   };
 
   const handleStopTimer = async (etapaNome, registro) => {
-    await base44.entities.TempoEtapa.create({
+    await db.TempoEtapa.create({
       sessao_id: sessaoId,
       sessao_data: sessao?.data || "",
       sessao_tipo: sessao?.tipo || "",

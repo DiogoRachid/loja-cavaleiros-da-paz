@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { DollarSign, Table, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GerenciarCentrosCusto from "@/components/mensalidades/GerenciarCentrosCusto";
@@ -16,9 +17,9 @@ export default function AdminMensalidades() {
 
   const loadDados = async () => {
     const [m, ir, cc] = await Promise.all([
-      base44.entities.Mensalidade.list("-created_date", 200),
-      base44.entities.Irmao.filter({ ativo: true }),
-      base44.entities.CentroCusto.list("ordem", 50),
+      db.Mensalidade.list("-created_date", 200),
+      db.Irmao.filter({ ativo: true }),
+      db.CentroCusto.list("ordem", 50),
     ]);
     setMensalidades(m);
     setIrmaos(ir);
@@ -26,12 +27,12 @@ export default function AdminMensalidades() {
   };
 
   const loadMensalidades = async () => {
-    const m = await base44.entities.Mensalidade.list("-created_date", 200);
+    const m = await db.Mensalidade.list("-created_date", 200);
     setMensalidades(m);
   };
 
   const loadCentros = async () => {
-    const cc = await base44.entities.CentroCusto.list("ordem", 50);
+    const cc = await db.CentroCusto.list("ordem", 50);
     setCentros(cc);
   };
 

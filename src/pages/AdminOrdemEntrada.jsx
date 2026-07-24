@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { ClipboardList, Plus, Save, X, ArrowUp, ArrowDown, Check, Printer } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,9 +33,9 @@ export default function AdminOrdemEntrada() {
 
   const loadDados = async () => {
     const [s, a, q] = await Promise.all([
-      base44.entities.Sessao.filter({ status: "Agendada" }),
-      base44.entities.Autoridade.filter({ ativa: true }),
-      base44.entities.QuadroOficiais.filter({ exercicio: new Date().getFullYear().toString() }),
+      db.Sessao.filter({ status: "Agendada" }),
+      db.Autoridade.filter({ ativa: true }),
+      db.QuadroOficiais.filter({ exercicio: new Date().getFullYear().toString() }),
     ]);
     setSessoes(s);
     setAutoridades(a);
@@ -42,7 +43,7 @@ export default function AdminOrdemEntrada() {
   };
 
   const loadOrdem = async () => {
-    const data = await base44.entities.OrdemEntrada.filter({ sessao_id: sessaoId });
+    const data = await db.OrdemEntrada.filter({ sessao_id: sessaoId });
     const sorted = data.sort((a, b) => a.posicao - b.posicao);
     setOrdem(sorted);
   };
@@ -66,19 +67,19 @@ export default function AdminOrdemEntrada() {
       const of = oficiais.find(o => o.cargo === novoItem.oficial_cargo);
       dados = { ...dados, oficial_cargo: novoItem.oficial_cargo, oficial_nome: of?.titular_nome || "" };
     }
-    await base44.entities.OrdemEntrada.create(dados);
+    await db.OrdemEntrada.create(dados);
     await loadOrdem();
     setShowForm(false);
     setNovoItem({ tipo_participante: "Autoridade", autoridade_id: "", oficial_cargo: "", presente: false });
   };
 
   const togglePresente = async (item) => {
-    await base44.entities.OrdemEntrada.update(item.id, { presente: !item.presente, confirmado: !item.presente });
+    await db.OrdemEntrada.update(item.id, { presente: !item.presente, confirmado: !item.presente });
     await loadOrdem();
   };
 
   const remover = async (id) => {
-    await base44.entities.OrdemEntrada.delete(id);
+    await db.OrdemEntrada.delete(id);
     await loadOrdem();
   };
 
@@ -89,8 +90,8 @@ export default function AdminOrdemEntrada() {
     const posA = newOrdem[idx].posicao;
     const posB = newOrdem[swapIdx].posicao;
     await Promise.all([
-      base44.entities.OrdemEntrada.update(newOrdem[idx].id, { posicao: posB }),
-      base44.entities.OrdemEntrada.update(newOrdem[swapIdx].id, { posicao: posA }),
+      db.OrdemEntrada.update(newOrdem[idx].id, { posicao: posB }),
+      db.OrdemEntrada.update(newOrdem[swapIdx].id, { posicao: posA }),
     ]);
     await loadOrdem();
   };

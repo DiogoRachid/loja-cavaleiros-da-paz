@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { FileText, BarChart, ClipboardList, TrendingUp, AlertCircle, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +16,7 @@ export default function AdminChanceler() {
   }, []);
 
   const loadDados = async () => {
-    const irmaos = await base44.entities.Irmao.filter({ ativo: true });
+    const irmaos = await db.Irmao.filter({ ativo: true });
     const regulares = irmaos.filter(i => i.situacao === "Regular").length;
     const irregulares = irmaos.filter(i => i.situacao === "Irregular").length;
     const mediaFreq = irmaos.length > 0 ? Math.round((regulares / irmaos.length) * 100) : 0;

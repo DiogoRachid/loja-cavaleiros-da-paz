@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Award, Save, Eye, CheckCircle, Edit2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,8 +35,8 @@ export default function AdminQuadroOficiais() {
 
   const loadDados = async () => {
     const [q, ir] = await Promise.all([
-      base44.entities.QuadroOficiais.filter({ exercicio: EXERCICIO }),
-      base44.entities.Irmao.filter({ ativo: true }),
+      db.QuadroOficiais.filter({ exercicio: EXERCICIO }),
+      db.Irmao.filter({ ativo: true }),
     ]);
     setIrmaos(ir);
     if (q.length > 0) {
@@ -65,9 +66,9 @@ export default function AdminQuadroOficiais() {
     setSaving(true);
     for (const item of quadro) {
       if (item.id) {
-        await base44.entities.QuadroOficiais.update(item.id, item);
+        await db.QuadroOficiais.update(item.id, item);
       } else {
-        const criado = await base44.entities.QuadroOficiais.create(item);
+        const criado = await db.QuadroOficiais.create(item);
         item.id = criado.id;
       }
     }
@@ -77,7 +78,7 @@ export default function AdminQuadroOficiais() {
 
   const publicar = async () => {
     for (const item of quadro) {
-      if (item.id) await base44.entities.QuadroOficiais.update(item.id, { publicado: true, data_publicacao: new Date().toISOString().split("T")[0] });
+      if (item.id) await db.QuadroOficiais.update(item.id, { publicado: true, data_publicacao: new Date().toISOString().split("T")[0] });
     }
     setPublicado(true);
     setQuadro(prev => prev.map(q => ({ ...q, publicado: true })));

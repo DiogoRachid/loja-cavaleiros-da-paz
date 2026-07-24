@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Award, Search, Printer, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,9 +18,9 @@ export default function AdminAtestados() {
 
   const loadDados = async () => {
     const [ir, dl, q] = await Promise.all([
-      base44.entities.Irmao.filter({ ativo: true }),
-      base44.entities.DadosLoja.list(),
-      base44.entities.QuadroOficiais.filter({ exercicio: new Date().getFullYear().toString() }),
+      db.Irmao.filter({ ativo: true }),
+      db.DadosLoja.list(),
+      db.QuadroOficiais.filter({ exercicio: new Date().getFullYear().toString() }),
     ]);
     setIrmaos(ir);
     setDadosLoja(dl[0] || null);

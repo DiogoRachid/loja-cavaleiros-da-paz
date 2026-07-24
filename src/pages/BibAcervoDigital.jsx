@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { createPageUrl } from "@/utils";
 import {
   FileText, Plus, Search, Loader2, Upload, Trash2, Eye, Pencil,
@@ -55,16 +56,16 @@ export default function BibAcervoDigital() {
   }, []);
 
   const loadDocumentos = async () => {
-    const docs = await base44.entities.AcervoDigital.list("-created_date");
+    const docs = await db.AcervoDigital.list("-created_date");
     setDocumentos(docs);
     setLoading(false);
   };
 
   const handleSave = async (data) => {
     if (editando) {
-      await base44.entities.AcervoDigital.update(editando.id, data);
+      await db.AcervoDigital.update(editando.id, data);
     } else {
-      await base44.entities.AcervoDigital.create(data);
+      await db.AcervoDigital.create(data);
     }
     setFormOpen(false);
     setEditando(null);
@@ -73,7 +74,7 @@ export default function BibAcervoDigital() {
 
   const handleDelete = async () => {
     if (docParaDeletar) {
-      await base44.entities.AcervoDigital.delete(docParaDeletar.id);
+      await db.AcervoDigital.delete(docParaDeletar.id);
       setDeleteDialogOpen(false);
       setDocParaDeletar(null);
       loadDocumentos();
@@ -81,7 +82,7 @@ export default function BibAcervoDigital() {
   };
 
    const handleToggleDisponibilidade = async (doc) => {
-     await base44.entities.AcervoDigital.update(doc.id, {
+     await db.AcervoDigital.update(doc.id, {
        disponivel: !doc.disponivel
      });
      loadDocumentos();

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
@@ -38,7 +39,7 @@ export default function IrmaoEmprestimos() {
       setIrmao(irmaoSessao);
         
       // Buscar empréstimos do irmão pelo ID
-      const emps = await base44.entities.Emprestimo.filter(
+      const emps = await db.Emprestimo.filter(
         { irmao_id: irmaoSessao.id },
         "-data_retirada",
         100

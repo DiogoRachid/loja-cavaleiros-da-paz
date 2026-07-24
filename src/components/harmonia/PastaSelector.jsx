@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { FolderOpen } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 
 export default function PastaSelector({ value, valueName, onChange }) {
   const [pastas, setPastas] = useState([]);
 
   useEffect(() => {
-    base44.entities.PastaMp3.list("nome", 100).then(setPastas);
+    db.PastaMp3.list("nome", 100).then(setPastas);
   }, []);
 
   const handleChange = (pastaId) => {

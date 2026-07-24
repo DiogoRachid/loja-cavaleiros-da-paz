@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
@@ -36,9 +37,9 @@ export default function BibDashboard() {
   const loadData = async () => {
     try {
       const [itens, irmaos, emprestimos] = await Promise.all([
-        base44.entities.Item.filter({ ativo: true }),
-        base44.entities.Irmao.filter({ ativo: true }),
-        base44.entities.Emprestimo.list("-created_date", 100)
+        db.Item.filter({ ativo: true }),
+        db.Irmao.filter({ ativo: true }),
+        db.Emprestimo.list("-created_date", 100)
       ]);
 
       const hoje = new Date();
