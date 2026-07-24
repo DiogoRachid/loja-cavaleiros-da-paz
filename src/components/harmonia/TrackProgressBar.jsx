@@ -54,22 +54,22 @@ export default function TrackProgressBar({ position, duration, onSeek }) {
         onPointerUp={handlePointerUp}
         onPointerCancel={() => setDragRatio(null)}
       >
-        <div className="h-1.5 w-full rounded-full bg-slate-200">
+        <div className="h-1.5 w-full rounded-full bg-white/25">
           <div
-            className="h-1.5 rounded-full bg-[#C9A227]"
+            className="h-1.5 rounded-full bg-[#D6B45E]"
             style={{ width: `${ratio * 100}%` }}
           />
         </div>
         {/* Bolinha de arrasto */}
         <div
-          className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full bg-[#C9A227] border-2 border-white shadow transition-transform ${
+          className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full bg-[#D6B45E] border-2 border-[#253251] shadow transition-transform ${
             dragRatio !== null ? "w-5 h-5" : "w-3.5 h-3.5"
           }`}
           style={{ left: `${ratio * 100}%` }}
         />
       </div>
-      <div className="flex justify-between text-[10px] font-mono tabular-nums text-slate-500 -mt-0.5">
-        <span className="text-[#C9A227]">{formatMs(shownMs)}</span>
+      <div className="flex justify-between text-sm font-medium tabular-nums text-white -mt-0.5">
+        <span>{formatMs(shownMs)}</span>
         <span>{formatMs(total)}</span>
       </div>
     </div>

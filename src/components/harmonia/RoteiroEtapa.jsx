@@ -105,84 +105,85 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
             const isCurrentTrack = playback?.currentTrackId === track.id;
             const isPlaying = isCurrentTrack && !playback?.isPaused;
             return (
-              <div key={track.id || ti} className="p-3 rounded-lg bg-slate-50">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                  <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-1 min-w-0 w-full">
-                    <span className="text-[#1B3A5F] text-[10px] font-bold w-5 text-right flex-shrink-0 pt-2 sm:pt-0">
-                      {String(ti + 1).padStart(2, "0")}
-                    </span>
-                    <div className="flex flex-col flex-shrink-0 pt-0.5 sm:pt-0">
-                      <button
-                        title="Mover para cima"
-                        disabled={ti === 0}
-                        className="p-1 text-slate-400 hover:text-[#1B3A5F] disabled:opacity-20 disabled:cursor-default"
-                        onClick={() => onMoveTrack(etapa.id, track.id, -1)}
-                      >
-                        <ChevronUp className="w-3 h-3" />
-                      </button>
-                      <button
-                        title="Mover para baixo"
-                        disabled={ti === tracks.length - 1}
-                        className="p-1 text-slate-400 hover:text-[#1B3A5F] disabled:opacity-20 disabled:cursor-default"
-                        onClick={() => onMoveTrack(etapa.id, track.id, 1)}
-                      >
-                        <ChevronDown className="w-3 h-3" />
-                      </button>
-                    </div>
-                    <div className="w-9 h-9 rounded bg-slate-200 flex items-center justify-center flex-shrink-0">
-                      <Music className="w-4 h-4 text-slate-400" />
-                    </div>
-                    <div className="flex-1 min-w-0 pr-1">
-                      <p className="text-[#1B3A5F] text-sm font-medium break-words leading-5">{track.name}</p>
-                      {track.artists && <p className="text-slate-400 text-xs break-words mt-0.5">{track.artists}</p>}
-                    </div>
+              <div key={track.id || ti} className={`mx-auto flex min-h-[400px] w-full max-w-[440px] flex-col justify-center rounded-xl bg-[#253251] px-6 py-8 sm:px-8 text-white shadow-lg transition-shadow ${isCurrentTrack ? "ring-2 ring-[#D6B45E] shadow-xl" : ""}`}>
+                <div className="text-center">
+                  <span className="block text-6xl sm:text-7xl font-bold tracking-tight text-white">
+                    {String(ti + 1).padStart(2, "0")}
+                  </span>
+                  <p className="mt-5 text-lg sm:text-xl font-semibold break-words leading-7 text-white">{track.name}</p>
+                  {track.artists && <p className="mt-2 text-base break-words text-slate-300">{track.artists}</p>}
+                  <div className="mt-4 space-y-1 text-sm sm:text-base text-slate-400">
+                    <p>Tocar ou pausar música</p>
+                    <p>Repetir lista a partir desta música</p>
+                    <p>Remover música</p>
                   </div>
-                  <div className="flex items-center justify-end gap-1 pl-16 sm:pl-0 border-t border-slate-200 pt-2 sm:border-0 sm:pt-0 flex-shrink-0">
-                    {track.file_url && (
-                      <>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          title="Tocar ou pausar música"
-                          className="h-9 w-9 sm:h-7 sm:w-7 text-[#1B3A5F] hover:bg-slate-200"
-                          onClick={() => playback?.toggle(track)}
-                        >
-                          {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          title="Repetir lista a partir desta música"
-                          className="h-9 w-9 sm:h-7 sm:w-7 text-[#C9A227] hover:bg-amber-50"
-                          onClick={() => handleRepeatFrom(ti)}
-                        >
-                          <Repeat className="w-4 h-4" />
-                        </Button>
-                      </>
-                    )}
+                </div>
+
+                <div className="mt-7 flex items-center justify-center gap-3 sm:gap-4">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    title="Mover para cima"
+                    disabled={ti === 0}
+                    className="h-10 w-10 text-white hover:text-[#D6B45E] hover:bg-white/10 disabled:opacity-20"
+                    onClick={() => onMoveTrack(etapa.id, track.id, -1)}
+                  >
+                    <ChevronUp className="w-5 h-5 -rotate-90" />
+                  </Button>
+                  {track.file_url && (
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-9 w-9 sm:h-7 sm:w-7 text-red-400 hover:text-red-500 hover:bg-red-50"
-                      onClick={() => {
-                        if (window.confirm(`Remover a música \"${track.name}\" desta etapa?`)) {
-                          onRemoveTrack(etapa.id, track.id);
-                        }
-                      }}
+                      title="Tocar ou pausar música"
+                      className="h-16 w-16 rounded-full border-4 border-[#D6B45E] text-[#D6B45E] hover:bg-[#D6B45E] hover:text-[#253251]"
+                      onClick={() => playback?.toggle(track)}
                     >
-                      <X className="w-4 h-4" />
+                      {isPlaying ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7 ml-1" />}
                     </Button>
-                  </div>
+                  )}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    title="Mover para baixo"
+                    disabled={ti === tracks.length - 1}
+                    className="h-10 w-10 text-white hover:text-[#D6B45E] hover:bg-white/10 disabled:opacity-20"
+                    onClick={() => onMoveTrack(etapa.id, track.id, 1)}
+                  >
+                    <ChevronDown className="w-5 h-5 -rotate-90" />
+                  </Button>
+                  {track.file_url && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Repetir lista a partir desta música"
+                      className="h-10 w-10 text-white hover:text-[#D6B45E] hover:bg-white/10"
+                      onClick={() => handleRepeatFrom(ti)}
+                    >
+                      <Repeat className="w-5 h-5" />
+                    </Button>
+                  )}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    title="Remover música"
+                    className="h-10 w-10 text-slate-400 hover:text-red-300 hover:bg-white/10"
+                    onClick={() => {
+                      if (window.confirm(`Remover a música \"${track.name}\" desta etapa?`)) {
+                        onRemoveTrack(etapa.id, track.id);
+                      }
+                    }}
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
                 </div>
-                {isCurrentTrack && (
-                  <div className="mt-1">
-                    <TrackProgressBar
-                      position={playback.position}
-                      duration={playback.duration}
-                      onSeek={(ms) => playback.seek(ms)}
-                    />
-                  </div>
-                )}
+
+                <div className="mt-7">
+                  <TrackProgressBar
+                    position={isCurrentTrack ? playback.position : 0}
+                    duration={isCurrentTrack ? playback.duration : 0}
+                    onSeek={(ms) => isCurrentTrack && playback.seek(ms)}
+                  />
+                </div>
               </div>
             );
           })}
