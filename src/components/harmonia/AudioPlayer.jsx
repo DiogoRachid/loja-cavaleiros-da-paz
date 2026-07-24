@@ -49,7 +49,7 @@ export default function AudioPlayer({ src }) {
   };
 
   return (
-    <div className="flex items-center gap-2 w-full sm:w-[400px] bg-white border border-slate-200 rounded-full px-3 py-2 flex-shrink-0">
+    <div className="flex items-center gap-2 w-full sm:w-[400px] bg-[#253251] rounded-xl px-3 py-2.5 shadow-md flex-shrink-0">
       <audio
         ref={audioRef}
         src={src}
@@ -62,20 +62,20 @@ export default function AudioPlayer({ src }) {
       />
       <button
         onClick={toggle}
-        className="w-9 h-9 rounded-full bg-[#1B3A5F] hover:bg-[#152d49] flex items-center justify-center flex-shrink-0 text-white"
+        className="w-10 h-10 rounded-full border-2 border-[#D6B45E] text-[#D6B45E] hover:bg-[#D6B45E] hover:text-[#253251] flex items-center justify-center flex-shrink-0 transition-colors"
       >
         {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
       </button>
-      <span className="text-[11px] text-slate-500 tabular-nums flex-shrink-0 w-9 text-right">{fmt(current)}</span>
+      <span className="text-[11px] text-white tabular-nums flex-shrink-0 w-9 text-right">{fmt(current)}</span>
       <Slider
         value={[current]}
         max={duration || 1}
         step={1}
         onValueChange={seek}
-        className="flex-1 cursor-pointer"
+        className="flex-1 cursor-pointer [&>span:first-child]:bg-white/25 [&>span:first-child>span]:bg-[#D6B45E] [&_[role=slider]]:border-[#D6B45E] [&_[role=slider]]:bg-[#D6B45E]"
       />
-      <span className="text-[11px] text-slate-500 tabular-nums flex-shrink-0 w-9">{fmt(duration)}</span>
-      <button onClick={toggleMute} className="text-slate-500 hover:text-slate-700 flex-shrink-0">
+      <span className="text-[11px] text-white tabular-nums flex-shrink-0 w-9">{fmt(duration)}</span>
+      <button onClick={toggleMute} className="text-slate-300 hover:text-[#D6B45E] flex-shrink-0 transition-colors">
         {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
       </button>
       <Slider
@@ -83,7 +83,7 @@ export default function AudioPlayer({ src }) {
         max={1}
         step={0.05}
         onValueChange={changeVolume}
-        className="w-16 cursor-pointer flex-shrink-0 hidden sm:flex"
+        className="w-16 cursor-pointer flex-shrink-0 hidden sm:flex [&>span:first-child]:bg-white/25 [&>span:first-child>span]:bg-[#D6B45E] [&_[role=slider]]:border-[#D6B45E] [&_[role=slider]]:bg-[#D6B45E]"
       />
     </div>
   );
