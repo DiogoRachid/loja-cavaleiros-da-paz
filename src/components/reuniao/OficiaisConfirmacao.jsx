@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import CargoIcon from "@/components/CargoIcon";
 
 export default function OficiaisConfirmacao({ quadro, irmaos, onChange }) {
   const toggleConfirmado = (idx) => {
@@ -54,7 +55,10 @@ export default function OficiaisConfirmacao({ quadro, irmaos, onChange }) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div>
-                    <p className="font-semibold text-[#1B3A5F] text-sm">{o.cargo}</p>
+                    <p className="font-semibold text-[#1B3A5F] text-sm flex items-center gap-1.5">
+                      <CargoIcon cargo={o.cargo} className="w-4 h-4 text-[#C9A227]" />
+                      {o.cargo}
+                    </p>
                     <p className="text-sm text-slate-600 mt-0.5">
                       {o.titular_nome || <span className="text-slate-400 italic">Não definido</span>}
                     </p>

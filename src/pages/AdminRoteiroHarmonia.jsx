@@ -42,10 +42,21 @@ export default function AdminRoteiroHarmonia() {
   }, [sessaoId]);
 
   const loadDados = async () => {
-    const [sessoes, roteiros] = await Promise.all([
+    const [sessoes, roteiros, pastas] = await Promise.all([
       db.Sessao.filter({ id: sessaoId }),
       db.RoteiroHarmonia.filter({ sessao_id: sessaoId }),
+      db.PastaMp3.list("nome", 200),
     ]);
+
+    // Após a troca de banco os IDs das pastas mudaram: revincula pelo nome
+    const norm = (s) => (s || "").trim().toLowerCase();
+    const pastaPorId = new Map(pastas.map((p) => [p.id, p]));
+    const pastaPorNome = new Map(pastas.map((p) => [norm(p.nome), p]));
+    const revincular = (id, nome) => {
+      if (id && pastaPorId.has(id)) return { id, nome: pastaPorId.get(id).nome };
+      const p = pastaPorNome.get(norm(nome));
+      return p ? { id: p.id, nome: p.nome } : { id: "", nome: "" };
+    };
     const s = sessoes[0] || null;
     setSessao(s);
 
@@ -63,14 +74,17 @@ export default function AdminRoteiroHarmonia() {
 
     let r = roteiros[0];
     if (!r) {
-      const etapasIniciais = nomesEtapas.map((nome, i) => ({
-        id: genId(),
-        numero: i + 1,
-        nome,
-        tracks: [],
-        playlist_id: configMap[nome]?.playlist_id || "",
-        playlist_name: configMap[nome]?.playlist_name || "",
-      }));
+      const etapasIniciais = nomesEtapas.map((nome, i) => {
+        const p = revincular(configMap[nome]?.playlist_id, configMap[nome]?.playlist_name);
+        return {
+          id: genId(),
+          numero: i + 1,
+          nome,
+          tracks: [],
+          playlist_id: p.id,
+          playlist_name: p.nome,
+        };
+      });
       r = await db.RoteiroHarmonia.create({
         sessao_id: sessaoId,
         sessao_data: s?.data || "",
@@ -85,11 +99,15 @@ export default function AdminRoteiroHarmonia() {
     // Migrar tracks antigos e completar playlist a partir da config quando estiver vazia
     const migradas = parsed.map((e) => {
       const cfg = configMap[e.nome];
+      const p = revincular(
+        e.playlist_id || cfg?.playlist_id,
+        e.playlist_name || cfg?.playlist_name
+      );
       return {
         ...e,
         tracks: e.tracks || (e.track ? [e.track] : []),
-        playlist_id: e.playlist_id || cfg?.playlist_id || "",
-        playlist_name: e.playlist_name || cfg?.playlist_name || "",
+        playlist_id: p.id,
+        playlist_name: p.nome,
       };
     });
 
@@ -97,13 +115,10 @@ export default function AdminRoteiroHarmonia() {
     const nomesExistentes = new Set(migradas.map((e) => e.nome));
     const novas = nomesEtapas
       .filter((nome) => !nomesExistentes.has(nome))
-      .map((nome) => ({
-        id: genId(),
-        nome,
-        tracks: [],
-        playlist_id: configMap[nome]?.playlist_id || "",
-        playlist_name: configMap[nome]?.playlist_name || "",
-      }));
+      .map((nome) => {
+        const p = revincular(configMap[nome]?.playlist_id, configMap[nome]?.playlist_name);
+        return { id: genId(), nome, tracks: [], playlist_id: p.id, playlist_name: p.nome };
+      });
 
     const combinadas = [...migradas, ...novas].map((e, i) => ({ ...e, numero: i + 1 }));
     setEtapas(combinadas);
