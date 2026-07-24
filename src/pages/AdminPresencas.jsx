@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { ClipboardList, Check, X, Save, ShieldAlert } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,8 +27,8 @@ export default function AdminPresencas() {
 
   const loadDados = async () => {
     const [s, ir] = await Promise.all([
-      base44.entities.Sessao.list("-data", 20),
-      base44.entities.Irmao.filter({ ativo: true }),
+      db.Sessao.list("-data", 20),
+      db.Irmao.filter({ ativo: true }, "nome_completo", 500),
     ]);
     setSessoes(s);
     setIrmaos(ir);
@@ -38,7 +38,7 @@ export default function AdminPresencas() {
   const grauSessao = sessaoAtual?.grau || "Aprendiz";
 
   const loadPresencas = async () => {
-    const existing = await base44.entities.Presenca.filter({ sessao_id: sessaoId });
+    const existing = await db.Presenca.filter({ sessao_id: sessaoId }, "-created_date", 500);
     const sessao = sessoes.find(s => s.id === sessaoId);
     const grau = sessao?.grau || "Aprendiz";
 
@@ -100,11 +100,11 @@ export default function AdminPresencas() {
   const salvar = async () => {
     setSaving(true);
     for (const p of presencas) {
-      const { _novo, _grau, ...dados } = p;
+      const { _novo, _grau, id, created_date, updated_date, created_by_id, ...dados } = p;
       if (_novo) {
-        await base44.entities.Presenca.create(dados);
-      } else if (p.id) {
-        await base44.entities.Presenca.update(p.id, dados);
+        await db.Presenca.create(dados);
+      } else if (id) {
+        await db.Presenca.update(id, dados);
       }
     }
     await loadPresencas();

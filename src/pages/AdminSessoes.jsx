@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Gavel, Plus, Calendar, Edit2, Trash2, X, Save } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ export default function AdminSessoes() {
   useEffect(() => { loadSessoes(); }, []);
 
   const loadSessoes = async () => {
-    const data = await base44.entities.Sessao.list("-data", 50);
+    const data = await db.Sessao.list("-data", 100);
     setSessoes(data);
   };
 
@@ -33,8 +33,10 @@ export default function AdminSessoes() {
 
   const salvar = async () => {
     setSaving(true);
-    if (editando) await base44.entities.Sessao.update(editando, form);
-    else await base44.entities.Sessao.create(form);
+    const dados = { ...form };
+    delete dados.id; delete dados.created_date; delete dados.updated_date; delete dados.created_by_id;
+    if (editando) await db.Sessao.update(editando, dados);
+    else await db.Sessao.create(dados);
     await loadSessoes();
     setShowForm(false);
     setSaving(false);
@@ -42,7 +44,7 @@ export default function AdminSessoes() {
 
   const excluir = async (id) => {
     if (!confirm("Deseja excluir esta sessão?")) return;
-    await base44.entities.Sessao.delete(id);
+    await db.Sessao.delete(id);
     await loadSessoes();
   };
 
