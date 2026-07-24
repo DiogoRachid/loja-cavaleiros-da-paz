@@ -36,9 +36,9 @@ export const CARGO_JOIA = {
 
 // Joias reais (imagens) — sendo adicionadas cargo por cargo
 export const CARGO_JOIA_IMG = {
-  "Venerável Mestre": "https://media.base44.com/images/public/69aea997b473b479398fe231/f061861bb_generated_image.png",
-  "Primeiro Vigilante": "https://media.base44.com/images/public/69aea997b473b479398fe231/259327d55_generated_image.png",
-  "Segundo Vigilante": "https://media.base44.com/images/public/69aea997b473b479398fe231/20925fa5a_generated_image.png",
+  "Venerável Mestre": "https://media.base44.com/images/public/69aea997b473b479398fe231/cd3ef6922_generated_image.png",
+  "Primeiro Vigilante": "https://media.base44.com/images/public/69aea997b473b479398fe231/549146e6e_generated_image.png",
+  "Segundo Vigilante": "https://media.base44.com/images/public/69aea997b473b479398fe231/f337bb194_generated_image.png",
   "Orador": "https://media.base44.com/images/public/69aea997b473b479398fe231/4c5b55d35_generated_image.png",
   "Secretário": "https://media.base44.com/images/public/69aea997b473b479398fe231/fd0d986fe_generated_image.png",
   "Tesoureiro": "https://media.base44.com/images/public/69aea997b473b479398fe231/2579f39d5_generated_image.png",
