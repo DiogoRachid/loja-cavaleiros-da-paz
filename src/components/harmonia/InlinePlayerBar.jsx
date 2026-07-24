@@ -1,4 +1,4 @@
-import { Play, Pause, Volume2, VolumeX } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Repeat1 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
 const fmt = (ms) => {
@@ -11,7 +11,8 @@ const fmt = (ms) => {
 // Barra de player compacta (visual igual ao da Biblioteca de Músicas),
 // controlada pelo estado global de reprodução do roteiro.
 export default function InlinePlayerBar({
-  playing, position, duration, volume, onToggle, onSeek, onVolume, className = "",
+  playing, position, duration, volume, onToggle, onSeek, onVolume,
+  repeat, onToggleRepeat, className = "",
 }) {
   const muted = volume === 0;
 
@@ -33,6 +34,15 @@ export default function InlinePlayerBar({
         className="flex-1 cursor-pointer [&>span:first-child]:bg-white/25 [&>span:first-child>span]:bg-[#D6B45E] [&_[role=slider]]:border-[#D6B45E] [&_[role=slider]]:bg-[#D6B45E]"
       />
       <span className="text-[11px] text-white tabular-nums flex-shrink-0 w-9">{fmt(duration)}</span>
+      {onToggleRepeat && (
+        <button
+          title="Repetir esta música"
+          onClick={onToggleRepeat}
+          className={`flex-shrink-0 transition-colors ${repeat ? "text-[#D6B45E]" : "text-slate-300 hover:text-[#D6B45E]"}`}
+        >
+          <Repeat1 className="w-4 h-4" />
+        </button>
+      )}
       <button
         title="Silenciar"
         onClick={() => onVolume(muted ? 1 : 0)}

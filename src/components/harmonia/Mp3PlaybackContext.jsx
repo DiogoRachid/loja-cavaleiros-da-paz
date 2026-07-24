@@ -15,6 +15,9 @@ export function Mp3PlaybackProvider({ children }) {
   const crossfadingRef = useRef(false);
   const fnsRef = useRef({});
   const volumeRef = useRef(1);          // volume mestre (0 a 1)
+  const repeatTrackRef = useRef(false); // repetir a música atual
+  const ownerRef = useRef(null);        // etapa (pasta) da fila atual
+  const nextEtapaResolverRef = useRef(null); // devolve a próxima etapa com músicas
 
   const [activeQueueOwner, setActiveQueueOwner] = useState(null);
   const [currentTrackId, setCurrentTrackId] = useState(null);
@@ -23,6 +26,7 @@ export function Mp3PlaybackProvider({ children }) {
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState(null);
   const [volume, setVolumeState] = useState(1);
+  const [repeatTrack, setRepeatTrack] = useState(false);
 
   const clearFade = () => {
     if (fadeTimerRef.current) {
@@ -45,6 +49,7 @@ export function Mp3PlaybackProvider({ children }) {
       audioRef.current = null;
     }
     queueRef.current = [];
+    ownerRef.current = null;
     setActiveQueueOwner(null);
     setCurrentTrackId(null);
     setIsPaused(true);
@@ -53,8 +58,20 @@ export function Mp3PlaybackProvider({ children }) {
   };
 
   const nextIndex = () => {
+    if (repeatTrackRef.current) return queueIndexRef.current;
     const n = queueIndexRef.current + 1;
     if (n < queueRef.current.length) return n;
+
+    // Fim da pasta: emenda (com transição) na próxima etapa que tenha músicas
+    const prox = nextEtapaResolverRef.current?.(ownerRef.current);
+    const fila = (prox?.tracks || []).filter((t) => t.file_url);
+    if (fila.length > 0) {
+      queueRef.current = fila;
+      ownerRef.current = prox.etapaId;
+      setActiveQueueOwner(prox.etapaId);
+      queueIndexRef.current = -1;
+      return 0;
+    }
     return loopRef.current ? 0 : -1;
   };
 
@@ -159,8 +176,9 @@ export function Mp3PlaybackProvider({ children }) {
   const playEtapa = (etapaId, tracks, startIndex = 0) => {
     const fila = (tracks || []).filter((t) => t.file_url);
     if (fila.length === 0) return;
-    loopRef.current = true;
+    loopRef.current = false;
     queueRef.current = fila;
+    ownerRef.current = etapaId;
     setActiveQueueOwner(etapaId);
     playTrackAt(Math.min(Math.max(startIndex, 0), fila.length - 1));
   };
@@ -191,6 +209,7 @@ export function Mp3PlaybackProvider({ children }) {
     }
     loopRef.current = false;
     queueRef.current = [track];
+    ownerRef.current = null;
     setActiveQueueOwner(null);
     playTrackAt(0);
   };
@@ -212,9 +231,21 @@ export function Mp3PlaybackProvider({ children }) {
     if (audioRef.current && !crossfadingRef.current) audioRef.current.volume = v;
   };
 
+  const toggleRepeatTrack = () => {
+    repeatTrackRef.current = !repeatTrackRef.current;
+    setRepeatTrack(repeatTrackRef.current);
+  };
+
+  const setNextEtapaResolver = (fn) => {
+    nextEtapaResolverRef.current = fn;
+  };
+
   const value = {
     volume,
     setVolume,
+    repeatTrack,
+    toggleRepeatTrack,
+    setNextEtapaResolver,
     activeQueueOwner,
     currentTrackId,
     isPaused,

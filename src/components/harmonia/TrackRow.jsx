@@ -7,7 +7,7 @@ export default function TrackRow({
   track, index, total, isCurrent, isPlaying,
   onToggle, onMove, onRemove, onRepeat, position, duration, onSeek,
 }) {
-  const { volume, setVolume } = useMp3Playback();
+  const { volume, setVolume, repeatTrack, toggleRepeatTrack } = useMp3Playback();
 
   const player = track.file_url && (
     <InlinePlayerBar
@@ -18,7 +18,9 @@ export default function TrackRow({
       onToggle={() => onToggle(track)}
       onSeek={(ms) => (isCurrent ? onSeek(ms) : onToggle(track))}
       onVolume={setVolume}
-      className="w-full sm:w-[280px] flex-shrink-0"
+      repeat={isCurrent && repeatTrack}
+      onToggleRepeat={toggleRepeatTrack}
+      className="w-full sm:w-[300px] flex-shrink-0"
     />
   );
 

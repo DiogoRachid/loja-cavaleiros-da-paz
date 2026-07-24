@@ -102,6 +102,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
         <div className="px-2 pb-2 sm:px-3 space-y-2">
           <PastaSelector
             value={etapa.playlist_id}
+            valueName={etapa.playlist_name}
             onChange={(pasta) => onChangePlaylist(etapa.id, pasta)}
           />
 

@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import RoteiroEtapa from "@/components/harmonia/RoteiroEtapa";
 import TrackSearchModal from "@/components/harmonia/TrackSearchModal";
 import { Mp3PlaybackProvider } from "@/components/harmonia/Mp3PlaybackContext";
+import EtapaChain from "@/components/harmonia/EtapaChain";
 
 const ETAPAS_PADRAO = [
   "Entrada",
@@ -218,6 +219,7 @@ export default function AdminRoteiroHarmonia() {
 
   return (
     <Mp3PlaybackProvider>
+    <EtapaChain etapas={etapas} />
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3 flex-wrap">
