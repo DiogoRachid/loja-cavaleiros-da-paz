@@ -10,8 +10,9 @@ import { createPageUrl } from "@/utils";
 import OficiaisConfirmacao from "@/components/reuniao/OficiaisConfirmacao";
 import AutoridadesList from "@/components/reuniao/AutoridadesList";
 import RoteiroReuniao, { ITENS_PADRAO } from "@/components/reuniao/RoteiroReuniao";
+import { svgCargo } from "@/components/reuniao/cargoSvg";
 
-// Símbolos/ícones por cargo (texto)
+// Símbolos/ícones por cargo (texto) — mantido apenas como referência
 const SIMBOLO_CARGO = {
   "Venerável Mestre": "☉",
   "Primeiro Vigilante": "△",
@@ -211,7 +212,8 @@ export default function PrepararReuniao() {
   td { padding: 4px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
   tr:nth-child(even) td { background: #f9f9f9; }
 
-  .simbolo { font-size: 13pt; width: 22px; display: inline-block; text-align: center; }
+  .simbolo { width: 22px; height: 16px; display: inline-flex; align-items: center; justify-content: center; }
+  .simbolo svg { display: block; }
   .confirmado { color: green; font-weight: bold; }
   .ausente { color: #c00; }
 
@@ -258,7 +260,7 @@ export default function PrepararReuniao() {
             ? '<span class="confirmado">✔ Presente</span>'
             : (o.substituto_nome ? '<span style="color:#855">✦ Substituto</span>' : '<span class="ausente">✘ Ausente</span>');
           return `<tr>
-            <td><span class="simbolo">${SIMBOLO_CARGO[o.cargo] || "◆"}</span></td>
+            <td><span class="simbolo">${svgCargo(o.cargo, 16)}</span></td>
             <td><strong>${o.cargo}</strong></td>
             <td>${nome || "—"}</td>
             <td>${situacao}</td>
