@@ -1,3 +1,5 @@
+import { CARGO_JOIA_IMG } from "@/components/CargoIcon";
+
 // Ícones (joias) dos cargos em SVG inline, para uso na impressão/PDF do roteiro.
 // Mesmos desenhos usados na tela (CargoIcon).
 
@@ -72,8 +74,13 @@ const CARGO_PATHS = {
   "Secretário de Ação Social": P.heart,
 };
 
-// Retorna o SVG do cargo pronto para inserir no HTML de impressão.
+// Retorna a joia do cargo pronta para inserir no HTML de impressão.
+// Usa as mesmas imagens em prata exibidas na tela; se não houver, cai no SVG.
 export function svgCargo(cargo, tamanho = 16) {
+  const img = CARGO_JOIA_IMG[cargo];
+  if (img) {
+    return `<img src="${img}" width="${tamanho}" height="${tamanho}" style="width:${tamanho}px;height:${tamanho}px;object-fit:contain;vertical-align:middle;display:inline-block" />`;
+  }
   const paths = CARGO_PATHS[cargo] || P.award;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${tamanho}" height="${tamanho}" viewBox="0 0 24 24" fill="none" stroke="#1B3A5F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
 }
