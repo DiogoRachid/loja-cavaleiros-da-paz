@@ -218,14 +218,14 @@ export default function AdminRoteiroHarmonia() {
             {sessao.tipo} {sessao.numero && `Nº ${sessao.numero}`}{roteiro?.grau && ` • ${roteiro.grau}`} • {sessao.data} às {sessao.hora}
           </p>
         </div>
-        <Button onClick={salvar} disabled={saving} className="ml-auto bg-[#1B3A5F] text-white hover:bg-[#152d49]">
+        <Button onClick={salvar} disabled={saving} size="sm" className="ml-auto bg-[#1B3A5F] text-white hover:bg-[#152d49]">
           {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
           Salvar Roteiro
         </Button>
       </div>
 
       <Card>
-        <CardContent className="p-6">
+        <CardContent className="p-2 sm:p-4">
           <div className="space-y-2">
             {etapas.map((etapa, i) => (
               <RoteiroEtapa

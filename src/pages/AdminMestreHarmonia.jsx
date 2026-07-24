@@ -91,20 +91,20 @@ export default function AdminMestreHarmonia() {
                 const temPlaylist = playlists.some(p => p.sessao_id === s.id);
                 return (
                   <Link key={s.id} to={`/AdminRoteiroHarmonia?sessao=${s.id}`}>
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
-                      <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-between gap-2 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
+                      <div className="flex items-center gap-3 min-w-0">
                         <div className="w-12 h-12 rounded-xl bg-[#1B3A5F] flex flex-col items-center justify-center flex-shrink-0">
                           <span className="text-[#C9A227] text-[10px] font-medium">
                             {s.data?.split("-")[1] && ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"][parseInt(s.data.split("-")[1]) - 1]}
                           </span>
                           <span className="text-white text-lg font-bold">{s.data?.split("-")[2]}</span>
                         </div>
-                        <div>
-                          <p className="font-medium text-slate-800">{s.tipo} {s.numero && `Nº ${s.numero}`}</p>
-                          <p className="text-sm text-slate-500">{s.data} às {s.hora} • {s.grau}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium text-slate-800 truncate">{s.tipo} {s.numero && `Nº ${s.numero}`}</p>
+                          <p className="text-xs sm:text-sm text-slate-500 truncate">{s.data} às {s.hora} • {s.grau}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         {temPlaylist ? (
                           <Badge className="bg-green-100 text-green-800">
                             <Music className="w-3 h-3 mr-1" />Roteiro pronto

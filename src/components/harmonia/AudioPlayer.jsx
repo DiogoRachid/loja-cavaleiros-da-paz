@@ -49,7 +49,7 @@ export default function AudioPlayer({ src }) {
   };
 
   return (
-    <div className="flex items-center gap-2 w-full sm:w-[400px] bg-[#253251] rounded-xl px-3 py-2.5 shadow-md flex-shrink-0">
+    <div className="flex items-center gap-2 w-full sm:w-[260px] bg-[#253251] rounded-lg px-2 py-1.5 flex-shrink-0">
       <audio
         ref={audioRef}
         src={src}
@@ -62,9 +62,9 @@ export default function AudioPlayer({ src }) {
       />
       <button
         onClick={toggle}
-        className="w-10 h-10 rounded-full border-2 border-[#D6B45E] text-[#D6B45E] hover:bg-[#D6B45E] hover:text-[#253251] flex items-center justify-center flex-shrink-0 transition-colors"
+        className="w-8 h-8 rounded-full border-2 border-[#D6B45E] text-[#D6B45E] hover:bg-[#D6B45E] hover:text-[#253251] flex items-center justify-center flex-shrink-0 transition-colors"
       >
-        {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+        {playing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
       </button>
       <span className="text-[11px] text-white tabular-nums flex-shrink-0 w-9 text-right">{fmt(current)}</span>
       <Slider
@@ -83,7 +83,7 @@ export default function AudioPlayer({ src }) {
         max={1}
         step={0.05}
         onValueChange={changeVolume}
-        className="w-16 cursor-pointer flex-shrink-0 hidden sm:flex [&>span:first-child]:bg-white/25 [&>span:first-child>span]:bg-[#D6B45E] [&_[role=slider]]:border-[#D6B45E] [&_[role=slider]]:bg-[#D6B45E]"
+        className="w-14 cursor-pointer flex-shrink-0 hidden md:flex [&>span:first-child]:bg-white/25 [&>span:first-child>span]:bg-[#D6B45E] [&_[role=slider]]:border-[#D6B45E] [&_[role=slider]]:bg-[#D6B45E]"
       />
     </div>
   );
