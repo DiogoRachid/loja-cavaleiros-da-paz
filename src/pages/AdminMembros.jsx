@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Users, Search, UserCheck, UserX, Filter, ArrowUp, ArrowDown, Edit2, Save, X, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,7 @@ export default function AdminMembros() {
 
   const loadIrmaos = async () => {
     const [data, mc] = await Promise.all([
-      base44.entities.Irmao.list("-created_date", 200),
+      db.Irmao.list("-created_date", 500),
       base44.entities.MembroComissao.filter({ ativo: true }),
     ]);
     setIrmaos(data);
@@ -50,7 +51,12 @@ export default function AdminMembros() {
 
   const salvar = async () => {
     setSaving(true);
-    await base44.entities.Irmao.update(editando, form);
+    const dados = { ...form };
+    delete dados.id; delete dados.created_date; delete dados.updated_date; delete dados.created_by_id;
+    for (const campo of ["data_iniciacao", "data_elevacao", "data_exaltacao", "data_nascimento"]) {
+      if (!dados[campo]) dados[campo] = null;
+    }
+    await db.Irmao.update(editando, dados);
     await loadIrmaos();
     setEditando(null);
     setSaving(false);
@@ -58,7 +64,7 @@ export default function AdminMembros() {
 
   const excluir = async (id) => {
     if (!confirm("Deseja excluir permanentemente este irmão?")) return;
-    await base44.entities.Irmao.delete(id);
+    await db.Irmao.delete(id);
     await loadIrmaos();
   };
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { UserPlus, Edit2, Trash2, X, Save, Search, ArrowUp, ArrowDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ export default function AdminCadastroIrmaos() {
   useEffect(() => { loadIrmaos(); }, []);
 
   const loadIrmaos = async () => {
-    const data = await base44.entities.Irmao.list("-created_date", 200);
+    const data = await db.Irmao.list("-created_date", 500);
     setIrmaos(data);
   };
 
@@ -57,8 +57,12 @@ export default function AdminCadastroIrmaos() {
     if (!form.nome_completo || !form.numero_glp) return alert("Nome e Nº GLP são obrigatórios.");
     setSaving(true);
     const dados = { ...form, senha: form.senha || form.numero_glp };
-    if (editando) await base44.entities.Irmao.update(editando, dados);
-    else await base44.entities.Irmao.create(dados);
+    delete dados.id; delete dados.created_date; delete dados.updated_date; delete dados.created_by_id;
+    for (const campo of ["data_iniciacao", "data_elevacao", "data_exaltacao", "data_nascimento"]) {
+      if (!dados[campo]) dados[campo] = null;
+    }
+    if (editando) await db.Irmao.update(editando, dados);
+    else await db.Irmao.create(dados);
     await loadIrmaos();
     setShowForm(false);
     setSaving(false);
@@ -66,7 +70,7 @@ export default function AdminCadastroIrmaos() {
 
   const excluir = async (id) => {
     if (!confirm("Deseja excluir este irmão?")) return;
-    await base44.entities.Irmao.delete(id);
+    await db.Irmao.delete(id);
     await loadIrmaos();
   };
 

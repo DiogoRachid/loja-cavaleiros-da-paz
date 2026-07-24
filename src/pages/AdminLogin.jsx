@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Crown, Lock, User, ArrowLeft, Library } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ export default function AdminLogin() {
       if (isBibliotecario) {
         // Login via entidade Irmao com cargo Bibliotecário
         if (!numeroGlp || !senha) { setErro("Preencha todos os campos."); setLoading(false); return; }
-        const irmaos = await base44.entities.Irmao.filter({ numero_glp: numeroGlp, ativo: true });
+        const irmaos = await db.Irmao.filter({ numero_glp: numeroGlp, ativo: true });
         if (!irmaos || irmaos.length === 0) {
           setErro("Número GLP não encontrado ou irmão inativo.");
           setLoading(false);
@@ -71,7 +71,7 @@ export default function AdminLogin() {
       } else {
         // Login via entidade Irmao
         if (!numeroGlp || !senha) { setErro("Preencha todos os campos."); setLoading(false); return; }
-        const irmaos = await base44.entities.Irmao.filter({ numero_glp: numeroGlp, ativo: true });
+        const irmaos = await db.Irmao.filter({ numero_glp: numeroGlp, ativo: true });
         if (!irmaos || irmaos.length === 0) {
           setErro("Número GLP não encontrado ou irmão inativo.");
           setLoading(false);
