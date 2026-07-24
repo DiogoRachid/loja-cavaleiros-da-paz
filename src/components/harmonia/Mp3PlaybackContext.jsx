@@ -14,6 +14,7 @@ export function Mp3PlaybackProvider({ children }) {
   const loopRef = useRef(false);        // se a fila repete ao terminar
   const crossfadingRef = useRef(false);
   const fnsRef = useRef({});
+  const volumeRef = useRef(1);          // volume mestre (0 a 1)
 
   const [activeQueueOwner, setActiveQueueOwner] = useState(null);
   const [currentTrackId, setCurrentTrackId] = useState(null);
@@ -21,6 +22,7 @@ export function Mp3PlaybackProvider({ children }) {
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState(null);
+  const [volume, setVolumeState] = useState(1);
 
   const clearFade = () => {
     if (fadeTimerRef.current) {
@@ -66,7 +68,7 @@ export function Mp3PlaybackProvider({ children }) {
     }
     const a = new Audio(track.file_url);
     a.preload = "auto";
-    a.volume = fadeIn ? 0 : 1;
+    a.volume = fadeIn ? 0 : volumeRef.current;
     audioRef.current = a;
     queueIndexRef.current = index;
     setCurrentTrackId(track.id);
@@ -86,7 +88,7 @@ export function Mp3PlaybackProvider({ children }) {
       const start = Date.now();
       fadeTimerRef.current = setInterval(() => {
         const r = Math.min(1, (Date.now() - start) / FADE_MS);
-        a.volume = r;
+        a.volume = r * volumeRef.current;
         if (r >= 1) {
           clearInterval(fadeTimerRef.current);
           fadeTimerRef.current = null;
@@ -121,8 +123,8 @@ export function Mp3PlaybackProvider({ children }) {
     const start = Date.now();
     fadeTimerRef.current = setInterval(() => {
       const r = Math.min(1, (Date.now() - start) / FADE_MS);
-      old.volume = Math.max(0, 1 - r);
-      next.volume = r;
+      old.volume = Math.max(0, 1 - r) * volumeRef.current;
+      next.volume = r * volumeRef.current;
       if (r >= 1) {
         old.pause();
         old.src = "";
@@ -174,7 +176,7 @@ export function Mp3PlaybackProvider({ children }) {
     } else {
       if (crossfadingRef.current) {
         clearFade();
-        a.volume = 1;
+        a.volume = volumeRef.current;
       }
       a.pause();
       setIsPaused(true);
@@ -198,13 +200,21 @@ export function Mp3PlaybackProvider({ children }) {
     if (!a) return;
     if (crossfadingRef.current) {
       clearFade();
-      a.volume = 1;
+      a.volume = volumeRef.current;
     }
     a.currentTime = ms / 1000;
     setPosition(ms);
   };
 
+  const setVolume = (v) => {
+    volumeRef.current = v;
+    setVolumeState(v);
+    if (audioRef.current && !crossfadingRef.current) audioRef.current.volume = v;
+  };
+
   const value = {
+    volume,
+    setVolume,
     activeQueueOwner,
     currentTrackId,
     isPaused,
