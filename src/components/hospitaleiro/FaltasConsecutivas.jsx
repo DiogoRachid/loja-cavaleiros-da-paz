@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { AlertTriangle, Phone, PhoneOff, CheckCircle, ChevronDown, ChevronUp, Pencil, Trash2, X, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,7 @@ export default function FaltasConsecutivas({ irmaos, sessoes, presencas, contato
   const registrarContato = async (irmao, status) => {
     setSalvando(true);
     const admin = JSON.parse(sessionStorage.getItem("admin_data") || "{}");
-    await base44.entities.ContatoHospitaleiro.create({
+    await db.ContatoHospitaleiro.create({
       irmao_id: irmao.id,
       irmao_nome: irmao.nome_completo,
       faltas_consecutivas: irmao.faltasConsecutivas,
@@ -59,13 +59,13 @@ export default function FaltasConsecutivas({ irmaos, sessoes, presencas, contato
 
   const excluirContato = async (contatoId) => {
     if (!confirm("Excluir este registro de contato?")) return;
-    await base44.entities.ContatoHospitaleiro.delete(contatoId);
+    await db.ContatoHospitaleiro.delete(contatoId);
     onContatoSalvo();
   };
 
   const salvarEdicao = async (contatoId) => {
     setSalvando(true);
-    await base44.entities.ContatoHospitaleiro.update(contatoId, { descricao: descricaoEdit });
+    await db.ContatoHospitaleiro.update(contatoId, { descricao: descricaoEdit });
     setEditando(null);
     setDescricaoEdit("");
     setSalvando(false);

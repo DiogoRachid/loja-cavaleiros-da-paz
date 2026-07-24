@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Heart, Phone, PhoneOff, Trash2, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,14 +14,14 @@ export default function AdminHistoricoContatos() {
   useEffect(() => { loadContatos(); }, []);
 
   const loadContatos = async () => {
-    const c = await base44.entities.ContatoHospitaleiro.list("-created_date", 200);
+    const c = await db.ContatoHospitaleiro.list("-created_date", 500);
     setContatos(c);
     setLoading(false);
   };
 
   const excluirContato = async (id) => {
     if (!confirm("Excluir este registro de contato?")) return;
-    await base44.entities.ContatoHospitaleiro.delete(id);
+    await db.ContatoHospitaleiro.delete(id);
     setContatos(prev => prev.filter(c => c.id !== id));
   };
 

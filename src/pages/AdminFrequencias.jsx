@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { BarChart2, Search, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,9 +17,9 @@ export default function AdminFrequencias() {
 
   const loadDados = async () => {
     const [ir, s, p] = await Promise.all([
-      base44.entities.Irmao.filter({ ativo: true }),
-      base44.entities.Sessao.filter({ status: "Realizada" }),
-      base44.entities.Presenca.list(),
+      db.Irmao.filter({ ativo: true }, "nome_completo", 500),
+      db.Sessao.filter({ status: "Realizada" }, "-data", 500),
+      db.Presenca.list("-created_date", 5000),
     ]);
     setIrmaos(ir);
     setSessoes(s);

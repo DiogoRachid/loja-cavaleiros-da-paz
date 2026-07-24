@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Heart, AlertTriangle, Phone, PhoneOff, CheckCircle, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,10 +21,10 @@ export default function AdminHospitaleiro() {
   const loadDados = async () => {
     await autoRealizarSessoes();
     const [ir, s, p, c] = await Promise.all([
-      base44.entities.Irmao.filter({ ativo: true }),
-      base44.entities.Sessao.filter({ status: "Realizada" }),
-      base44.entities.Presenca.list(),
-      base44.entities.ContatoHospitaleiro.list("-created_date", 100),
+      db.Irmao.filter({ ativo: true }, "nome_completo", 500),
+      db.Sessao.filter({ status: "Realizada" }, "-data", 500),
+      db.Presenca.list("-created_date", 5000),
+      db.ContatoHospitaleiro.list("-created_date", 200),
     ]);
     setIrmaos(ir);
     setSessoes(s);
