@@ -8,6 +8,9 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import CargoIcon, { CARGO_JOIA } from "@/components/CargoIcon";
+
+const LOGO_URL = "https://media.base44.com/images/public/69aea997b473b479398fe231/9a3f4b5ac_LogoCavaleirosAlta.png";
 
 // Links por cargo no portal administrativo
 const ADMIN_LINKS_BY_CARGO = {
@@ -147,13 +150,13 @@ export default function Layout({ children, currentPageName }) {
 
   let links = IRMAO_LINKS;
   let portalLabel = "Portal do Irmão";
-  let portalIcon = <BookOpen className="w-5 h-5 text-[#1B3A5F]" />;
 
   if (isAdmin || isBibliotecario) {
     links = ADMIN_LINKS_BY_CARGO[cargo] || ADMIN_LINKS_BY_CARGO["Bibliotecário"];
     portalLabel = cargo || "Portal Administrativo";
-    portalIcon = <Crown className="w-5 h-5 text-[#1B3A5F]" />;
   }
+
+  const joia = CARGO_JOIA[cargo]?.joia;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -176,12 +179,16 @@ export default function Layout({ children, currentPageName }) {
               {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#C9A227] flex items-center justify-center">
-                {portalIcon}
+              <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-[#C9A227]">
+                <img src={LOGO_URL} alt="Cavaleiros da Paz nº25" className="w-full h-full object-contain p-0.5" />
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-white font-semibold text-lg">Cavaleiros da Paz nº25</h1>
-                <p className="text-[#C9A227] text-xs">{portalLabel}</p>
+                <p className="text-[#C9A227] text-xs flex items-center gap-1.5">
+                  <CargoIcon cargo={cargo} className="w-3.5 h-3.5" />
+                  {portalLabel}
+                  {joia && <span className="text-[#C9A227]/70">• {joia}</span>}
+                </p>
               </div>
             </div>
           </div>

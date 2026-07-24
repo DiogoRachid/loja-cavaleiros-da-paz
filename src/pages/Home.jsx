@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { BookOpen, Users, Calendar, Crown } from "lucide-react";
+import { Users, Calendar, Crown } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -29,9 +29,11 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-[#C9A227] to-[#8B7019] flex items-center justify-center shadow-2xl">
-            <BookOpen className="w-12 h-12 text-[#1B3A5F]" />
-          </div>
+          <img
+            src="https://media.base44.com/images/public/69aea997b473b479398fe231/9a3f4b5ac_LogoCavaleirosAlta.png"
+            alt="A.R.L.S. Cavaleiros da Paz nº25"
+            className="w-44 md:w-56 mx-auto mb-6 drop-shadow-2xl"
+          />
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
             Cavaleiros da Paz nº25
           </h1>
