@@ -34,7 +34,24 @@ export const CARGO_JOIA = {
   "Secretário de Ação Social": { icon: Heart, joia: "Coração" },
 };
 
+// Joias reais (imagens) — sendo adicionadas cargo por cargo
+export const CARGO_JOIA_IMG = {
+  "Venerável Mestre": "https://media.base44.com/images/public/69aea997b473b479398fe231/f061861bb_generated_image.png",
+  "Primeiro Vigilante": "https://media.base44.com/images/public/69aea997b473b479398fe231/259327d55_generated_image.png",
+  "Segundo Vigilante": "https://media.base44.com/images/public/69aea997b473b479398fe231/20925fa5a_generated_image.png",
+};
+
 export default function CargoIcon({ cargo, className = "w-5 h-5" }) {
+  const img = CARGO_JOIA_IMG[cargo];
+  if (img) {
+    return (
+      <img
+        src={img}
+        alt={CARGO_JOIA[cargo]?.joia || cargo}
+        className={`${className} object-contain mix-blend-multiply`}
+      />
+    );
+  }
   const Icon = CARGO_JOIA[cargo]?.icon || Award;
   return <Icon className={className} />;
 }
