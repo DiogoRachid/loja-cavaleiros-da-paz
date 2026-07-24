@@ -20,6 +20,13 @@ export default function OficiaisConfirmacao({ quadro, irmaos, onChange }) {
     onChange(updated);
   };
 
+  // Após a troca de banco os IDs mudaram: revincula o substituto pelo nome
+  const resolverSubstitutoId = (o) => {
+    if (o.substituto_id && irmaos.some(ir => ir.id === o.substituto_id)) return o.substituto_id;
+    const porNome = irmaos.find(ir => ir.nome_completo === o.substituto_nome);
+    return porNome?.id || "";
+  };
+
   const titularesConfirmados = new Set(quadro.filter(o => o.confirmado && o.titular_id).map(o => o.titular_id));
   const irmaosOrdenados = [...irmaos]
     .filter(ir => !titularesConfirmados.has(ir.id))
@@ -70,11 +77,17 @@ export default function OficiaisConfirmacao({ quadro, irmaos, onChange }) {
 
                 {!o.confirmado && (
                   <div className="mt-2">
-                    <Select value={o.substituto_id} onValueChange={v => setSubstituto(idx, v)}>
+                    <Select value={resolverSubstitutoId(o)} onValueChange={v => setSubstituto(idx, v)}>
                       <SelectTrigger className="h-8 text-sm w-full">
                         <SelectValue placeholder="Selecionar substituto..." />
                       </SelectTrigger>
                       <SelectContent>
+                        {(() => {
+                          const sid = resolverSubstitutoId(o);
+                          const atual = sid && !irmaosOrdenados.some(ir => ir.id === sid)
+                            ? irmaos.find(ir => ir.id === sid) : null;
+                          return atual ? <SelectItem value={atual.id}>{atual.nome_completo}</SelectItem> : null;
+                        })()}
                         {irmaosOrdenados.map(ir => (
                           <SelectItem key={ir.id} value={ir.id}>{ir.nome_completo}</SelectItem>
                         ))}
