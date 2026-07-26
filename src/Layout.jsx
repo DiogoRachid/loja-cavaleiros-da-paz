@@ -67,6 +67,7 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Agenda Ritual", page: "AdminAgendaRitual", icon: Calendar },
     { name: "Pastas de Músicas", page: "AdminMeusMp3s", icon: ListMusic },
     { name: "Tempos das Etapas", page: "AdminEstatisticasHarmonia", icon: Timer },
+    { name: "Configuração de Player", page: "AdminConfigPlayer", icon: Settings },
     { name: "Configurações", page: "AdminConfigEtapasHarmonia", icon: Settings },
   ],
   "Bibliotecário": [

@@ -43,7 +43,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
   };
 
   return (
-    <div className={`rounded-xl border bg-white transition-colors ${isEtapaPlaying ? "border-[#C9A227]" : "border-slate-200"}`}>
+    <div className={`rounded-xl border bg-white transition-colors ${isEtapaPlaying ? "border-[#C9A227]" : "border-slate-200"} ${isEtapaPlaying && playback?.nearEnd ? "ring-2 ring-[#C9A227] animate-pulse" : ""}`}>
       {/* Cabeçalho compacto */}
       <div className="flex items-center gap-2 px-2 py-2 sm:px-3">
         <button
