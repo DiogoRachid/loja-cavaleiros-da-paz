@@ -121,8 +121,8 @@ export default function AdminConfigEtapasHarmonia() {
           const dados = {
             ordem: i,
             etapa_nome: nome,
-            playlist_id: config?.playlist_id || "",
-            playlist_name: config?.playlist_name || "",
+            playlist_id: config?.playlist_id || null,
+            playlist_name: config?.playlist_name || null,
           };
           if (config?.id) {
             await db.ConfigEtapaHarmonia.update(config.id, dados);
