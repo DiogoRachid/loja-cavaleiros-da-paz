@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { BookOpen, User, Lock, ArrowLeft, Loader2, AlertTriangle, Eye, EyeOff, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,14 +28,14 @@ export default function IrmaoLogin() {
     setError("");
     setMsgRecuperar("");
     try {
-      const irmaos = await base44.entities.Irmao.filter({ numero_glp: glpRecuperar.trim(), ativo: true });
+      const irmaos = await db.Irmao.filter({ numero_glp: glpRecuperar.trim(), ativo: true });
       if (irmaos.length === 0) {
         setError("Número GLP não encontrado.");
         setLoading(false);
         return;
       }
       const irmao = irmaos[0];
-      await base44.entities.Irmao.update(irmao.id, { senha: irmao.numero_glp, primeiro_acesso: true });
+      await db.Irmao.update(irmao.id, { senha: irmao.numero_glp, primeiro_acesso: true });
       setMsgRecuperar(`Senha redefinida com sucesso! Use o número GLP (${irmao.numero_glp}) como senha.`);
     } catch (err) {
       setError("Erro ao redefinir senha. Tente novamente.");
@@ -57,7 +58,7 @@ export default function IrmaoLogin() {
 
     try {
       // Buscar irmão pelo número GLP
-      const irmaos = await base44.entities.Irmao.filter({ numero_glp: numeroGlp.trim(), ativo: true });
+      const irmaos = await db.Irmao.filter({ numero_glp: numeroGlp.trim(), ativo: true });
       
       if (irmaos.length === 0) {
         setError("Número GLP não encontrado. Verifique com o bibliotecário.");
@@ -77,7 +78,7 @@ export default function IrmaoLogin() {
       }
 
       // Registrar log de acesso
-      await base44.entities.LogAcesso.create({
+      await db.LogAcesso.create({
         irmao_id: irmao.id,
         irmao_nome: irmao.nome_completo,
         irmao_numero_glp: irmao.numero_glp,
@@ -114,13 +115,13 @@ export default function IrmaoLogin() {
     setLoading(true);
 
     try {
-      await base44.entities.Irmao.update(irmaoLogado.id, {
+      await db.Irmao.update(irmaoLogado.id, {
         senha: novaSenha,
         primeiro_acesso: false
       });
 
       // Registrar log de acesso
-      await base44.entities.LogAcesso.create({
+      await db.LogAcesso.create({
         irmao_id: irmaoLogado.id,
         irmao_nome: irmaoLogado.nome_completo,
         irmao_numero_glp: irmaoLogado.numero_glp,

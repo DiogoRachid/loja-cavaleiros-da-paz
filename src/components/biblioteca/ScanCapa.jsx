@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
+import { uploadFile } from "@/lib/upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -96,7 +97,7 @@ function ModoISBN({ onConcluir, onVoltar }) {
     setLoading(true);
     setErro("");
 
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const { file_url } = await uploadFile({ file });
 
     const result = await base44.integrations.Core.InvokeLLM({
       prompt: `Analise esta imagem e extraia o código ISBN-10 ou ISBN-13 visível na foto (geralmente está no código de barras ou escrito como "ISBN" seguido de números). Retorne apenas o código numérico sem espaços ou hífens.`,
@@ -308,7 +309,7 @@ function ModoCapa({ onConcluir, onVoltar }) {
   const handleCropConfirm = async (croppedFile) => {
     setStage("analyzing");
     setStatus("uploading");
-    const { file_url } = await base44.integrations.Core.UploadFile({ file: croppedFile });
+    const { file_url } = await uploadFile({ file: croppedFile });
     setStatus("analyzing");
 
     const result = await base44.integrations.Core.InvokeLLM({

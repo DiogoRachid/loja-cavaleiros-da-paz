@@ -1,14 +1,13 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { criar } from "../../shared/supabase.ts";
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
     const { tipo, dados } = await req.json();
 
     if (tipo === "acesso") {
-      await base44.asServiceRole.entities.LogAcesso.create(dados);
+      await criar("log_acesso", dados);
     } else if (tipo === "download") {
-      await base44.asServiceRole.entities.LogDownload.create(dados);
+      await criar("log_download", dados);
     } else {
       return Response.json({ error: "Tipo inválido" }, { status: 400 });
     }

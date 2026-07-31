@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Upload, Check, FileText } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { uploadFile } from "@/lib/upload";
 
 export default function ItemForm({ item, onSave, onCancel }) {
   const [saving, setSaving] = useState(false);
@@ -65,7 +65,7 @@ export default function ItemForm({ item, onSave, onCancel }) {
 
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await uploadFile({ file });
       handleChange("imagem_capa", file_url);
     } catch (error) {
       console.error("Erro no upload:", error);

@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 
 // modo: "fisico" usa Item.nome | "digital" usa AcervoDigital.titulo
 export default function DuplicatasModal({ open, onClose, itens, modo, onConcluido }) {
@@ -36,9 +37,9 @@ export default function DuplicatasModal({ open, onClose, itens, modo, onConcluid
     setDeletando(itemParaDeletar.id);
     try {
       if (modo === "fisico") {
-        await base44.entities.Item.update(itemParaDeletar.id, { ativo: false });
+        await db.Item.update(itemParaDeletar.id, { ativo: false });
       } else {
-        await base44.entities.AcervoDigital.delete(itemParaDeletar.id);
+        await db.AcervoDigital.delete(itemParaDeletar.id);
       }
       toast.success("Item removido com sucesso.");
       onConcluido();

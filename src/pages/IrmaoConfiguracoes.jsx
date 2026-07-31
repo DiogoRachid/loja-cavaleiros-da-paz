@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { createPageUrl } from "@/utils";
 import { Lock, Eye, EyeOff, Loader2, AlertTriangle, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -51,7 +52,7 @@ export default function IrmaoConfiguracoes() {
     }
 
     setLoading(true);
-    await base44.entities.Irmao.update(irmao.id, { senha: novaSenha, primeiro_acesso: false });
+    await db.Irmao.update(irmao.id, { senha: novaSenha, primeiro_acesso: false });
     const irmaoAtualizado = { ...irmao, senha: novaSenha, primeiro_acesso: false };
     sessionStorage.setItem("irmao_data", JSON.stringify(irmaoAtualizado));
     setIrmao(irmaoAtualizado);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import * as pdfjsLib from "pdfjs-dist";
-import { base44 } from "@/api/base44Client";
+import { uploadFile } from "@/lib/upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,7 +45,7 @@ export default function SugestaoForm({ sugestao, onSave, onCancel }) {
     await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
     const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
     const capaFile = new File([blob], 'capa.jpg', { type: 'image/jpeg' });
-    const { file_url } = await base44.integrations.Core.UploadFile({ file: capaFile });
+    const { file_url } = await uploadFile({ file: capaFile });
     return file_url;
   };
 
@@ -66,7 +66,7 @@ export default function SugestaoForm({ sugestao, onSave, onCancel }) {
     const file = e.target.files[0];
     if (!file) return;
     setUploadingPdf(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const { file_url } = await uploadFile({ file });
     setForm(f => ({ ...f, arquivo_url: file_url }));
     if (!form.capa_url) {
       const capa = await gerarCapaDoPDF(file_url);
@@ -79,7 +79,7 @@ export default function SugestaoForm({ sugestao, onSave, onCancel }) {
     const file = e.target.files[0];
     if (!file) return;
     setUploadingCapa(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    const { file_url } = await uploadFile({ file });
     setForm(f => ({ ...f, capa_url: file_url }));
     setUploadingCapa(false);
   };

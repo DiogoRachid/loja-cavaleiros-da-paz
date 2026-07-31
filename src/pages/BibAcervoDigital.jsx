@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
+import { uploadFile } from "@/lib/upload";
 import { createPageUrl } from "@/utils";
 import * as pdfjsLib from "pdfjs-dist";
 import { PDFDocument } from "pdf-lib";
@@ -72,16 +73,16 @@ export default function BibAcervoDigital() {
   }, []);
 
   const loadDocumentos = async () => {
-    const docs = await base44.entities.AcervoDigital.list("-created_date");
+    const docs = await db.AcervoDigital.list("-created_date");
     setDocumentos(docs);
     setLoading(false);
   };
 
   const handleSave = async (data) => {
     if (editando) {
-      await base44.entities.AcervoDigital.update(editando.id, data);
+      await db.AcervoDigital.update(editando.id, data);
     } else {
-      await base44.entities.AcervoDigital.create(data);
+      await db.AcervoDigital.create(data);
       notificarWhatsApp({
         tipo: data.tipo || "Documento",
         nome: data.titulo,
@@ -96,7 +97,7 @@ export default function BibAcervoDigital() {
 
   const handleDelete = async () => {
     if (docParaDeletar) {
-      await base44.entities.AcervoDigital.delete(docParaDeletar.id);
+      await db.AcervoDigital.delete(docParaDeletar.id);
       setDeleteDialogOpen(false);
       setDocParaDeletar(null);
       loadDocumentos();
@@ -105,7 +106,7 @@ export default function BibAcervoDigital() {
 
    const handleToggleDisponibilidade = async (doc) => {
      const novoStatus = !doc.disponivel;
-     await base44.entities.AcervoDigital.update(doc.id, { disponivel: novoStatus });
+     await db.AcervoDigital.update(doc.id, { disponivel: novoStatus });
      if (novoStatus) {
        notificarWhatsApp({
          tipo: doc.tipo || "Documento",
@@ -138,8 +139,8 @@ export default function BibAcervoDigital() {
         await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
         const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
         const capaFile = new File([blob], 'capa.jpg', { type: 'image/jpeg' });
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: capaFile });
-        await base44.entities.AcervoDigital.update(doc.id, { capa_url: file_url });
+        const { file_url } = await uploadFile({ file: capaFile });
+        await db.AcervoDigital.update(doc.id, { capa_url: file_url });
         ok++;
       } catch (e) {
         console.error('Erro ao gerar capa para', doc.titulo, e);

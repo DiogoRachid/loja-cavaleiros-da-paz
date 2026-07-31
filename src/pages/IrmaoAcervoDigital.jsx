@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { createPageUrl } from "@/utils";
 import {
   FileText, Search, Loader2, BookOpen, GraduationCap,
@@ -63,8 +64,8 @@ export default function IrmaoAcervoDigital() {
 
   const loadData = async () => {
     const [docs, avs] = await Promise.all([
-      base44.entities.AcervoDigital.filter({ ativo: true, disponivel: true }, "-created_date"),
-      base44.entities.Avaliacao.filter({ documento_id: { "$ne": null } }, "-data_avaliacao")
+      db.AcervoDigital.filter({ ativo: true, disponivel: true }, "-created_date"),
+      db.Avaliacao.filter({ documento_id: { "$ne": null } }, "-data_avaliacao")
     ]);
     setDocumentos(docs);
     setAvaliacoes(avs);
@@ -86,7 +87,7 @@ export default function IrmaoAcervoDigital() {
   const registrarDownload = (doc) => {
     window.open(doc.arquivo_url, '_blank');
 
-    base44.entities.LogDownload.create({
+    db.LogDownload.create({
       documento_id: doc.id,
       documento_titulo: doc.titulo,
       irmao_id: irmao.id,
@@ -102,7 +103,7 @@ export default function IrmaoAcervoDigital() {
 
     setEnviandoAvaliacao(true);
     try {
-      await base44.entities.Avaliacao.create({
+      await db.Avaliacao.create({
         documento_id: docSelecionado.id,
         irmao_id: irmao.id,
         irmao_nome: irmao.nome_completo,

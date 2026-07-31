@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
@@ -174,7 +175,7 @@ export default function IrmaoScan() {
       setIrmao(irmaoSessao);
         
       // Carregar empréstimos ativos
-      const emps = await base44.entities.Emprestimo.filter(
+      const emps = await db.Emprestimo.filter(
         { irmao_id: irmaoSessao.id, status: "Ativo" }
       );
       setEmprestimosAtivos(emps);
@@ -204,7 +205,7 @@ export default function IrmaoScan() {
       }
 
       // Buscar item pelo código QR
-      const itens = await base44.entities.Item.filter({ codigo_qr: codigo });
+      const itens = await db.Item.filter({ codigo_qr: codigo });
       
       if (itens.length === 0) {
         setResultado({
@@ -250,7 +251,7 @@ export default function IrmaoScan() {
 
     try {
       // Criar empréstimo
-      await base44.entities.Emprestimo.create({
+      await db.Emprestimo.create({
         item_id: itemEncontrado.id,
         item_nome: itemEncontrado.nome,
         irmao_id: irmao.id,
@@ -263,7 +264,7 @@ export default function IrmaoScan() {
       });
 
       // Atualizar quantidades
-      await base44.entities.Item.update(itemEncontrado.id, {
+      await db.Item.update(itemEncontrado.id, {
         quantidade_disponivel: (itemEncontrado.quantidade_disponivel || 1) - 1,
         quantidade_emprestada: (itemEncontrado.quantidade_emprestada || 0) + 1
       });
@@ -297,15 +298,15 @@ export default function IrmaoScan() {
         if (!emp) continue;
 
         // Atualizar empréstimo
-        await base44.entities.Emprestimo.update(emp.id, {
+        await db.Emprestimo.update(emp.id, {
           data_devolucao: format(new Date(), "yyyy-MM-dd"),
           status: "Devolvido"
         });
 
         // Atualizar item
-        const itens = await base44.entities.Item.filter({ id: emp.item_id });
+        const itens = await db.Item.filter({ id: emp.item_id });
         if (itens.length > 0) {
-          await base44.entities.Item.update(itens[0].id, {
+          await db.Item.update(itens[0].id, {
             quantidade_disponivel: (itens[0].quantidade_disponivel || 0) + 1,
             quantidade_emprestada: Math.max(0, (itens[0].quantidade_emprestada || 1) - 1)
           });

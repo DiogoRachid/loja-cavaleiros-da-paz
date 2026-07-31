@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -18,16 +19,16 @@ export default function DevolucaoForm({ emprestimo, onSave, onCancel }) {
 
     try {
       // Atualizar empréstimo
-      await base44.entities.Emprestimo.update(emprestimo.id, {
+      await db.Emprestimo.update(emprestimo.id, {
         data_devolucao: dataDevolucao,
         status: "Devolvido",
         observacoes: observacoes
       });
 
       // Atualizar quantidades do item
-      const item = await base44.entities.Item.filter({ id: emprestimo.item_id });
+      const item = await db.Item.filter({ id: emprestimo.item_id });
       if (item.length > 0) {
-        await base44.entities.Item.update(item[0].id, {
+        await db.Item.update(item[0].id, {
           quantidade_disponivel: (item[0].quantidade_disponivel || 0) + 1,
           quantidade_emprestada: Math.max(0, (item[0].quantidade_emprestada || 1) - 1)
         });

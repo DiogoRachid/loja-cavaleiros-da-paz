@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { createPageUrl } from "@/utils";
 import { PDFDocument } from "pdf-lib";
 import {
@@ -57,7 +58,7 @@ export default function AcervoPublico() {
   const loadPreview = async () => {
     try {
       if (tipo === "digital") {
-        const docs = await base44.entities.AcervoDigital.filter({ id: itemId });
+        const docs = await db.AcervoDigital.filter({ id: itemId });
         const doc = docs[0];
         if (doc) {
           const titulo = doc.titulo;
@@ -66,7 +67,7 @@ export default function AcervoPublico() {
           setMetaTags(titulo, capa);
         }
       } else {
-        const its = await base44.entities.Item.filter({ id: itemId });
+        const its = await db.Item.filter({ id: itemId });
         const it = its[0];
         if (it) {
           const titulo = it.nome;
@@ -101,15 +102,15 @@ export default function AcervoPublico() {
     setLoadingItem(true);
     if (tipo === "digital") {
       const [doc, avs] = await Promise.all([
-        base44.entities.AcervoDigital.filter({ id: itemId }),
-        base44.entities.Avaliacao.filter({ documento_id: itemId }, "-data_avaliacao")
+        db.AcervoDigital.filter({ id: itemId }),
+        db.Avaliacao.filter({ documento_id: itemId }, "-data_avaliacao")
       ]);
       setItem(doc[0] || null);
       setAvaliacoes(avs);
     } else {
       const [it, avs] = await Promise.all([
-        base44.entities.Item.filter({ id: itemId }),
-        base44.entities.Avaliacao.filter({ item_id: itemId }, "-data_avaliacao")
+        db.Item.filter({ id: itemId }),
+        db.Avaliacao.filter({ item_id: itemId }, "-data_avaliacao")
       ]);
       setItem(it[0] || null);
       setAvaliacoes(avs);
@@ -122,7 +123,7 @@ export default function AcervoPublico() {
     setLoginLoading(true);
     setError("");
 
-    const irmaos = await base44.entities.Irmao.filter({ numero_glp: numeroGlp.trim(), ativo: true });
+    const irmaos = await db.Irmao.filter({ numero_glp: numeroGlp.trim(), ativo: true });
     if (irmaos.length === 0) {
       setError("Número GLP não encontrado.");
       setLoginLoading(false);
@@ -159,14 +160,14 @@ export default function AcervoPublico() {
     setRecuperarLoading(true);
     setError("");
     setMsgRecuperar("");
-    const irmaos = await base44.entities.Irmao.filter({ numero_glp: glpRecuperar.trim(), ativo: true });
+    const irmaos = await db.Irmao.filter({ numero_glp: glpRecuperar.trim(), ativo: true });
     if (irmaos.length === 0) {
       setError("Número GLP não encontrado.");
       setRecuperarLoading(false);
       return;
     }
     const ir = irmaos[0];
-    await base44.entities.Irmao.update(ir.id, { senha: ir.numero_glp, primeiro_acesso: true });
+    await db.Irmao.update(ir.id, { senha: ir.numero_glp, primeiro_acesso: true });
     setMsgRecuperar(`Senha redefinida! Use seu número GLP (${ir.numero_glp}) como senha.`);
     setRecuperarLoading(false);
   };

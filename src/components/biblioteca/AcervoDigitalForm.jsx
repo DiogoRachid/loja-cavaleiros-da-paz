@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { uploadFile } from "@/lib/upload";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,7 +78,7 @@ export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
 
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await uploadFile({ file });
       handleChange(field, file_url);
 
       // Se for PDF e não houver capa, gerar automaticamente da 1ª página
@@ -86,7 +86,7 @@ export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
         const blob = await gerarCapaDoPDF(file_url);
         if (blob) {
           const capaFile = new File([blob], 'capa.jpg', { type: 'image/jpeg' });
-          const { file_url: capa_url } = await base44.integrations.Core.UploadFile({ file: capaFile });
+          const { file_url: capa_url } = await uploadFile({ file: capaFile });
           handleChange('capa_url', capa_url);
         }
       }
@@ -106,7 +106,7 @@ export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
       const blob = await gerarCapaDoPDF(formData.arquivo_url);
       if (!blob) throw new Error('Blob vazio');
       const capaFile = new File([blob], 'capa.jpg', { type: 'image/jpeg' });
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: capaFile });
+      const { file_url } = await uploadFile({ file: capaFile });
       handleChange('capa_url', file_url);
       toast.success('Capa gerada com sucesso!');
     } catch (e) {

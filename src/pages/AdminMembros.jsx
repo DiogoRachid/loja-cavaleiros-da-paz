@@ -31,7 +31,7 @@ export default function AdminMembros() {
   const loadIrmaos = async () => {
     const [data, mc] = await Promise.all([
       db.Irmao.list("-created_date", 500),
-      base44.entities.MembroComissao.filter({ ativo: true }),
+      db.MembroComissao.filter({ ativo: true }),
     ]);
     setIrmaos(data);
     setMembrosComissao(mc);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { uploadFile } from "@/lib/upload";
 import { db } from "@/api/db";
 import { FolderPlus, ListMusic, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -58,7 +58,7 @@ export default function AdminMeusMp3s() {
           duplicadas.push(nome);
           continue;
         }
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        const { file_url } = await uploadFile({ file });
         const novo = await db.MinhaMp3.create({ nome, file_url });
         nomesExistentes.add(nome.trim().toLowerCase());
         setMp3s((prev) => [...prev, novo].sort((a, b) => a.nome.localeCompare(b.nome)));

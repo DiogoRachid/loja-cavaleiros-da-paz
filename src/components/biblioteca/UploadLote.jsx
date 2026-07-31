@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
+import { uploadFile } from "@/lib/upload";
 import { Upload, X, FileText, Loader2, CheckCircle, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +29,7 @@ async function gerarCapa(arquivo_url) {
     await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
     const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
     const capaFile = new File([blob], 'capa.jpg', { type: 'image/jpeg' });
-    const { file_url } = await base44.integrations.Core.UploadFile({ file: capaFile });
+    const { file_url } = await uploadFile({ file: capaFile });
     return file_url;
   } catch (e) {
     console.error('Erro ao gerar capa:', e);
@@ -84,7 +85,7 @@ export default function UploadLote({ modo = "bib", irmao = null, onConcluido }) 
 
       try {
         // 1. Upload do PDF
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: lista[i].file });
+        const { file_url } = await uploadFile({ file: lista[i].file });
 
         // 2. Gerar capa
         const capa_url = await gerarCapa(file_url);
