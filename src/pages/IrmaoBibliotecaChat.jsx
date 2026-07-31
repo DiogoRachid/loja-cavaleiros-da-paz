@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { base44 } from "@/api/base44Client";
+import { chatAcervo } from "@/api/functions";
 import { createPageUrl } from "@/utils";
 
 export default function IrmaoBibliotecaChat() {
@@ -37,9 +37,8 @@ export default function IrmaoBibliotecaChat() {
     setCarregando(true);
 
     try {
-      // Padrão de chamada do SDK @base44/sdk: cada função vira um método
-      // em base44.functions com o mesmo nome do arquivo em base44/functions/
-      const resp = await base44.functions.chatAcervo({
+      // Chama a função customizada exportada em @/api/functions
+      const resp = await chatAcervo({
         pergunta: texto,
         grau_usuario: irmao.grau,
       });
