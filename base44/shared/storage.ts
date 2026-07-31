@@ -1,6 +1,8 @@
 // Helpers de Storage do Supabase (via API REST) usados na migração de arquivos.
 
 export const BUCKET = "arquivos";
+// Limite de tamanho por arquivo no bucket (500 MB)
+export const LIMITE_BYTES = 524288000;
 
 function config() {
   const url = Deno.env.get("SUPABASE_URL");
@@ -31,8 +33,29 @@ export async function migrarArquivo(origemUrl: string, caminho: string) {
 
   const download = await fetch(origemUrl);
   if (!download.ok) throw new Error("Falha ao baixar (" + download.status + "): " + origemUrl);
-  const bytes = new Uint8Array(await download.arrayBuffer());
   const contentType = download.headers.get("content-type") || "application/octet-stream";
+  const tamanho = Number(download.headers.get("content-length") || 0);
+
+  // Arquivos grandes são repassados em streaming para não estourar a memória
+  if (tamanho > 40 * 1024 * 1024) {
+    const uploadStream = await fetch(url + "/storage/v1/object/" + BUCKET + "/" + caminho, {
+      method: "POST",
+      headers: {
+        apikey: key,
+        Authorization: "Bearer " + key,
+        "Content-Type": contentType,
+        "x-upsert": "true",
+      },
+      body: download.body,
+    });
+    if (!uploadStream.ok) throw new Error("Falha no upload: " + (await uploadStream.text()));
+    return {
+      publicUrl: url + "/storage/v1/object/public/" + BUCKET + "/" + caminho,
+      bytes: tamanho,
+    };
+  }
+
+  const bytes = new Uint8Array(await download.arrayBuffer());
 
   const upload = await fetch(url + "/storage/v1/object/" + BUCKET + "/" + caminho, {
     method: "POST",
