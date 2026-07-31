@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -36,8 +35,8 @@ export default function EmprestimoForm({ onSave, onCancel }) {
   const loadData = async () => {
     try {
       const [itensData, irmaosData] = await Promise.all([
-        db.Item.filter({ ativo: true }),
-        db.Irmao.filter({ ativo: true })
+        base44.entities.Item.filter({ ativo: true }),
+        base44.entities.Irmao.filter({ ativo: true })
       ]);
       setItens(itensData.filter(i => (i.quantidade_disponivel || 0) > 0));
       setIrmaos(irmaosData);
@@ -56,7 +55,7 @@ export default function EmprestimoForm({ onSave, onCancel }) {
       const irmao = irmaos.find(i => i.id === formData.irmao_id);
 
       // Criar empréstimo
-      await db.Emprestimo.create({
+      await base44.entities.Emprestimo.create({
         item_id: formData.item_id,
         item_nome: item.nome,
         irmao_id: formData.irmao_id,
@@ -70,7 +69,7 @@ export default function EmprestimoForm({ onSave, onCancel }) {
       });
 
       // Atualizar quantidades do item
-      await db.Item.update(item.id, {
+      await base44.entities.Item.update(item.id, {
         quantidade_disponivel: (item.quantidade_disponivel || 1) - 1,
         quantidade_emprestada: (item.quantidade_emprestada || 0) + 1
       });

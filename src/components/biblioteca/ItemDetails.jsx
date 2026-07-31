@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { Badge } from "@/components/ui/badge";
 import { 
   BookOpen, FileText, Newspaper, Archive, 
@@ -21,7 +20,7 @@ export default function ItemDetails({ item, onClose }) {
 
   const loadHistorico = async () => {
     try {
-      const emprestimos = await db.Emprestimo.filter(
+      const emprestimos = await base44.entities.Emprestimo.filter(
         { item_id: item.id },
         "-data_retirada",
         20

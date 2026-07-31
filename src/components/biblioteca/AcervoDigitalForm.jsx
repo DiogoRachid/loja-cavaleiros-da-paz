@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import * as pdfjsLib from "pdfjs-dist";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 import {
   Select,
   SelectContent,
@@ -13,7 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Upload, FileText, Check } from "lucide-react";
+import { Loader2, Upload, FileText, Check, ImagePlus } from "lucide-react";
+import { toast } from "sonner";
 
 export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
   const [saving, setSaving] = useState(false);
@@ -52,6 +56,22 @@ export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const gerarCapaDoPDF = async (pdfUrl) => {
+    const pdf = await pdfjsLib.getDocument({
+      url: pdfUrl,
+      withCredentials: false,
+      cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist/cmaps/',
+      cMapPacked: true,
+    }).promise;
+    const page = await pdf.getPage(1);
+    const viewport = page.getViewport({ scale: 1.5 });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+  };
+
   const handleFileUpload = async (e, field) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -60,11 +80,43 @@ export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       handleChange(field, file_url);
+
+      // Se for PDF e não houver capa, gerar automaticamente da 1ª página
+      if (field === 'arquivo_url' && !formData.capa_url) {
+        const blob = await gerarCapaDoPDF(file_url);
+        if (blob) {
+          const capaFile = new File([blob], 'capa.jpg', { type: 'image/jpeg' });
+          const { file_url: capa_url } = await base44.integrations.Core.UploadFile({ file: capaFile });
+          handleChange('capa_url', capa_url);
+        }
+      }
     } catch (error) {
       console.error("Erro no upload:", error);
     }
     setUploading(false);
   };
+
+  const [gerandoCapa, setGerandoCapa] = useState(false);
+
+
+  const handleGerarCapa = async () => {
+    if (!formData.arquivo_url) return;
+    setGerandoCapa(true);
+    try {
+      const blob = await gerarCapaDoPDF(formData.arquivo_url);
+      if (!blob) throw new Error('Blob vazio');
+      const capaFile = new File([blob], 'capa.jpg', { type: 'image/jpeg' });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: capaFile });
+      handleChange('capa_url', file_url);
+      toast.success('Capa gerada com sucesso!');
+    } catch (e) {
+      console.error('Erro ao gerar capa:', e);
+      toast.error('Erro ao gerar capa: ' + (e.message || 'verifique o console'));
+    }
+    setGerandoCapa(false);
+  };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -155,6 +207,7 @@ export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
         <Label>Arquivo PDF *</Label>
         <div className="mt-2">
           {formData.arquivo_url ? (
+            <>
             <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
               <Check className="w-5 h-5 text-emerald-600" />
               <span className="text-sm text-emerald-700 flex-1">PDF carregado</span>
@@ -176,6 +229,20 @@ export default function AcervoDigitalForm({ documento, onSave, onCancel }) {
                 />
               </label>
             </div>
+            <div className="flex gap-2 mt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={handleGerarCapa}
+                disabled={gerandoCapa}
+              >
+                {gerandoCapa ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <ImagePlus className="w-3 h-3 mr-1" />}
+                {gerandoCapa ? 'Gerando...' : 'Gerar Capa'}
+              </Button>
+            </div>
+            </>
           ) : (
             <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-[#1B3A5F] hover:bg-slate-50 transition-colors">
               {uploading ? (

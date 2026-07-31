@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { Badge } from "@/components/ui/badge";
 import { 
   Mail, Phone, Calendar, Award, History, Loader2, BookOpen 
@@ -20,7 +19,7 @@ export default function IrmaoDetails({ irmao, onClose }) {
 
   const loadHistorico = async () => {
     try {
-      const emprestimos = await db.Emprestimo.filter(
+      const emprestimos = await base44.entities.Emprestimo.filter(
         { irmao_id: irmao.id },
         "-data_retirada",
         50

@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/select";
 import { Loader2, Upload, Check, FileText } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 
 export default function ItemForm({ item, onSave, onCancel }) {
   const [saving, setSaving] = useState(false);
@@ -29,6 +28,7 @@ export default function ItemForm({ item, onSave, onCancel }) {
     quantidade_emprestada: 0,
     localizacao: "",
     imagem_capa: "",
+    isbn: "",
     ativo: true
   });
 
@@ -46,6 +46,7 @@ export default function ItemForm({ item, onSave, onCancel }) {
         quantidade_emprestada: item.quantidade_emprestada || 0,
         localizacao: item.localizacao || "",
         imagem_capa: item.imagem_capa || "",
+        isbn: item.isbn || "",
         ativo: item.ativo !== false
       });
     }
@@ -165,6 +166,16 @@ export default function ItemForm({ item, onSave, onCancel }) {
             value={formData.localizacao}
             onChange={(e) => handleChange("localizacao", e.target.value)}
             placeholder="Ex: Estante A, Prateleira 2"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="isbn">ISBN</Label>
+          <Input
+            id="isbn"
+            value={formData.isbn}
+            onChange={(e) => handleChange("isbn", e.target.value)}
+            placeholder="Ex: 9786580921058"
           />
         </div>
 
