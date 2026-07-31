@@ -11,9 +11,9 @@ export const TABELAS = [
 ];
 
 function config() {
-  const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!url || !key) throw new Error("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY não configurados");
+  const url = Deno.env.get("SUPABASE2_URL");
+  const key = Deno.env.get("SUPABASE2_SERVICE_ROLE_KEY");
+  if (!url || !key) throw new Error("SUPABASE2_URL / SUPABASE2_SERVICE_ROLE_KEY não configurados");
   return { url: url.replace(/\/$/, ""), key };
 }
 
