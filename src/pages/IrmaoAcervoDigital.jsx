@@ -174,6 +174,13 @@ export default function IrmaoAcervoDigital() {
           <p className="text-slate-500">{filteredDocs.length} documento(s) disponível(is)</p>
         </div>
 
+        <Button
+          onClick={() => window.location.href = createPageUrl("IrmaoBibliotecaChat")}
+          className="bg-[#1B3A5F] hover:bg-[#15304d]"
+        >
+          <MessageSquare className="w-4 h-4 mr-2" />
+          Perguntar ao Acervo
+        </Button>
       </div>
 
       {/* Filtros */}
