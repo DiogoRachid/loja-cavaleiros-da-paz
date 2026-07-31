@@ -1,15 +1,27 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-
-// Ajuste este import conforme o padrão de chamada de funções que vocês já usam no base44
-// (ex: import { chatAcervo } from "@/functions/chatAcervo";)
 import { base44 } from "@/api/base44Client";
+import { createPageUrl } from "@/utils";
 
-export default function IrmaoBibliotecaChat({ grauUsuario = "Aprendiz" }) {
+export default function IrmaoBibliotecaChat() {
   const [mensagens, setMensagens] = useState([]);
   const [pergunta, setPergunta] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [irmao, setIrmao] = useState(null);
   const fimDaListaRef = useRef(null);
+
+  // Mesmo padrão de autenticação usado em IrmaoAcervoDigital.jsx
+  useEffect(() => {
+    const irmaoAuth = sessionStorage.getItem("irmao_auth");
+    const irmaoData = sessionStorage.getItem("irmao_data");
+
+    if (irmaoAuth !== "true" || !irmaoData) {
+      window.location.href = createPageUrl("IrmaoLogin");
+      return;
+    }
+
+    setIrmao(JSON.parse(irmaoData));
+  }, []);
 
   useEffect(() => {
     fimDaListaRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -17,7 +29,7 @@ export default function IrmaoBibliotecaChat({ grauUsuario = "Aprendiz" }) {
 
   async function enviarPergunta() {
     const texto = pergunta.trim();
-    if (!texto || carregando) return;
+    if (!texto || carregando || !irmao) return;
 
     const novaMensagemUsuario = { autor: "usuario", texto };
     setMensagens((prev) => [...prev, novaMensagemUsuario]);
@@ -25,17 +37,23 @@ export default function IrmaoBibliotecaChat({ grauUsuario = "Aprendiz" }) {
     setCarregando(true);
 
     try {
-      const resp = await base44.functions.invoke("chatAcervo", {
+      // Padrão de chamada do SDK @base44/sdk: cada função vira um método
+      // em base44.functions com o mesmo nome do arquivo em base44/functions/
+      const resp = await base44.functions.chatAcervo({
         pergunta: texto,
-        grau_usuario: grauUsuario,
+        grau_usuario: irmao.grau,
       });
+
+      // O SDK pode devolver o corpo direto ou dentro de resp.data,
+      // dependendo da versão — cobre os dois casos.
+      const dados = resp?.data ?? resp;
 
       setMensagens((prev) => [
         ...prev,
         {
           autor: "agente",
-          texto: resp.resposta,
-          fontes: resp.fontes || [],
+          texto: dados.resposta,
+          fontes: dados.fontes || [],
         },
       ]);
     } catch (err) {
@@ -60,12 +78,20 @@ export default function IrmaoBibliotecaChat({ grauUsuario = "Aprendiz" }) {
     }
   }
 
+  if (!irmao) {
+    return (
+      <div className="flex items-center justify-center h-64 text-sm text-gray-400">
+        Carregando...
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-[600px] max-w-2xl mx-auto border rounded-lg bg-white shadow-sm">
       <div className="px-4 py-3 border-b">
         <h2 className="text-lg font-semibold">Consulta ao Acervo Digital</h2>
         <p className="text-sm text-gray-500">
-          Pergunte sobre os livros e artigos disponíveis no acervo
+          Pergunte sobre os livros e artigos disponíveis no acervo (grau: {irmao.grau})
         </p>
       </div>
 
