@@ -1,0 +1,86 @@
+{
+  "name": "SugestaoAcervo",
+  "type": "object",
+  "properties": {
+    "titulo": {
+      "type": "string",
+      "description": "T\u00edtulo do documento"
+    },
+    "autor": {
+      "type": "string",
+      "description": "Autor do documento"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Livro",
+        "Trabalho",
+        "Artigo",
+        "Instru\u00e7\u00e3o",
+        "Ritual",
+        "Outro"
+      ],
+      "description": "Tipo do documento"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o ou resumo"
+    },
+    "data_publicacao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de publica\u00e7\u00e3o"
+    },
+    "grau_minimo": {
+      "type": "string",
+      "enum": [
+        "Aprendiz",
+        "Companheiro",
+        "Mestre"
+      ],
+      "default": "Aprendiz",
+      "description": "Grau m\u00ednimo para acesso"
+    },
+    "arquivo_url": {
+      "type": "string",
+      "description": "URL do arquivo PDF"
+    },
+    "capa_url": {
+      "type": "string",
+      "description": "URL da imagem de capa"
+    },
+    "irmao_id": {
+      "type": "string",
+      "description": "ID do irm\u00e3o que enviou"
+    },
+    "irmao_nome": {
+      "type": "string",
+      "description": "Nome do irm\u00e3o que enviou"
+    },
+    "irmao_numero_glp": {
+      "type": "string",
+      "description": "N\u00famero GLP do irm\u00e3o"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Aprovado",
+        "Reprovado",
+        "Em Revis\u00e3o"
+      ],
+      "default": "Pendente",
+      "description": "Status da sugest\u00e3o"
+    },
+    "observacoes_revisao": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es do bibliotec\u00e1rio"
+    }
+  },
+  "required": [
+    "titulo",
+    "tipo",
+    "arquivo_url",
+    "irmao_id"
+  ]
+}
