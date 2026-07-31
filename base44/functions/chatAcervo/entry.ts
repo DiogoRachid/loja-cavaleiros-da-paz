@@ -1,146 +1,191 @@
-// Função chatAcervo: recebe uma pergunta do irmão, busca os trechos mais
-// relevantes do acervo digital (via embedding + pgvector) e usa a API própria
-// (que roteia para o OpenRouter, modelo free) para gerar a resposta com base
-// apenas nesses trechos, citando as fontes.
+// base44/functions/chatAcervo/entry.ts
+//
+// Recebe uma pergunta do usuário, busca os trechos mais relevantes do acervo
+// (via embedding + pgvector) e gera uma resposta usando o LLM configurado
+// (roteado pela API própria em api.arquitetus.com -> OpenRouter).
+//
+// Variáveis de ambiente necessárias (configurar no painel do base44):
+//   SUPABASE2_URL             - já existente no projeto
+//   SUPABASE2_SERVICE_ROLE_KEY- já existente no projeto
+//   EMBED_API_URL             - https://supabase.rachid.dpdns.org/embed-api/embed
+//   EMBED_API_SECRET          - a mesma chave usada no .env do VPS
+//   ARQUITETUS_API_URL        - https://api.arquitetus.com/v1
+//   ARQUITETUS_API_TOKEN      - seu token
+//   ARQUITETUS_MODEL          - openrouter/free (ajustar se der erro de modelo)
 
-function configSupabase() {
-  const url = Deno.env.get("SUPABASE2_URL");
-  const key = Deno.env.get("SUPABASE2_SERVICE_ROLE_KEY");
-  if (!url || !key) throw new Error("SUPABASE2_URL / SUPABASE2_SERVICE_ROLE_KEY não configurados");
-  return { url: url.replace(/\/$/, ""), key };
+interface PedidoChat {
+  pergunta: string;
+  grau_usuario: string; // ex: "Aprendiz", "Companheiro", "Mestre"
 }
 
-function configEmbedApi() {
-  const url = Deno.env.get("EMBED_API_URL"); // ex: https://supabase.rachid.dpdns.org/embed-api/embed
-  const key = Deno.env.get("EMBED_API_SECRET");
-  if (!url || !key) throw new Error("EMBED_API_URL / EMBED_API_SECRET não configurados");
-  return { url, key };
+interface TrechoEncontrado {
+  acervo_id: string;
+  conteudo: string;
+  titulo: string;
+  similarity: number;
 }
 
-function configLLM() {
-  const url = Deno.env.get("ARQUITETUS_API_URL"); // ex: https://api.arquitetus.com/v1
-  const token = Deno.env.get("ARQUITETUS_API_TOKEN");
-  const modelo = Deno.env.get("ARQUITETUS_MODEL"); // ex: "nvidia/nemotron-...-free" ou o id que você usa
-  if (!url || !token || !modelo) {
-    throw new Error("ARQUITETUS_API_URL / ARQUITETUS_API_TOKEN / ARQUITETUS_MODEL não configurados");
-  }
-  return { url: url.replace(/\/$/, ""), token, modelo };
-}
+const SUPABASE_URL = Deno.env.get("SUPABASE2_URL")!;
+const SUPABASE_KEY = Deno.env.get("SUPABASE2_SERVICE_ROLE_KEY")!;
+const EMBED_API_URL = Deno.env.get("EMBED_API_URL")!;
+const EMBED_API_SECRET = Deno.env.get("EMBED_API_SECRET")!;
+const ARQUITETUS_API_URL = Deno.env.get("ARQUITETUS_API_URL")!;
+const ARQUITETUS_API_TOKEN = Deno.env.get("ARQUITETUS_API_TOKEN")!;
+const ARQUITETUS_MODEL = Deno.env.get("ARQUITETUS_MODEL") ?? "openrouter/free";
 
-// Gera o embedding da pergunta chamando o serviço no VPS
-async function embedPergunta(texto) {
-  const { url, key } = configEmbedApi();
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-API-Key": key },
-    body: JSON.stringify({ texto }),
-  });
-  if (!res.ok) throw new Error("Falha ao gerar embedding: " + (await res.text()));
-  const data = await res.json();
-  return data.embedding;
-}
+const MATCH_COUNT = 6; // quantos trechos trazer para o contexto
+const SIMILARITY_MIN = 0.3; // abaixo disso, ignora (RPC já filtra, mas fica de guarda aqui também)
 
-// Busca os trechos mais relevantes no Supabase via a função match_chunks (RPC)
-async function buscarTrechos(embedding, grauUsuario, quantidade = 6) {
-  const { url, key } = configSupabase();
-  const res = await fetch(url + "/rest/v1/rpc/match_chunks", {
+async function gerarEmbedding(texto: string): Promise<number[]> {
+  const resp = await fetch(EMBED_API_URL, {
     method: "POST",
     headers: {
-      apikey: key,
-      Authorization: "Bearer " + key,
       "Content-Type": "application/json",
+      "X-API-Key": EMBED_API_SECRET,
+    },
+    body: JSON.stringify({ texto }),
+  });
+
+  if (!resp.ok) {
+    const erro = await resp.text();
+    throw new Error(`Falha ao gerar embedding (${resp.status}): ${erro}`);
+  }
+
+  const data = await resp.json();
+  return data.embedding as number[];
+}
+
+async function buscarTrechos(
+  embedding: number[],
+  grauUsuario: string,
+): Promise<TrechoEncontrado[]> {
+  const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/match_chunks`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
     },
     body: JSON.stringify({
       query_embedding: embedding,
-      match_count: quantidade,
-      grau_usuario: grauUsuario || "Aprendiz",
+      match_count: MATCH_COUNT,
+      grau_usuario: grauUsuario,
     }),
   });
-  if (!res.ok) throw new Error("Falha na busca de trechos: " + (await res.text()));
-  return await res.json();
+
+  if (!resp.ok) {
+    const erro = await resp.text();
+    throw new Error(`Falha ao buscar trechos (${resp.status}): ${erro}`);
+  }
+
+  const trechos = (await resp.json()) as TrechoEncontrado[];
+  return trechos.filter((t) => t.similarity >= SIMILARITY_MIN);
 }
 
-// Monta o prompt com os trechos encontrados e chama a API própria (OpenRouter)
-async function gerarResposta(pergunta, trechos) {
-  const { url, token, modelo } = configLLM();
+function montarPrompt(pergunta: string, trechos: TrechoEncontrado[]): string {
+  if (trechos.length === 0) {
+    return (
+      `O usuário perguntou: "${pergunta}"\n\n` +
+      `Não foram encontrados trechos relevantes no acervo para essa pergunta. ` +
+      `Responda educadamente que não encontrou informação sobre isso no acervo digital disponível, ` +
+      `sem inventar conteúdo.`
+    );
+  }
 
   const contexto = trechos
-    .map((t, i) => `[Fonte ${i + 1}: "${t.titulo}"${t.autor ? " — " + t.autor : ""}]\n${t.conteudo}`)
+    .map(
+      (t, i) =>
+        `[Fonte ${i + 1} - "${t.titulo}"]\n${t.conteudo.slice(0, 1500)}`,
+    )
     .join("\n\n---\n\n");
 
-  const systemPrompt =
-    "Você é o assistente de consulta da biblioteca digital de uma loja maçônica. " +
-    "Responda à pergunta do irmão usando APENAS as informações presentes nos trechos fornecidos abaixo. " +
-    "Se a resposta não estiver nos trechos, diga claramente que não encontrou essa informação no acervo, " +
-    "sem inventar conteúdo. Sempre que possível, cite de qual fonte (livro/documento) veio cada informação, " +
-    "usando o formato (Fonte: \"Título\"). Responda em português, de forma clara e respeitosa.";
+  return (
+    `Você é um assistente de biblioteca digital. Responda a pergunta do usuário ` +
+    `usando APENAS as informações dos trechos abaixo, extraídos do acervo. ` +
+    `Se a resposta não estiver nos trechos, diga que não encontrou essa informação no acervo. ` +
+    `Sempre que possível, cite o título da fonte usada entre parênteses ao final da afirmação.\n\n` +
+    `=== TRECHOS DO ACERVO ===\n\n${contexto}\n\n=== FIM DOS TRECHOS ===\n\n` +
+    `Pergunta do usuário: ${pergunta}`
+  );
+}
 
-  const userPrompt = `Trechos do acervo:\n\n${contexto}\n\n---\n\nPergunta do irmão: ${pergunta}`;
-
-  const res = await fetch(url + "/chat/completions", {
+async function chamarLLM(prompt: string): Promise<string> {
+  const resp = await fetch(`${ARQUITETUS_API_URL}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: "Bearer " + token,
+      Authorization: `Bearer ${ARQUITETUS_API_TOKEN}`,
     },
     body: JSON.stringify({
-      model: modelo,
+      model: ARQUITETUS_MODEL,
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+        {
+          role: "system",
+          content:
+            "Você é um assistente de consulta bibliográfica, objetivo e preciso, que só responde com base nos trechos fornecidos.",
+        },
+        { role: "user", content: prompt },
       ],
       temperature: 0.3,
     }),
   });
 
-  if (!res.ok) throw new Error("Falha ao chamar o modelo: " + (await res.text()));
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content ?? "";
+  if (!resp.ok) {
+    const erro = await resp.text();
+    throw new Error(`Falha ao chamar LLM (${resp.status}): ${erro}`);
+  }
+
+  const data = await resp.json();
+  return data.choices?.[0]?.message?.content ?? "Não foi possível gerar uma resposta.";
 }
 
-Deno.serve(async (req) => {
+export default async function handler(req: Request): Promise<Response> {
   try {
-    const { pergunta, grau_usuario } = await req.json();
-
-    if (!pergunta || !pergunta.trim()) {
-      return Response.json({ error: "Pergunta vazia" }, { status: 400 });
-    }
-
-    const embedding = await embedPergunta(pergunta);
-    const trechos = await buscarTrechos(embedding, grau_usuario, 6);
-
-    // filtra trechos muito pouco relevantes (ruído), mantendo só os realmente próximos
-    const trechosRelevantes = trechos.filter((t) => t.similarity > 0.35);
-
-    if (trechosRelevantes.length === 0) {
-      return Response.json({
-        resposta:
-          "Não encontrei nenhum trecho relevante no acervo digital para responder essa pergunta. " +
-          "Tente reformular ou consulte diretamente o bibliotecário.",
-        fontes: [],
+    if (req.method !== "POST") {
+      return new Response(JSON.stringify({ erro: "Método não permitido" }), {
+        status: 405,
+        headers: { "Content-Type": "application/json" },
       });
     }
 
-    const resposta = await gerarResposta(pergunta, trechosRelevantes);
+    const body = (await req.json()) as PedidoChat;
 
-    // remove duplicatas de fonte (mesmo livro pode aparecer em vários trechos)
-    const fontesMap = new Map();
-    for (const t of trechosRelevantes) {
-      if (!fontesMap.has(t.acervo_id)) {
-        fontesMap.set(t.acervo_id, {
-          titulo: t.titulo,
-          autor: t.autor,
-          arquivo_url: t.arquivo_url,
-          similaridade: Math.round(t.similarity * 100) / 100,
-        });
-      }
+    if (!body.pergunta || !body.pergunta.trim()) {
+      return new Response(JSON.stringify({ erro: "Pergunta vazia" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    return Response.json({
-      resposta,
-      fontes: Array.from(fontesMap.values()),
-    });
-  } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    const grauUsuario = body.grau_usuario || "Aprendiz";
+
+    // 1. Embedding da pergunta
+    const embedding = await gerarEmbedding(body.pergunta);
+
+    // 2. Busca de trechos relevantes (já filtrando por grau_minimo dentro do match_chunks)
+    const trechos = await buscarTrechos(embedding, grauUsuario);
+
+    // 3. Monta prompt e chama o LLM
+    const prompt = montarPrompt(body.pergunta, trechos);
+    const resposta = await chamarLLM(prompt);
+
+    // 4. Monta lista de fontes únicas citadas
+    const fontesUnicas = Array.from(
+      new Map(trechos.map((t) => [t.acervo_id, t.titulo])).entries(),
+    ).map(([acervo_id, titulo]) => ({ acervo_id, titulo }));
+
+    return new Response(
+      JSON.stringify({
+        resposta,
+        fontes: fontesUnicas,
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  } catch (err) {
+    console.error("Erro em chatAcervo:", err);
+    return new Response(
+      JSON.stringify({ erro: err instanceof Error ? err.message : "Erro desconhecido" }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
   }
-});
+}
