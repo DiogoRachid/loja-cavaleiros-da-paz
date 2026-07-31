@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { chatAcervo } from "@/api/functions";
+import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 
 export default function IrmaoBibliotecaChat() {
@@ -37,15 +37,17 @@ export default function IrmaoBibliotecaChat() {
     setCarregando(true);
 
     try {
-      // Chama a função customizada exportada em @/api/functions
-      const resp = await chatAcervo({
+      // Mesmo padrão usado em src/api/db.js: base44.functions.invoke(nome, payload)
+      const res = await base44.functions.invoke("chatAcervo", {
         pergunta: texto,
         grau_usuario: irmao.grau,
       });
 
-      // O SDK pode devolver o corpo direto ou dentro de resp.data,
-      // dependendo da versão — cobre os dois casos.
-      const dados = resp?.data ?? resp;
+      if (res.data?.erro) {
+        throw new Error(res.data.erro);
+      }
+
+      const dados = res.data;
 
       setMensagens((prev) => [
         ...prev,
