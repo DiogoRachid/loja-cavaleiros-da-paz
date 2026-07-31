@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { Upload, X, FileText, Loader2, CheckCircle, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,7 +91,7 @@ export default function UploadLote({ modo = "bib", irmao = null, onConcluido }) 
 
         // 3. Salvar
         if (modo === "bib") {
-          await base44.entities.AcervoDigital.create({
+          await db.AcervoDigital.create({
             titulo: lista[i].titulo,
             tipo: lista[i].tipo,
             grau_minimo: lista[i].grau_minimo,
@@ -100,7 +101,7 @@ export default function UploadLote({ modo = "bib", irmao = null, onConcluido }) 
             disponivel: false,
           });
         } else {
-          await base44.entities.SugestaoAcervo.create({
+          await db.SugestaoAcervo.create({
             titulo: lista[i].titulo,
             tipo: lista[i].tipo,
             grau_minimo: lista[i].grau_minimo,

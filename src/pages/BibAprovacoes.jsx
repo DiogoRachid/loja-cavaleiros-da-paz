@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { createPageUrl } from "@/utils";
 import { CheckCircle, XCircle, Pencil, Loader2, FileText, GraduationCap, Clock, Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -29,14 +29,14 @@ export default function BibAprovacoes() {
   }, []);
 
   const load = async () => {
-    const data = await base44.entities.SugestaoAcervo.list("-created_date");
+    const data = await db.SugestaoAcervo.list("-created_date");
     setSugestoes(data);
     setLoading(false);
   };
 
   const aprovar = async (s) => {
     setProcessando(s.id);
-    await base44.entities.AcervoDigital.create({
+    await db.AcervoDigital.create({
       titulo: s.titulo,
       autor: s.autor,
       tipo: s.tipo,
@@ -48,7 +48,7 @@ export default function BibAprovacoes() {
       ativo: true,
       disponivel: true,
     });
-    await base44.entities.SugestaoAcervo.update(s.id, { status: "Aprovado" });
+    await db.SugestaoAcervo.update(s.id, { status: "Aprovado" });
     toast.success(`"${s.titulo}" aprovado e adicionado ao acervo digital!`);
     setProcessando(null);
     load();
@@ -56,20 +56,20 @@ export default function BibAprovacoes() {
 
   const reprovar = async (s) => {
     setProcessando(s.id);
-    await base44.entities.SugestaoAcervo.update(s.id, { status: "Reprovado" });
+    await db.SugestaoAcervo.update(s.id, { status: "Reprovado" });
     toast.info(`"${s.titulo}" reprovado.`);
     setProcessando(null);
     load();
   };
 
   const deletar = async (id) => {
-    await base44.entities.SugestaoAcervo.delete(id);
+    await db.SugestaoAcervo.delete(id);
     toast.success("Registro removido do histórico.");
     load();
   };
 
   const handleRevisar = async (form) => {
-    await base44.entities.SugestaoAcervo.update(revisando.id, { ...form, status: "Em Revisão" });
+    await db.SugestaoAcervo.update(revisando.id, { ...form, status: "Em Revisão" });
     toast.success("Sugestão atualizada.");
     setRevisando(null);
     load();

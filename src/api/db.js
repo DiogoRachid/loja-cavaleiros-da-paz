@@ -38,6 +38,7 @@ export const db = {
   Emprestimo: tabela("emprestimo"),
   AcervoDigital: tabela("acervo_digital"),
   Avaliacao: tabela("avaliacao"),
+  SugestaoAcervo: tabela("sugestao_acervo"),
   LogAcesso: tabela("log_acesso"),
   LogDownload: tabela("log_download"),
   MinhaMp3: tabela("minha_mp3"),

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { db } from "@/api/db";
 import { createPageUrl } from "@/utils";
 import { FileText, Plus, Loader2, GraduationCap, Clock, CheckCircle, XCircle, Eye } from "lucide-react";
 import SugestaoForm from "@/components/biblioteca/SugestaoForm";
@@ -46,7 +46,7 @@ export default function IrmaoSugestoes() {
   }, []);
 
   const loadSugestoes = async (irmaoId) => {
-    const data = await base44.entities.SugestaoAcervo.filter({ irmao_id: irmaoId }, "-created_date");
+    const data = await db.SugestaoAcervo.filter({ irmao_id: irmaoId }, "-created_date");
     setSugestoes(data);
     setLoading(false);
   };
@@ -54,7 +54,7 @@ export default function IrmaoSugestoes() {
   const handleEnviar = async (form) => {
     if (!irmao) return;
     setSalvando(true);
-    await base44.entities.SugestaoAcervo.create({
+    await db.SugestaoAcervo.create({
       ...form,
       irmao_id: irmao.id,
       irmao_nome: irmao.nome_completo,
