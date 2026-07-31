@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { 
   Plus, Search, Edit, Trash2, Loader2, 
   UserCog, Eye, EyeOff
@@ -59,7 +58,7 @@ export default function BibBibliotecarios() {
 
   const loadBibliotecarios = async () => {
     try {
-      const data = await db.Bibliotecario.list("-created_date");
+      const data = await base44.entities.Bibliotecario.list("-created_date");
       setBibliotecarios(data);
     } catch (error) {
       console.error("Erro ao carregar bibliotecários:", error);
@@ -73,9 +72,9 @@ export default function BibBibliotecarios() {
 
     try {
       if (selectedBib) {
-        await db.Bibliotecario.update(selectedBib.id, formData);
+        await base44.entities.Bibliotecario.update(selectedBib.id, formData);
       } else {
-        await db.Bibliotecario.create(formData);
+        await base44.entities.Bibliotecario.create(formData);
       }
       await loadBibliotecarios();
       setFormOpen(false);
@@ -90,7 +89,7 @@ export default function BibBibliotecarios() {
 
   const handleDelete = async () => {
     if (selectedBib) {
-      await db.Bibliotecario.delete(selectedBib.id);
+      await base44.entities.Bibliotecario.delete(selectedBib.id);
       await loadBibliotecarios();
     }
     setDeleteDialogOpen(false);

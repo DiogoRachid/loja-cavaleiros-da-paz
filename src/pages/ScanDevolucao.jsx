@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { 
   QrCode, Loader2, CheckCircle, AlertTriangle, Package, ArrowLeft
 } from "lucide-react";
@@ -29,11 +28,11 @@ export default function ScanDevolucao() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      const irmaos = await db.Irmao.filter({ email: currentUser.email });
+      const irmaos = await base44.entities.Irmao.filter({ email: currentUser.email });
       if (irmaos.length > 0) {
         setIrmao(irmaos[0]);
         
-        const emps = await db.Emprestimo.filter(
+        const emps = await base44.entities.Emprestimo.filter(
           { irmao_email: currentUser.email, status: "Ativo" }
         );
         setEmprestimosAtivos(emps);
@@ -61,14 +60,14 @@ export default function ScanDevolucao() {
         const emp = emprestimosAtivos.find(e => e.id === empId);
         if (!emp) continue;
 
-        await db.Emprestimo.update(emp.id, {
+        await base44.entities.Emprestimo.update(emp.id, {
           data_devolucao: format(new Date(), "yyyy-MM-dd"),
           status: "Devolvido"
         });
 
-        const itens = await db.Item.filter({ id: emp.item_id });
+        const itens = await base44.entities.Item.filter({ id: emp.item_id });
         if (itens.length > 0) {
-          await db.Item.update(itens[0].id, {
+          await base44.entities.Item.update(itens[0].id, {
             quantidade_disponivel: (itens[0].quantidade_disponivel || 0) + 1,
             quantidade_emprestada: Math.max(0, (itens[0].quantidade_emprestada || 1) - 1)
           });

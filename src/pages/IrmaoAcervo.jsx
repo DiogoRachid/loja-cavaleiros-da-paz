@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { createPageUrl } from "@/utils";
 import {
   Book, Search, Loader2, Star, Calendar, MessageSquare, 
@@ -36,6 +35,7 @@ export default function IrmaoAcervo() {
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [filtroOrdem, setFiltroOrdem] = useState("nome");
   const [itemSelecionado, setItemSelecionado] = useState(null);
+
   
   // Estado para avaliação
   const [nota, setNota] = useState(5);
@@ -57,8 +57,8 @@ export default function IrmaoAcervo() {
 
   const loadData = async () => {
     const [itemsData, avs] = await Promise.all([
-      db.Item.filter({ ativo: true }, "nome"),
-      db.Avaliacao.filter({ item_id: { "$ne": null } }, "-data_avaliacao")
+      base44.entities.Item.filter({ ativo: true }, "nome"),
+      base44.entities.Avaliacao.filter({ item_id: { "$ne": null } }, "-data_avaliacao")
     ]);
     setItems(itemsData);
     setAvaliacoes(avs);
@@ -78,7 +78,7 @@ export default function IrmaoAcervo() {
 
     setEnviandoAvaliacao(true);
     try {
-      await db.Avaliacao.create({
+      await base44.entities.Avaliacao.create({
         item_id: itemSelecionado.id,
         irmao_id: irmao.id,
         irmao_nome: irmao.nome_completo,
@@ -232,6 +232,7 @@ export default function IrmaoAcervo() {
                         {disponivel ? "Disponível" : "Indisponível"}
                       </Badge>
                     </div>
+
                   </div>
                 </div>
               </CardContent>

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { useLocation } from "react-router-dom";
 import { 
   QrCode, Loader2, CheckCircle, AlertTriangle, BookOpen, ArrowLeft
@@ -33,13 +32,13 @@ export default function ScanRetirada() {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
 
-      const irmaos = await db.Irmao.filter({ email: currentUser.email });
+      const irmaos = await base44.entities.Irmao.filter({ email: currentUser.email });
       if (irmaos.length > 0) {
         setIrmao(irmaos[0]);
       }
 
       if (codigo) {
-        const itens = await db.Item.filter({ codigo_qr: codigo });
+        const itens = await base44.entities.Item.filter({ codigo_qr: codigo });
         if (itens.length > 0) {
           setItem(itens[0]);
         } else {
@@ -69,7 +68,7 @@ export default function ScanRetirada() {
         return;
       }
 
-      await db.Emprestimo.create({
+      await base44.entities.Emprestimo.create({
         item_id: item.id,
         item_nome: item.nome,
         irmao_id: irmao.id,
@@ -81,7 +80,7 @@ export default function ScanRetirada() {
         tipo_operacao: "QR Code"
       });
 
-      await db.Item.update(item.id, {
+      await base44.entities.Item.update(item.id, {
         quantidade_disponivel: (item.quantidade_disponivel || 1) - 1,
         quantidade_emprestada: (item.quantidade_emprestada || 0) + 1
       });

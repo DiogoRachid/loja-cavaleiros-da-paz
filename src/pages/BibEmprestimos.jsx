@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { 
   Plus, Search, Filter, Loader2, BookMarked, 
   ArrowLeftRight, CheckCircle, AlertTriangle, User, Library, Trash2
@@ -68,9 +67,9 @@ export default function BibEmprestimos() {
   const loadEmprestimos = async () => {
     try {
       const [data, listaIrmaos, listaItems] = await Promise.all([
-        db.Emprestimo.list("-data_retirada", 200),
-        db.Irmao.list("nome_completo", 1000),
-        db.Item.list("nome", 1000)
+        base44.entities.Emprestimo.list("-data_retirada", 200),
+        base44.entities.Irmao.list("nome_completo", 1000),
+        base44.entities.Item.list("nome", 1000)
       ]);
       
       setIrmaos(listaIrmaos);
@@ -109,7 +108,7 @@ export default function BibEmprestimos() {
   const handleDelete = async () => {
     if (itemToDelete) {
       try {
-        await db.Emprestimo.delete(itemToDelete.id);
+        await base44.entities.Emprestimo.delete(itemToDelete.id);
         toast.success("Empréstimo apagado");
         setDeleteDialogOpen(false);
         setItemToDelete(null);

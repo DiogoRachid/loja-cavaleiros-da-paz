@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { createPageUrl } from "@/utils";
 import { 
   Loader2, Printer, Search, Calendar as CalendarIcon, 
@@ -37,9 +36,9 @@ export default function BibRelatorios() {
     try {
       // Carregar um volume maior de dados para permitir filtragem local
       const [acessos, downloads, emprestimos] = await Promise.all([
-        db.LogAcesso.list("-data_acesso", 1000),
-        db.LogDownload.list("-data_download", 1000),
-        db.Emprestimo.list("-data_retirada", 1000)
+        base44.entities.LogAcesso.list("-data_acesso", 1000),
+        base44.entities.LogDownload.list("-data_download", 1000),
+        base44.entities.Emprestimo.list("-data_retirada", 1000)
       ]);
 
       setData({ 

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { db } from "@/api/db";
-import { BookOpen, User, Lock, ArrowLeft, Loader2, AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import { BookOpen, User, Lock, ArrowLeft, Loader2, AlertTriangle, Eye, EyeOff, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,32 @@ export default function IrmaoLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
+  // Estado para recuperar senha
+  const [recuperarSenha, setRecuperarSenha] = useState(false);
+  const [glpRecuperar, setGlpRecuperar] = useState("");
+  const [msgRecuperar, setMsgRecuperar] = useState("");
+
+  const handleRecuperarSenha = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setMsgRecuperar("");
+    try {
+      const irmaos = await base44.entities.Irmao.filter({ numero_glp: glpRecuperar.trim(), ativo: true });
+      if (irmaos.length === 0) {
+        setError("Número GLP não encontrado.");
+        setLoading(false);
+        return;
+      }
+      const irmao = irmaos[0];
+      await base44.entities.Irmao.update(irmao.id, { senha: irmao.numero_glp, primeiro_acesso: true });
+      setMsgRecuperar(`Senha redefinida com sucesso! Use o número GLP (${irmao.numero_glp}) como senha.`);
+    } catch (err) {
+      setError("Erro ao redefinir senha. Tente novamente.");
+    }
+    setLoading(false);
+  };
+
   // Estado para troca de senha
   const [trocaSenha, setTrocaSenha] = useState(false);
   const [novaSenha, setNovaSenha] = useState("");
@@ -31,7 +57,7 @@ export default function IrmaoLogin() {
 
     try {
       // Buscar irmão pelo número GLP
-      const irmaos = await db.Irmao.filter({ numero_glp: numeroGlp.trim(), ativo: true });
+      const irmaos = await base44.entities.Irmao.filter({ numero_glp: numeroGlp.trim(), ativo: true });
       
       if (irmaos.length === 0) {
         setError("Número GLP não encontrado. Verifique com o bibliotecário.");
@@ -50,16 +76,8 @@ export default function IrmaoLogin() {
         return;
       }
 
-      // Se é primeiro acesso ou não tem senha personalizada, pedir troca
-      if (irmao.primeiro_acesso !== false || !irmao.senha) {
-        setIrmaoLogado(irmao);
-        setTrocaSenha(true);
-        setLoading(false);
-        return;
-      }
-
       // Registrar log de acesso
-      await db.LogAcesso.create({
+      await base44.entities.LogAcesso.create({
         irmao_id: irmao.id,
         irmao_nome: irmao.nome_completo,
         irmao_numero_glp: irmao.numero_glp,
@@ -70,7 +88,7 @@ export default function IrmaoLogin() {
       // Login normal
       sessionStorage.setItem("irmao_auth", "true");
       sessionStorage.setItem("irmao_data", JSON.stringify(irmao));
-      navigate(createPageUrl("IrmaoPortal"));
+      navigate(createPageUrl("IrmaoEmprestimos"));
     } catch (err) {
       console.error("Erro:", err);
       setError("Erro ao verificar cadastro. Tente novamente.");
@@ -96,13 +114,13 @@ export default function IrmaoLogin() {
     setLoading(true);
 
     try {
-      await db.Irmao.update(irmaoLogado.id, {
+      await base44.entities.Irmao.update(irmaoLogado.id, {
         senha: novaSenha,
         primeiro_acesso: false
       });
 
       // Registrar log de acesso
-      await db.LogAcesso.create({
+      await base44.entities.LogAcesso.create({
         irmao_id: irmaoLogado.id,
         irmao_nome: irmaoLogado.nome_completo,
         irmao_numero_glp: irmaoLogado.numero_glp,
@@ -113,7 +131,7 @@ export default function IrmaoLogin() {
       const irmaoAtualizado = { ...irmaoLogado, senha: novaSenha, primeiro_acesso: false };
       sessionStorage.setItem("irmao_auth", "true");
       sessionStorage.setItem("irmao_data", JSON.stringify(irmaoAtualizado));
-      navigate(createPageUrl("IrmaoPortal"));
+      navigate(createPageUrl("IrmaoEmprestimos"));
     } catch (err) {
       console.error("Erro:", err);
       setError("Erro ao atualizar senha. Tente novamente.");
@@ -148,7 +166,42 @@ export default function IrmaoLogin() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {!trocaSenha ? (
+            {recuperarSenha ? (
+              <form onSubmit={handleRecuperarSenha} className="space-y-4">
+                <p className="text-sm text-slate-600">Informe seu número GLP. A senha será redefinida para o número GLP.</p>
+                {error && (
+                  <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />{error}
+                  </div>
+                )}
+                {msgRecuperar && (
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 text-sm">{msgRecuperar}</div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="glpRecuperar">Número GLP</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input
+                      id="glpRecuperar"
+                      value={glpRecuperar}
+                      onChange={(e) => setGlpRecuperar(e.target.value)}
+                      placeholder="Seu número GLP"
+                      className="pl-10"
+                      autoFocus
+                      required
+                    />
+                  </div>
+                </div>
+                {!msgRecuperar && (
+                  <Button type="submit" className="w-full bg-[#1B3A5F] hover:bg-[#15304d]" disabled={loading || !glpRecuperar}>
+                    {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Redefinindo...</> : "Redefinir Senha"}
+                  </Button>
+                )}
+                <Button type="button" variant="outline" className="w-full" onClick={() => { setRecuperarSenha(false); setError(""); setMsgRecuperar(""); }}>
+                  Voltar ao login
+                </Button>
+              </form>
+            ) : !trocaSenha ? (
               <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
                   <motion.div
@@ -208,13 +261,8 @@ export default function IrmaoLogin() {
                   disabled={loading || !numeroGlp || !senha}
                 >
                   {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Verificando...
-                    </>
-                  ) : (
-                    "Entrar"
-                  )}
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Verificando...</>
+                  ) : "Entrar"}
                 </Button>
               </form>
             ) : (
@@ -290,7 +338,17 @@ export default function IrmaoLogin() {
               </form>
             )}
 
-            <div className="mt-6 pt-4 border-t text-center">
+            <div className="mt-6 pt-4 border-t space-y-2 text-center">
+              {!trocaSenha && !recuperarSenha && (
+                <button
+                  type="button"
+                  onClick={() => { setRecuperarSenha(true); setError(""); }}
+                  className="text-sm text-[#C9A227] hover:text-[#b08c1e] flex items-center justify-center gap-1 w-full"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Recuperar senha
+                </button>
+              )}
               <Link 
                 to={createPageUrl("Home")}
                 className="text-sm text-slate-500 hover:text-[#1B3A5F] flex items-center justify-center gap-1"

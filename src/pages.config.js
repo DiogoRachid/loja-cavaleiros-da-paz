@@ -47,6 +47,7 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AcervoPublico from './pages/AcervoPublico';
 import AdminAgendaRitual from './pages/AdminAgendaRitual';
 import AdminAtestados from './pages/AdminAtestados';
 import AdminAutoridades from './pages/AdminAutoridades';
@@ -71,6 +72,7 @@ import AdminTesoureiro from './pages/AdminTesoureiro';
 import AdminVM from './pages/AdminVM';
 import BibAcervo from './pages/BibAcervo';
 import BibAcervoDigital from './pages/BibAcervoDigital';
+import BibAprovacoes from './pages/BibAprovacoes';
 import BibBibliotecarios from './pages/BibBibliotecarios';
 import BibDashboard from './pages/BibDashboard';
 import BibEmprestimos from './pages/BibEmprestimos';
@@ -83,16 +85,19 @@ import BibRelatorios from './pages/BibRelatorios';
 import Home from './pages/Home';
 import IrmaoAcervo from './pages/IrmaoAcervo';
 import IrmaoAcervoDigital from './pages/IrmaoAcervoDigital';
+import IrmaoConfiguracoes from './pages/IrmaoConfiguracoes';
 import IrmaoEmprestimos from './pages/IrmaoEmprestimos';
 import IrmaoLogin from './pages/IrmaoLogin';
 import IrmaoPortal from './pages/IrmaoPortal';
 import IrmaoScan from './pages/IrmaoScan';
+import IrmaoSugestoes from './pages/IrmaoSugestoes';
 import ScanDevolucao from './pages/ScanDevolucao';
 import ScanRetirada from './pages/ScanRetirada';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AcervoPublico": AcervoPublico,
     "AdminAgendaRitual": AdminAgendaRitual,
     "AdminAtestados": AdminAtestados,
     "AdminAutoridades": AdminAutoridades,
@@ -117,6 +122,7 @@ export const PAGES = {
     "AdminVM": AdminVM,
     "BibAcervo": BibAcervo,
     "BibAcervoDigital": BibAcervoDigital,
+    "BibAprovacoes": BibAprovacoes,
     "BibBibliotecarios": BibBibliotecarios,
     "BibDashboard": BibDashboard,
     "BibEmprestimos": BibEmprestimos,
@@ -129,10 +135,12 @@ export const PAGES = {
     "Home": Home,
     "IrmaoAcervo": IrmaoAcervo,
     "IrmaoAcervoDigital": IrmaoAcervoDigital,
+    "IrmaoConfiguracoes": IrmaoConfiguracoes,
     "IrmaoEmprestimos": IrmaoEmprestimos,
     "IrmaoLogin": IrmaoLogin,
     "IrmaoPortal": IrmaoPortal,
     "IrmaoScan": IrmaoScan,
+    "IrmaoSugestoes": IrmaoSugestoes,
     "ScanDevolucao": ScanDevolucao,
     "ScanRetirada": ScanRetirada,
 }

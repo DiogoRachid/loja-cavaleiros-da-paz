@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { 
   Plus, Search, Edit, Trash2, Eye, Loader2, 
   UserCircle, Mail, Phone, Award
@@ -51,7 +50,7 @@ export default function BibIrmaos() {
 
   const loadIrmaos = async () => {
     try {
-      const data = await db.Irmao.list("-created_date");
+      const data = await base44.entities.Irmao.list("-created_date");
       setIrmaos(data);
     } catch (error) {
       console.error("Erro ao carregar irmãos:", error);
@@ -61,9 +60,9 @@ export default function BibIrmaos() {
 
   const handleSave = async (irmaoData) => {
     if (selectedIrmao) {
-      await db.Irmao.update(selectedIrmao.id, irmaoData);
+      await base44.entities.Irmao.update(selectedIrmao.id, irmaoData);
     } else {
-      await db.Irmao.create(irmaoData);
+      await base44.entities.Irmao.create(irmaoData);
     }
     await loadIrmaos();
     setFormOpen(false);
@@ -72,7 +71,7 @@ export default function BibIrmaos() {
 
   const handleDelete = async () => {
     if (selectedIrmao) {
-      await db.Irmao.update(selectedIrmao.id, { ativo: false });
+      await base44.entities.Irmao.update(selectedIrmao.id, { ativo: false });
       await loadIrmaos();
     }
     setDeleteDialogOpen(false);

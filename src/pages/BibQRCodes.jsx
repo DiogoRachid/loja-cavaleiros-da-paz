@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { 
   Search, QrCode, Loader2, Download, Printer,
   BookOpen, FileText, Newspaper, Archive
@@ -34,7 +33,7 @@ export default function BibQRCodes() {
 
   const loadItens = async () => {
     try {
-      const data = await db.Item.filter({ ativo: true });
+      const data = await base44.entities.Item.filter({ ativo: true });
       setItens(data);
     } catch (error) {
       console.error("Erro ao carregar itens:", error);

@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { 
   Plus, Search, Filter, BookOpen, FileText, Newspaper, 
-  Archive, Edit, Trash2, Eye, Loader2, QrCode
+  Archive, Edit, Trash2, Eye, Loader2, QrCode, Camera, Share2, CopyCheck
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,6 +36,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import ItemForm from "@/components/biblioteca/ItemForm";
 import ItemDetails from "@/components/biblioteca/ItemDetails";
+import ScanCapa from "@/components/biblioteca/ScanCapa";
+import { notificarWhatsApp } from "@/lib/whatsapp";
+import ShareModal from "@/components/biblioteca/ShareModal";
+import DuplicatasModal from "@/components/biblioteca/DuplicatasModal";
 
 export default function BibAcervo() {
   const navigate = useNavigate();
@@ -47,6 +51,10 @@ export default function BibAcervo() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [scanOpen, setScanOpen] = useState(false);
+  const [prefilledData, setPrefilledData] = useState(null);
+  const [shareItem, setShareItem] = useState(null);
+  const [duplicatasOpen, setDuplicatasOpen] = useState(false);
 
   useEffect(() => {
     const bibAuth = sessionStorage.getItem("bib_auth");
@@ -59,7 +67,7 @@ export default function BibAcervo() {
 
   const loadItens = async () => {
     try {
-      const data = await db.Item.list("-created_date");
+      const data = await base44.entities.Item.list("-created_date");
       setItens(data);
     } catch (error) {
       console.error("Erro ao carregar itens:", error);
@@ -69,11 +77,17 @@ export default function BibAcervo() {
 
   const handleSave = async (itemData) => {
     if (selectedItem) {
-      await db.Item.update(selectedItem.id, itemData);
+      await base44.entities.Item.update(selectedItem.id, itemData);
     } else {
       // Gerar código QR único
       const codigoQR = `LCP25-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-      await db.Item.create({ ...itemData, codigo_qr: codigoQR });
+      await base44.entities.Item.create({ ...itemData, codigo_qr: codigoQR });
+      notificarWhatsApp({
+        tipo: itemData.tipo || "Item",
+        nome: itemData.nome,
+        grau: itemData.grau_minimo || "Aprendiz",
+        autor: itemData.autor,
+      });
     }
     await loadItens();
     setFormOpen(false);
@@ -82,7 +96,7 @@ export default function BibAcervo() {
 
   const handleDelete = async () => {
     if (selectedItem) {
-      await db.Item.update(selectedItem.id, { ativo: false });
+      await base44.entities.Item.update(selectedItem.id, { ativo: false });
       await loadItens();
     }
     setDeleteDialogOpen(false);
@@ -102,6 +116,13 @@ export default function BibAcervo() {
   const openDelete = (item) => {
     setSelectedItem(item);
     setDeleteDialogOpen(true);
+  };
+
+  const handleScanConcluido = (dados) => {
+    setScanOpen(false);
+    setSelectedItem(null);
+    setPrefilledData(dados);
+    setFormOpen(true);
   };
 
   const tipoIcons = {
@@ -141,13 +162,31 @@ export default function BibAcervo() {
           <h1 className="text-2xl font-bold text-slate-800">Acervo</h1>
           <p className="text-slate-500">Gerencie os itens da biblioteca</p>
         </div>
-        <Button 
-          onClick={() => { setSelectedItem(null); setFormOpen(true); }}
-          className="bg-[#1B3A5F] hover:bg-[#15304d]"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Item
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setDuplicatasOpen(true)}
+            className="border-amber-500 text-amber-600 hover:bg-amber-50"
+          >
+            <CopyCheck className="w-4 h-4 mr-2" />
+            Duplicatas
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setScanOpen(true)}
+            className="border-[#1B3A5F] text-[#1B3A5F] hover:bg-[#1B3A5F] hover:text-white"
+          >
+            <Camera className="w-4 h-4 mr-2" />
+            Fotografar Capa
+          </Button>
+          <Button 
+            onClick={() => { setSelectedItem(null); setPrefilledData(null); setFormOpen(true); }}
+            className="bg-[#1B3A5F] hover:bg-[#15304d]"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Item
+          </Button>
+        </div>
       </div>
 
       {/* Filtros */}
@@ -224,6 +263,9 @@ export default function BibAcervo() {
                   </div>
                   
                   <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t">
+                    <Button variant="ghost" size="icon" title="Compartilhar" onClick={() => setShareItem(item)}>
+                      <Share2 className="w-4 h-4 text-[#1B3A5F]" />
+                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => openDetails(item)}>
                       <Eye className="w-4 h-4" />
                     </Button>
@@ -241,6 +283,18 @@ export default function BibAcervo() {
         </div>
       )}
 
+      <ShareModal
+        open={!!shareItem}
+        onClose={() => setShareItem(null)}
+        titulo={shareItem?.nome}
+        capa={shareItem?.imagem_capa}
+        tipo={shareItem?.tipo}
+        autor={shareItem?.autor}
+        grau={shareItem?.grau_minimo}
+        tipoAcervo="fisico"
+        itemId={shareItem?.id}
+      />
+
       {/* Modal de Formulário */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -250,9 +304,9 @@ export default function BibAcervo() {
             </DialogTitle>
           </DialogHeader>
           <ItemForm 
-            item={selectedItem} 
+            item={selectedItem || prefilledData} 
             onSave={handleSave}
-            onCancel={() => { setFormOpen(false); setSelectedItem(null); }}
+            onCancel={() => { setFormOpen(false); setSelectedItem(null); setPrefilledData(null); }}
           />
         </DialogContent>
       </Dialog>
@@ -266,6 +320,21 @@ export default function BibAcervo() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Scan de Capa */}
+      <ScanCapa
+        open={scanOpen}
+        onClose={() => setScanOpen(false)}
+        onConcluir={handleScanConcluido}
+      />
+
+      <DuplicatasModal
+        open={duplicatasOpen}
+        onClose={() => setDuplicatasOpen(false)}
+        itens={itens.filter(i => i.ativo !== false)}
+        modo="fisico"
+        onConcluido={() => { loadItens(); }}
+      />
 
       {/* Confirmação de Exclusão */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

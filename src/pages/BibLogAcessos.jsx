@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { createPageUrl } from "@/utils";
 import { 
   History, Search, Loader2, Calendar, User, 
@@ -54,8 +53,8 @@ export default function BibLogAcessos() {
   const loadLogs = async () => {
     setLoading(true);
     const [data, listaIrmaos] = await Promise.all([
-      db.LogAcesso.list("-data_acesso", 500),
-      db.Irmao.list("nome_completo", 1000)
+      base44.entities.LogAcesso.list("-data_acesso", 500),
+      base44.entities.Irmao.list("nome_completo", 1000)
     ]);
     setLogs(data);
     setIrmaos(listaIrmaos);
@@ -72,11 +71,11 @@ export default function BibLogAcessos() {
   const handleDelete = async () => {
     try {
       if (deleteMode === 'all') {
-        const promises = filteredLogs.map(log => db.LogAcesso.delete(log.id));
+        const promises = filteredLogs.map(log => base44.entities.LogAcesso.delete(log.id));
         await Promise.all(promises);
         toast.success("Histórico apagado com sucesso");
       } else if (deleteMode === 'single' && itemToDelete) {
-        await db.LogAcesso.delete(itemToDelete.id);
+        await base44.entities.LogAcesso.delete(itemToDelete.id);
         toast.success("Registro apagado");
       }
       setDeleteDialogOpen(false);

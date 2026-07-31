@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { createPageUrl } from "@/utils";
 import {
   FileText, Search, Loader2, BookOpen, GraduationCap,
@@ -38,12 +37,16 @@ export default function IrmaoAcervoDigital() {
   const [filtroOrdem, setFiltroOrdem] = useState("titulo");
   const [docSelecionado, setDocSelecionado] = useState(null);
   
+
+
   // Estado para avaliação
   const [nota, setNota] = useState(5);
   const [comentario, setComentario] = useState("");
   const [enviandoAvaliacao, setEnviandoAvaliacao] = useState(false);
 
   const grauOrdem = { "Aprendiz": 1, "Companheiro": 2, "Mestre": 3 };
+
+
 
   useEffect(() => {
     const irmaoAuth = sessionStorage.getItem("irmao_auth");
@@ -60,8 +63,8 @@ export default function IrmaoAcervoDigital() {
 
   const loadData = async () => {
     const [docs, avs] = await Promise.all([
-      db.AcervoDigital.filter({ ativo: true, disponivel: true }, "-created_date"),
-      db.Avaliacao.filter({ documento_id: { "$ne": null } }, "-data_avaliacao")
+      base44.entities.AcervoDigital.filter({ ativo: true, disponivel: true }, "-created_date"),
+      base44.entities.Avaliacao.filter({ documento_id: { "$ne": null } }, "-data_avaliacao")
     ]);
     setDocumentos(docs);
     setAvaliacoes(avs);
@@ -81,10 +84,9 @@ export default function IrmaoAcervoDigital() {
   };
 
   const registrarDownload = (doc) => {
-    const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.arquivo_url)}&embedded=true`;
-    window.open(viewerUrl, '_blank');
+    window.open(doc.arquivo_url, '_blank');
 
-    db.LogDownload.create({
+    base44.entities.LogDownload.create({
       documento_id: doc.id,
       documento_titulo: doc.titulo,
       irmao_id: irmao.id,
@@ -100,7 +102,7 @@ export default function IrmaoAcervoDigital() {
 
     setEnviandoAvaliacao(true);
     try {
-      await db.Avaliacao.create({
+      await base44.entities.Avaliacao.create({
         documento_id: docSelecionado.id,
         irmao_id: irmao.id,
         irmao_nome: irmao.nome_completo,
@@ -165,9 +167,12 @@ export default function IrmaoAcervoDigital() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Acervo Digital</h1>
-        <p className="text-slate-500">{filteredDocs.length} documento(s) disponível(is)</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Acervo Digital</h1>
+          <p className="text-slate-500">{filteredDocs.length} documento(s) disponível(is)</p>
+        </div>
+
       </div>
 
       {/* Filtros */}
@@ -289,6 +294,7 @@ export default function IrmaoAcervoDigital() {
                     <MessageSquare className="w-3 h-3 mr-1" />
                     Avaliar
                   </Button>
+
                 </div>
               </CardContent>
             </Card>
@@ -308,6 +314,9 @@ export default function IrmaoAcervoDigital() {
       <div className="text-center text-xs text-slate-400 mt-8 pb-4 border-t pt-4">
         Conteúdo protegido por direitos autorais — uso permitido apenas para fins educacionais e sem autorização para reprodução ou distribuição
       </div>
+
+
+
 
       {/* Dialog de Avaliação */}
       <Dialog open={!!docSelecionado} onOpenChange={(open) => {

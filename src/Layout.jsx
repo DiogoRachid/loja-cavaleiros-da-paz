@@ -4,7 +4,8 @@ import {
   BookOpen, Users, History, QrCode, LogOut, 
   Menu, X, Home, Library, BookMarked, BarChart,
   Crown, Calendar, DollarSign, FileText, Award,
-  Gavel, ClipboardList, Shield, Star, Heart, Music, ListMusic, Upload, Settings, Timer
+  Gavel, ClipboardList, Shield, Star, Heart, Music, ListMusic, Upload, Settings, Timer,
+  ClipboardCheck
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -79,6 +80,7 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Log de Acessos", page: "BibLogAcessos", icon: History },
     { name: "Log de Downloads", page: "BibLogDownloads", icon: History },
     { name: "QR Codes", page: "BibQRCodes", icon: QrCode },
+    { name: "Aprovações", page: "BibAprovacoes", icon: ClipboardCheck },
     { name: "Relatórios", page: "BibRelatorios", icon: BarChart },
   ],
 };
@@ -89,9 +91,10 @@ const IRMAO_LINKS = [
   { name: "Acervo Físico", page: "IrmaoAcervo", icon: Library },
   { name: "Acervo Digital", page: "IrmaoAcervoDigital", icon: BookOpen },
   { name: "Escanear QR", page: "IrmaoScan", icon: QrCode },
+  { name: "Minhas Sugestões", page: "IrmaoSugestoes", icon: BookOpen },
 ];
 
-const PAGES_SEM_LAYOUT = ["Home", "ScanRetirada", "ScanDevolucao", "BibLogin", "IrmaoLogin", "AdminLogin"];
+const PAGES_SEM_LAYOUT = ["Home", "ScanRetirada", "ScanDevolucao", "BibLogin", "IrmaoLogin", "AdminLogin", "AcervoPublico"];
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -202,6 +205,13 @@ export default function Layout({ children, currentPageName }) {
                   <p className="text-slate-300 text-xs">{user.cim ? `CIM: ${user.cim}` : ""}</p>
                 </div>
               </div>
+            )}
+            {isIrmao && (
+              <Link to={createPageUrl("IrmaoConfiguracoes")}>
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" title="Configurações">
+                  <Settings className="w-5 h-5" />
+                </Button>
+              </Link>
             )}
             <Link to={createPageUrl("Home")}>
               <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">

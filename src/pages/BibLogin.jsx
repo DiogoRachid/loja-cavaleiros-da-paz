@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { db } from "@/api/db";
 import { Shield, Lock, User, Eye, EyeOff, Loader2, AlertTriangle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +24,7 @@ export default function BibLogin() {
 
     try {
       // Buscar bibliotecário pelo login e senha
-      const bibliotecarios = await db.Bibliotecario.filter({ 
+      const bibliotecarios = await base44.entities.Bibliotecario.filter({ 
         login: login.trim(), 
         senha: senha,
         ativo: true 
