@@ -46,6 +46,18 @@ function filtroParaQuery(filtro) {
   for (const [campo, valor] of Object.entries(filtro || {})) {
     if (valor === null) partes.push(campo + "=is.null");
     else if (Array.isArray(valor)) partes.push(campo + "=in.(" + valor.map((v) => `"${v}"`).join(",") + ")");
+    else if (typeof valor === "object") {
+      // Suporte a operadores estilo Mongo: { $ne, $gt, $gte, $lt, $lte, $in }
+      const mapa = { $ne: "neq", $gt: "gt", $gte: "gte", $lt: "lt", $lte: "lte" };
+      for (const [op, v] of Object.entries(valor)) {
+        if (op === "$in" && Array.isArray(v)) {
+          partes.push(campo + "=in.(" + v.map((x) => `"${x}"`).join(",") + ")");
+        } else if (mapa[op]) {
+          if (v === null) partes.push(campo + "=" + (op === "$ne" ? "not.is.null" : mapa[op] + ".null"));
+          else partes.push(campo + "=" + mapa[op] + "." + encodeURIComponent(v));
+        }
+      }
+    }
     else partes.push(campo + "=eq." + encodeURIComponent(valor));
   }
   return partes;
