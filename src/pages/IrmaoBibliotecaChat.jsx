@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
+
+const CHAT_ACERVO_URL = "https://supabase.rachid.dpdns.org/functions/v1/chatAcervo";
+const CHAT_ACERVO_SECRET = import.meta.env.VITE_CHAT_ACERVO_SECRET;
 
 export default function IrmaoBibliotecaChat() {
   const [mensagens, setMensagens] = useState([]);
@@ -31,41 +33,107 @@ export default function IrmaoBibliotecaChat() {
     if (!texto || carregando || !irmao) return;
 
     const novaMensagemUsuario = { autor: "usuario", texto };
-    setMensagens((prev) => [...prev, novaMensagemUsuario]);
+    // Mensagem do agente já entra na lista, vazia, para ser preenchida
+    // progressivamente conforme o stream chega.
+    const indiceMensagemAgente = mensagens.length + 1;
+    setMensagens((prev) => [
+      ...prev,
+      novaMensagemUsuario,
+      { autor: "agente", texto: "", fontes: [], streaming: true },
+    ]);
     setPergunta("");
     setCarregando(true);
 
     try {
-      // Chama a function proxy no base44, que repassa server-side
-      // para a Edge Function do Supabase self-hosted (segredo nunca chega ao browser)
-      const res = await base44.functions.invoke("chatAcervoProxy", {
-        pergunta: texto,
-        grau_usuario: irmao.grau,
+      const resposta = await fetch(CHAT_ACERVO_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-chat-secret": CHAT_ACERVO_SECRET,
+        },
+        body: JSON.stringify({
+          pergunta: texto,
+          grau_usuario: irmao.grau,
+        }),
       });
 
-      if (res.data?.erro) {
-        throw new Error(res.data.erro);
+      if (!resposta.ok || !resposta.body) {
+        const textoErro = await resposta.text();
+        throw new Error(`Erro ${resposta.status}: ${textoErro}`);
       }
 
-      const dados = res.data;
+      const reader = resposta.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let fontesExtraidas = [];
+      let fontesJaLidas = false;
+      let textoAcumulado = "";
 
-      setMensagens((prev) => [
-        ...prev,
-        {
-          autor: "agente",
-          texto: dados.resposta,
-          fontes: dados.fontes || [],
-        },
-      ]);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // A primeira linha do stream traz as fontes; só processa uma vez.
+        if (!fontesJaLidas) {
+          const quebraLinha = buffer.indexOf("\n");
+          if (quebraLinha === -1) continue; // ainda não chegou a linha inteira
+
+          const primeiraLinha = buffer.slice(0, quebraLinha);
+          buffer = buffer.slice(quebraLinha + 1);
+
+          if (primeiraLinha.startsWith("__FONTES__")) {
+            try {
+              fontesExtraidas = JSON.parse(primeiraLinha.slice("__FONTES__".length));
+            } catch {
+              fontesExtraidas = [];
+            }
+          }
+          fontesJaLidas = true;
+
+          setMensagens((prev) => {
+            const copia = [...prev];
+            copia[indiceMensagemAgente] = {
+              ...copia[indiceMensagemAgente],
+              fontes: fontesExtraidas,
+            };
+            return copia;
+          });
+        }
+
+        textoAcumulado += buffer;
+        buffer = "";
+
+        setMensagens((prev) => {
+          const copia = [...prev];
+          copia[indiceMensagemAgente] = {
+            ...copia[indiceMensagemAgente],
+            texto: textoAcumulado,
+          };
+          return copia;
+        });
+      }
+
+      setMensagens((prev) => {
+        const copia = [...prev];
+        copia[indiceMensagemAgente] = {
+          ...copia[indiceMensagemAgente],
+          streaming: false,
+        };
+        return copia;
+      });
     } catch (err) {
-      setMensagens((prev) => [
-        ...prev,
-        {
+      setMensagens((prev) => {
+        const copia = [...prev];
+        copia[indiceMensagemAgente] = {
           autor: "agente",
           texto: "Desculpe, ocorreu um erro ao consultar o acervo. Tente novamente.",
           erro: true,
-        },
-      ]);
+          streaming: false,
+        };
+        return copia;
+      });
       console.error(err);
     } finally {
       setCarregando(false);
@@ -117,9 +185,17 @@ export default function IrmaoBibliotecaChat() {
                   : "bg-gray-100 text-gray-800"
               }`}
             >
-              <ReactMarkdown>{msg.texto}</ReactMarkdown>
+              {msg.autor === "agente" && msg.texto === "" && msg.streaming ? (
+                <span className="text-gray-400">Consultando o acervo...</span>
+              ) : (
+                <ReactMarkdown>{msg.texto}</ReactMarkdown>
+              )}
 
-              {msg.fontes && msg.fontes.length > 0 && (
+              {msg.streaming && msg.texto !== "" && (
+                <span className="inline-block w-1.5 h-3.5 bg-gray-400 ml-0.5 animate-pulse align-middle" />
+              )}
+
+              {msg.fontes && msg.fontes.length > 0 && !msg.streaming && (
                 <div className="mt-2 pt-2 border-t border-gray-300 text-xs text-gray-500">
                   <strong>Fontes:</strong>
                   <ul className="list-disc list-inside">
@@ -132,14 +208,6 @@ export default function IrmaoBibliotecaChat() {
             </div>
           </div>
         ))}
-
-        {carregando && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-lg px-3 py-2 text-sm text-gray-500">
-              Consultando o acervo...
-            </div>
-          </div>
-        )}
 
         <div ref={fimDaListaRef} />
       </div>
