@@ -1,9 +1,18 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { createPageUrl } from "@/utils";
+import { base44 } from "@/api/base44Client";
+import { appParams } from "@/lib/app-params";
 
 const CHAT_ACERVO_URL = "https://supabase.rachid.dpdns.org/functions/v1/chatAcervo";
 const CHAT_ACERVO_SECRET = import.meta.env.VITE_CHAT_ACERVO_SECRET;
+
+// Detecta se está rodando dentro do ecossistema base44 (token de sessão
+// presente) ou como app standalone (ex: Vercel). No base44, o secret não
+// chega ao bundle do frontend, então usamos o proxy server-side, sem
+// streaming (limitação de plataforma). Fora do base44, usamos fetch()
+// direto na Edge Function, com streaming real.
+const RODANDO_NO_BASE44 = Boolean(appParams.token);
 
 export default function IrmaoBibliotecaChat() {
   const [mensagens, setMensagens] = useState([]);
@@ -28,13 +37,117 @@ export default function IrmaoBibliotecaChat() {
     fimDaListaRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [mensagens]);
 
+  async function enviarPerguntaViaProxy(texto, indiceMensagemAgente) {
+    // Caminho base44: sem streaming, resposta chega completa via JSON.
+    const res = await base44.functions.invoke("chatAcervoProxy", {
+      pergunta: texto,
+      grau_usuario: irmao.grau,
+    });
+
+    if (res.data?.erro) {
+      throw new Error(res.data.erro);
+    }
+
+    const dados = res.data;
+
+    setMensagens((prev) => {
+      const copia = [...prev];
+      copia[indiceMensagemAgente] = {
+        autor: "agente",
+        texto: dados.resposta,
+        fontes: dados.fontes || [],
+        streaming: false,
+      };
+      return copia;
+    });
+  }
+
+  async function enviarPerguntaViaStream(texto, indiceMensagemAgente) {
+    // Caminho Vercel/standalone: streaming real via fetch direto.
+    const resposta = await fetch(CHAT_ACERVO_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-chat-secret": CHAT_ACERVO_SECRET,
+      },
+      body: JSON.stringify({
+        pergunta: texto,
+        grau_usuario: irmao.grau,
+      }),
+    });
+
+    if (!resposta.ok || !resposta.body) {
+      const textoErro = await resposta.text();
+      throw new Error(`Erro ${resposta.status}: ${textoErro}`);
+    }
+
+    const reader = resposta.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let fontesExtraidas = [];
+    let fontesJaLidas = false;
+    let textoAcumulado = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      if (!fontesJaLidas) {
+        const quebraLinha = buffer.indexOf("\n");
+        if (quebraLinha === -1) continue;
+
+        const primeiraLinha = buffer.slice(0, quebraLinha);
+        buffer = buffer.slice(quebraLinha + 1);
+
+        if (primeiraLinha.startsWith("__FONTES__")) {
+          try {
+            fontesExtraidas = JSON.parse(primeiraLinha.slice("__FONTES__".length));
+          } catch {
+            fontesExtraidas = [];
+          }
+        }
+        fontesJaLidas = true;
+
+        setMensagens((prev) => {
+          const copia = [...prev];
+          copia[indiceMensagemAgente] = {
+            ...copia[indiceMensagemAgente],
+            fontes: fontesExtraidas,
+          };
+          return copia;
+        });
+      }
+
+      textoAcumulado += buffer;
+      buffer = "";
+
+      setMensagens((prev) => {
+        const copia = [...prev];
+        copia[indiceMensagemAgente] = {
+          ...copia[indiceMensagemAgente],
+          texto: textoAcumulado,
+        };
+        return copia;
+      });
+    }
+
+    setMensagens((prev) => {
+      const copia = [...prev];
+      copia[indiceMensagemAgente] = {
+        ...copia[indiceMensagemAgente],
+        streaming: false,
+      };
+      return copia;
+    });
+  }
+
   async function enviarPergunta() {
     const texto = pergunta.trim();
     if (!texto || carregando || !irmao) return;
 
     const novaMensagemUsuario = { autor: "usuario", texto };
-    // Mensagem do agente já entra na lista, vazia, para ser preenchida
-    // progressivamente conforme o stream chega.
     const indiceMensagemAgente = mensagens.length + 1;
     setMensagens((prev) => [
       ...prev,
@@ -45,84 +158,11 @@ export default function IrmaoBibliotecaChat() {
     setCarregando(true);
 
     try {
-      const resposta = await fetch(CHAT_ACERVO_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-chat-secret": CHAT_ACERVO_SECRET,
-        },
-        body: JSON.stringify({
-          pergunta: texto,
-          grau_usuario: irmao.grau,
-        }),
-      });
-
-      if (!resposta.ok || !resposta.body) {
-        const textoErro = await resposta.text();
-        throw new Error(`Erro ${resposta.status}: ${textoErro}`);
+      if (RODANDO_NO_BASE44) {
+        await enviarPerguntaViaProxy(texto, indiceMensagemAgente);
+      } else {
+        await enviarPerguntaViaStream(texto, indiceMensagemAgente);
       }
-
-      const reader = resposta.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      let fontesExtraidas = [];
-      let fontesJaLidas = false;
-      let textoAcumulado = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-
-        // A primeira linha do stream traz as fontes; só processa uma vez.
-        if (!fontesJaLidas) {
-          const quebraLinha = buffer.indexOf("\n");
-          if (quebraLinha === -1) continue; // ainda não chegou a linha inteira
-
-          const primeiraLinha = buffer.slice(0, quebraLinha);
-          buffer = buffer.slice(quebraLinha + 1);
-
-          if (primeiraLinha.startsWith("__FONTES__")) {
-            try {
-              fontesExtraidas = JSON.parse(primeiraLinha.slice("__FONTES__".length));
-            } catch {
-              fontesExtraidas = [];
-            }
-          }
-          fontesJaLidas = true;
-
-          setMensagens((prev) => {
-            const copia = [...prev];
-            copia[indiceMensagemAgente] = {
-              ...copia[indiceMensagemAgente],
-              fontes: fontesExtraidas,
-            };
-            return copia;
-          });
-        }
-
-        textoAcumulado += buffer;
-        buffer = "";
-
-        setMensagens((prev) => {
-          const copia = [...prev];
-          copia[indiceMensagemAgente] = {
-            ...copia[indiceMensagemAgente],
-            texto: textoAcumulado,
-          };
-          return copia;
-        });
-      }
-
-      setMensagens((prev) => {
-        const copia = [...prev];
-        copia[indiceMensagemAgente] = {
-          ...copia[indiceMensagemAgente],
-          streaming: false,
-        };
-        return copia;
-      });
     } catch (err) {
       setMensagens((prev) => {
         const copia = [...prev];
