@@ -273,6 +273,10 @@ function montarPrompt(pergunta: string, trechos: TrechoEncontrado[]): string {
     `desse autor, deixe isso claro logo no início da resposta. Se NENHUM trecho for desse autor ` +
     `específico, diga isso claramente logo no início, e só então, se fizer sentido, complemente ` +
     `com o que os outros trechos disponíveis dizem sobre o tema em geral.\n` +
+    `- Planeje a resposta antes de escrever: se houver muitas fontes relevantes, priorize as ` +
+    `mais diretamente ligadas à pergunta e seja mais breve em cada seção, para garantir que a ` +
+    `resposta seja concluída (com o parágrafo "**Em resumo:**" no final) dentro do espaço disponível. ` +
+    `Nunca termine a resposta no meio de uma frase ou seção.\n` +
     `- Termine SEMPRE com um parágrafo final de síntese, iniciado por "**Em resumo:**", que amarre ` +
     `os pontos principais em poucas frases.\n` +
     `- Não invente conteúdo que não esteja nos trechos. Se a resposta não estiver neles, diga isso ` +
@@ -302,7 +306,7 @@ async function chamarLLM(prompt: string): Promise<string> {
         { role: "user", content: prompt },
       ],
       temperature: 0.3,
-      max_tokens: 1500,
+      max_tokens: 2500,
     }),
   });
 
