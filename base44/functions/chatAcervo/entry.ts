@@ -1,8 +1,9 @@
 // base44/functions/chatAcervo/entry.ts
 //
 // Recebe uma pergunta do usuário, busca os trechos mais relevantes do acervo
-// (via embedding + pgvector) e gera uma resposta usando o LLM configurado
-// (roteado pela API própria em api.arquitetus.com -> OpenRouter).
+// (via embedding + pgvector, COMPLEMENTADA por busca direta de autor/título
+// quando a pergunta contém nomes próprios) e gera uma resposta usando o LLM
+// configurado (roteado pela API própria em api.arquitetus.com -> OpenRouter).
 //
 // Variáveis de ambiente necessárias (configurar no painel do base44):
 //   SUPABASE2_URL             - já existente no projeto
@@ -25,6 +26,13 @@ interface TrechoEncontrado {
   similarity: number;
 }
 
+interface DocumentoAcervo {
+  id: string;
+  titulo: string;
+  autor: string | null;
+  grau_minimo: string;
+}
+
 const SUPABASE_URL = Deno.env.get("SUPABASE2_URL")!;
 const SUPABASE_KEY = Deno.env.get("SUPABASE2_SERVICE_ROLE_KEY")!;
 const EMBED_API_URL = Deno.env.get("EMBED_API_URL")!;
@@ -35,27 +43,41 @@ const ARQUITETUS_MODEL = Deno.env.get("ARQUITETUS_MODEL") ?? "openrouter/free";
 
 const MATCH_COUNT = 12; // mais trechos = mais material para uma resposta completa com múltiplas fontes
 const SIMILARITY_MIN = 0.15; // abaixo disso, ignora (RPC já filtra, mas fica de guarda aqui também)
+const CHUNKS_POR_DOC_AUTOR = 4; // quantos chunks trazer de cada documento achado por nome de autor/título
 
-async function gerarEmbedding(texto: string): Promise<number[]> {
-  const resp = await fetch(EMBED_API_URL, {
+const GRAU_ORDEM: Record<string, number> = { Aprendiz: 1, Companheiro: 2, Mestre: 3 };
+
+// Palavras comuns em português que começam maiúscula só por estarem no início
+// de frase, ou que aparecem capitalizadas com frequência sem serem nomes próprios.
+// Filtra essas para não gerar buscas inúteis (ex: "O", "Livro", "Da", "Lei").
+const PALAVRAS_IGNORADAS = new Set([
+  "O", "A", "Os", "As", "Um", "Uma", "De", "Do", "Da", "Dos", "Das",
+  "Em", "No", "Na", "Nos", "Nas", "E", "Ou", "Que", "Qual", "Quais",
+  "Como", "Quando", "Onde", "Por", "Para", "Com", "Sem", "Sobre",
+  "Fale", "Fala", "Me", "Meu", "Minha", "Explique", "Explica", "Diga",
+  "Livro", "Lei", "Grau", "Loja", "Ritual", "Maçonaria", "Maçônica",
+  "Maçônico", "Segundo", "Conforme", "Grande",
+]);
+
+function gerarEmbedding(texto: string): Promise<number[]> {
+  return fetch(EMBED_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-API-Key": EMBED_API_SECRET,
     },
     body: JSON.stringify({ texto }),
+  }).then(async (resp) => {
+    if (!resp.ok) {
+      const erro = await resp.text();
+      throw new Error(`Falha ao gerar embedding (${resp.status}): ${erro}`);
+    }
+    const data = await resp.json();
+    return data.embedding as number[];
   });
-
-  if (!resp.ok) {
-    const erro = await resp.text();
-    throw new Error(`Falha ao gerar embedding (${resp.status}): ${erro}`);
-  }
-
-  const data = await resp.json();
-  return data.embedding as number[];
 }
 
-async function buscarTrechos(
+async function buscarTrechosSemanticos(
   embedding: number[],
   grauUsuario: string,
 ): Promise<TrechoEncontrado[]> {
@@ -80,6 +102,140 @@ async function buscarTrechos(
 
   const trechos = (await resp.json()) as TrechoEncontrado[];
   return trechos.filter((t) => t.similarity >= SIMILARITY_MIN);
+}
+
+/**
+ * Extrai possíveis nomes próprios (de autor ou parte de título) da pergunta,
+ * com base em palavras capitalizadas que não são o início de frase nem
+ * palavras comuns do domínio (ex: "Livro", "Lei", "Grau").
+ */
+function extrairNomesProprios(pergunta: string): string[] {
+  const palavras = pergunta
+    .replace(/[?!.,;:]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+
+  const candidatos: string[] = [];
+
+  for (let i = 0; i < palavras.length; i++) {
+    const palavra = palavras[i];
+    const pareceNomeProprio = /^[A-ZÀ-Ý][a-zà-ÿ]+$/.test(palavra);
+    if (!pareceNomeProprio) continue;
+    if (PALAVRAS_IGNORADAS.has(palavra)) continue;
+    // Ignora a primeira palavra da frase inteira (normalmente é só a
+    // capitalização natural do início da pergunta, ex: "Fale sobre...").
+    if (i === 0) continue;
+    candidatos.push(palavra);
+  }
+
+  // Junta nomes consecutivos (ex: "Charles Boller" em vez de duas buscas separadas)
+  const agrupados: string[] = [];
+  let atual = "";
+  for (let i = 0; i < palavras.length; i++) {
+    const palavra = palavras[i];
+    const ehCandidato = candidatos.includes(palavra);
+    if (ehCandidato) {
+      atual = atual ? `${atual} ${palavra}` : palavra;
+    } else if (atual) {
+      agrupados.push(atual);
+      atual = "";
+    }
+  }
+  if (atual) agrupados.push(atual);
+
+  return [...new Set(agrupados)];
+}
+
+/**
+ * Busca documentos cujo autor ou título contenha algum dos termos extraídos
+ * da pergunta, respeitando o grau do usuário. Retorna os primeiros chunks
+ * de cada documento encontrado (não é busca semântica, é busca estrutural).
+ */
+async function buscarPorAutorOuTitulo(
+  termos: string[],
+  grauUsuario: string,
+): Promise<TrechoEncontrado[]> {
+  if (termos.length === 0) return [];
+
+  const grauMax = GRAU_ORDEM[grauUsuario] ?? 1;
+  const graisPermitidos = Object.entries(GRAU_ORDEM)
+    .filter(([, v]) => v <= grauMax)
+    .map(([k]) => k);
+
+  const filtroOu = termos
+    .map((t) => `autor.ilike.*${encodeURIComponent(t)}*,titulo.ilike.*${encodeURIComponent(t)}*`)
+    .join(",");
+
+  const filtroGrau = graisPermitidos.map((g) => `"${g}"`).join(",");
+
+  const url =
+    `${SUPABASE_URL}/rest/v1/acervo_digital` +
+    `?select=id,titulo,autor,grau_minimo` +
+    `&ativo=eq.true&disponivel=eq.true` +
+    `&grau_minimo=in.(${filtroGrau})` +
+    `&or=(${filtroOu})`;
+
+  const resp = await fetch(url, {
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+    },
+  });
+
+  if (!resp.ok) {
+    // Não trava a resposta principal por causa dessa busca complementar;
+    // apenas loga e segue sem esses resultados extras.
+    console.error("Falha na busca por autor/título:", await resp.text());
+    return [];
+  }
+
+  const documentos = (await resp.json()) as DocumentoAcervo[];
+  if (documentos.length === 0) return [];
+
+  const trechosExtras: TrechoEncontrado[] = [];
+
+  for (const doc of documentos) {
+    const respChunks = await fetch(
+      `${SUPABASE_URL}/rest/v1/acervo_chunk` +
+        `?select=conteudo,acervo_id` +
+        `&acervo_id=eq.${doc.id}` +
+        `&order=ordem.asc` +
+        `&limit=${CHUNKS_POR_DOC_AUTOR}`,
+      {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+      },
+    );
+
+    if (!respChunks.ok) continue;
+
+    const chunks = (await respChunks.json()) as { conteudo: string; acervo_id: string }[];
+    for (const c of chunks) {
+      trechosExtras.push({
+        acervo_id: doc.id,
+        conteudo: c.conteudo,
+        titulo: doc.titulo,
+        similarity: 1, // marcador: veio de busca estrutural exata, não semântica
+      });
+    }
+  }
+
+  return trechosExtras;
+}
+
+function mesclarTrechos(
+  semanticos: TrechoEncontrado[],
+  porAutor: TrechoEncontrado[],
+): TrechoEncontrado[] {
+  const vistos = new Set(semanticos.map((t) => `${t.acervo_id}:${t.conteudo.slice(0, 50)}`));
+  const extras = porAutor.filter(
+    (t) => !vistos.has(`${t.acervo_id}:${t.conteudo.slice(0, 50)}`),
+  );
+  // Resultados de autor/título entram primeiro: são uma correspondência exata
+  // de nome, então merecem prioridade sobre a similaridade semântica aproximada.
+  return [...extras, ...semanticos];
 }
 
 function montarPrompt(pergunta: string, trechos: TrechoEncontrado[]): string {
@@ -113,9 +269,12 @@ function montarPrompt(pergunta: string, trechos: TrechoEncontrado[]): string {
     `- Ao usar uma informação de um documento específico, cite o TÍTULO REAL do documento por ` +
     `extenso (ex: "segundo 'O Livro do Aprendiz'..."), nunca um rótulo interno como "[T1]", ` +
     `"Fonte 1" ou similar — esses rótulos são só para você localizar o trecho, o usuário não deve vê-los.\n` +
+    `- Se a pergunta menciona um nome de autor específico e algum trecho vier de um documento ` +
+    `desse autor, deixe isso claro logo no início da resposta. Se NENHUM trecho for desse autor ` +
+    `específico, diga isso claramente logo no início, e só então, se fizer sentido, complemente ` +
+    `com o que os outros trechos disponíveis dizem sobre o tema em geral.\n` +
     `- Termine SEMPRE com um parágrafo final de síntese, iniciado por "**Em resumo:**", que amarre ` +
-    `os pontos principais em poucas frases — especialmente útil se a pergunta tinha mais de um ` +
-    `sentido ou se várias fontes trouxeram ângulos diferentes.\n` +
+    `os pontos principais em poucas frases.\n` +
     `- Não invente conteúdo que não esteja nos trechos. Se a resposta não estiver neles, diga isso ` +
     `claramente em vez de complementar com conhecimento geral.\n\n` +
     `=== TRECHOS DO ACERVO ===\n\n${contexto}\n\n=== FIM DOS TRECHOS ===\n\n` +
@@ -176,17 +335,22 @@ export default async function handler(req: Request): Promise<Response> {
 
     const grauUsuario = body.grau_usuario || "Aprendiz";
 
-    // 1. Embedding da pergunta
+    // 1. Embedding da pergunta + busca semântica
     const embedding = await gerarEmbedding(body.pergunta);
+    const trechosSemanticos = await buscarTrechosSemanticos(embedding, grauUsuario);
 
-    // 2. Busca de trechos relevantes (já filtrando por grau_minimo dentro do match_chunks)
-    const trechos = await buscarTrechos(embedding, grauUsuario);
+    // 2. Busca complementar: nomes próprios na pergunta podem ser autor/título
+    const nomesProprios = extrairNomesProprios(body.pergunta);
+    const trechosPorAutor = await buscarPorAutorOuTitulo(nomesProprios, grauUsuario);
 
-    // 3. Monta prompt e chama o LLM
+    // 3. Mescla os dois conjuntos (autor/título tem prioridade)
+    const trechos = mesclarTrechos(trechosSemanticos, trechosPorAutor);
+
+    // 4. Monta prompt e chama o LLM
     const prompt = montarPrompt(body.pergunta, trechos);
     const resposta = await chamarLLM(prompt);
 
-    // 4. Monta lista de fontes únicas citadas
+    // 5. Monta lista de fontes únicas citadas
     const fontesUnicas = Array.from(
       new Map(trechos.map((t) => [t.acervo_id, t.titulo])).entries(),
     ).map(([acervo_id, titulo]) => ({ acervo_id, titulo }));
