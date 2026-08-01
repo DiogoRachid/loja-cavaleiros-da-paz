@@ -43,7 +43,7 @@ const ARQUITETUS_MODEL = Deno.env.get("ARQUITETUS_MODEL") ?? "openrouter/free";
 
 const MATCH_COUNT = 12; // mais trechos = mais material para uma resposta completa com múltiplas fontes
 const SIMILARITY_MIN = 0.15; // abaixo disso, ignora (RPC já filtra, mas fica de guarda aqui também)
-const CHUNKS_POR_DOC_AUTOR = 4; // quantos chunks trazer de cada documento achado por nome de autor/título
+const CHUNKS_POR_DOC_AUTOR = 8; // quantos chunks trazer de cada documento achado por nome de autor/título
 
 const GRAU_ORDEM: Record<string, number> = { Aprendiz: 1, Companheiro: 2, Mestre: 3 };
 
@@ -269,6 +269,9 @@ function montarPrompt(pergunta: string, trechos: TrechoEncontrado[]): string {
     `- Ao usar uma informação de um documento específico, cite o TÍTULO REAL do documento por ` +
     `extenso (ex: "segundo 'O Livro do Aprendiz'..."), nunca um rótulo interno como "[T1]", ` +
     `"Fonte 1" ou similar — esses rótulos são só para você localizar o trecho, o usuário não deve vê-los.\n` +
+    `- Preste atenção especial a documentos cujo TÍTULO já corresponda diretamente ao tema da ` +
+    `pergunta — eles tendem a ser a fonte mais relevante e devem ser explorados com prioridade, ` +
+    `mesmo que outros trechos pareçam mais numerosos.\n` +
     `- Se a pergunta menciona um nome de autor específico e algum trecho vier de um documento ` +
     `desse autor, deixe isso claro logo no início da resposta. Se NENHUM trecho for desse autor ` +
     `específico, diga isso claramente logo no início, e só então, se fizer sentido, complemente ` +
