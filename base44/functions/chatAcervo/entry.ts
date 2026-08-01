@@ -166,7 +166,7 @@ async function buscarPorAutorOuTitulo(
     .map((t) => `autor.ilike.*${encodeURIComponent(t)}*,titulo.ilike.*${encodeURIComponent(t)}*`)
     .join(",");
 
-  const filtroGrau = graisPermitidos.map((g) => `"${g}"`).join(",");
+  const filtroGrau = graisPermitidos.join(",");
 
   const url =
     `${SUPABASE_URL}/rest/v1/acervo_digital` +
