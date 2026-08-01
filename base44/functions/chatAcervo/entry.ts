@@ -33,7 +33,7 @@ const ARQUITETUS_API_URL = Deno.env.get("ARQUITETUS_API_URL")!;
 const ARQUITETUS_API_TOKEN = Deno.env.get("ARQUITETUS_API_TOKEN")!;
 const ARQUITETUS_MODEL = Deno.env.get("ARQUITETUS_MODEL") ?? "openrouter/free";
 
-const MATCH_COUNT = 10; // quantos trechos trazer para o contexto
+const MATCH_COUNT = 12; // mais trechos = mais material para uma resposta completa com múltiplas fontes
 const SIMILARITY_MIN = 0.15; // abaixo disso, ignora (RPC já filtra, mas fica de guarda aqui também)
 
 async function gerarEmbedding(texto: string): Promise<number[]> {
@@ -102,21 +102,22 @@ function montarPrompt(pergunta: string, trechos: TrechoEncontrado[]): string {
     .join("\n\n---\n\n");
 
   return (
-    `Você é um assistente de biblioteca digital. Responda a pergunta do usuário ` +
+    `Você é um assistente de biblioteca digital para estudo. Responda a pergunta do usuário ` +
     `usando APENAS as informações dos trechos abaixo, extraídos do acervo.\n\n` +
     `REGRAS DE ESTILO (siga rigorosamente):\n` +
-    `- Seja direto e conciso. Priorize uma resposta curta e clara; só se estenda se a pergunta ` +
-    `realmente exigir múltiplos aspectos ou houver ambiguidade real no termo perguntado.\n` +
-    `- NUNCA escreva os rótulos internos "[T1]", "[T2]", "(Fonte 1)", "(Fonte 2)" etc. na resposta. ` +
-    `Esses rótulos são só para você localizar a informação nos trechos, não para o usuário ver.\n` +
-    `- Se quiser atribuir uma afirmação a uma fonte específica, cite o título do documento por ` +
-    `extenso e apenas quando isso agregar valor real (ex: uma data, uma autoria, uma citação direta) — ` +
-    `não cite a fonte depois de cada frase.\n` +
-    `- Não repita a mesma informação com frases diferentes. Não liste "resumindo" no final se o ` +
-    `corpo da resposta já foi objetivo.\n` +
-    `- Se o termo da pergunta for ambíguo ou tiver mais de um significado relevante nos trechos, ` +
-    `apresente isso de forma breve (1-2 frases por sentido), sem transformar em um ensaio.\n` +
-    `- Se a resposta não estiver nos trechos, diga isso claramente e não invente conteúdo.\n\n` +
+    `- Elabore uma resposta completa e rica, explorando os diferentes ângulos, autores e ` +
+    `perspectivas que os trechos trouxerem sobre o tema perguntado. Se dois documentos abordam ` +
+    `o assunto de formas diferentes ou complementares, apresente ambos e relacione-os.\n` +
+    `- Organize a resposta em seções ou parágrafos temáticos, com um pequeno título em negrito ` +
+    `quando fizer sentido separar por sub-tema ou por fonte relevante.\n` +
+    `- Ao usar uma informação de um documento específico, cite o TÍTULO REAL do documento por ` +
+    `extenso (ex: "segundo 'O Livro do Aprendiz'..."), nunca um rótulo interno como "[T1]", ` +
+    `"Fonte 1" ou similar — esses rótulos são só para você localizar o trecho, o usuário não deve vê-los.\n` +
+    `- Termine SEMPRE com um parágrafo final de síntese, iniciado por "**Em resumo:**", que amarre ` +
+    `os pontos principais em poucas frases — especialmente útil se a pergunta tinha mais de um ` +
+    `sentido ou se várias fontes trouxeram ângulos diferentes.\n` +
+    `- Não invente conteúdo que não esteja nos trechos. Se a resposta não estiver neles, diga isso ` +
+    `claramente em vez de complementar com conhecimento geral.\n\n` +
     `=== TRECHOS DO ACERVO ===\n\n${contexto}\n\n=== FIM DOS TRECHOS ===\n\n` +
     `Pergunta do usuário: ${pergunta}`
   );
@@ -141,7 +142,8 @@ async function chamarLLM(prompt: string): Promise<string> {
         },
         { role: "user", content: prompt },
       ],
-      temperature: 0.2,
+      temperature: 0.3,
+      max_tokens: 1500,
     }),
   });
 
