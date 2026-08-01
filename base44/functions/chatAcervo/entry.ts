@@ -33,8 +33,8 @@ const ARQUITETUS_API_URL = Deno.env.get("ARQUITETUS_API_URL")!;
 const ARQUITETUS_API_TOKEN = Deno.env.get("ARQUITETUS_API_TOKEN")!;
 const ARQUITETUS_MODEL = Deno.env.get("ARQUITETUS_MODEL") ?? "openrouter/free";
 
-const MATCH_COUNT = 6; // quantos trechos trazer para o contexto
-const SIMILARITY_MIN = 0.3; // abaixo disso, ignora (RPC já filtra, mas fica de guarda aqui também)
+const MATCH_COUNT = 10; // quantos trechos trazer para o contexto
+const SIMILARITY_MIN = 0.15; // abaixo disso, ignora (RPC já filtra, mas fica de guarda aqui também)
 
 async function gerarEmbedding(texto: string): Promise<number[]> {
   const resp = await fetch(EMBED_API_URL, {
@@ -95,7 +95,7 @@ function montarPrompt(pergunta: string, trechos: TrechoEncontrado[]): string {
   const contexto = trechos
     .map(
       (t, i) =>
-        `[Fonte ${i + 1} - "${t.titulo}"]\n${t.conteudo.slice(0, 1500)}`,
+        `[Fonte ${i + 1} - "${t.titulo}"]\n${t.conteudo.slice(0, 1000)}`,
     )
     .join("\n\n---\n\n");
 
