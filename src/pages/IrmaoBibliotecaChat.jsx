@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
+import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
-
-const CHAT_ACERVO_URL = "https://supabase.rachid.dpdns.org/functions/v1/chatAcervo";
-const CHAT_ACERVO_SECRET = import.meta.env.VITE_CHAT_ACERVO_SECRET; // configurar no .env da Vercel
 
 export default function IrmaoBibliotecaChat() {
   const [mensagens, setMensagens] = useState([]);
@@ -38,28 +36,18 @@ export default function IrmaoBibliotecaChat() {
     setCarregando(true);
 
     try {
-      const resposta = await fetch(CHAT_ACERVO_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-chat-secret": CHAT_ACERVO_SECRET,
-        },
-        body: JSON.stringify({
-          pergunta: texto,
-          grau_usuario: irmao.grau,
-        }),
+      // Chama a function proxy no base44, que repassa server-side
+      // para a Edge Function do Supabase self-hosted (segredo nunca chega ao browser)
+      const res = await base44.functions.invoke("chatAcervoProxy", {
+        pergunta: texto,
+        grau_usuario: irmao.grau,
       });
 
-      if (!resposta.ok) {
-        const textoErro = await resposta.text();
-        throw new Error(`Erro ${resposta.status}: ${textoErro}`);
+      if (res.data?.erro) {
+        throw new Error(res.data.erro);
       }
 
-      const dados = await resposta.json();
-
-      if (dados.erro) {
-        throw new Error(dados.erro);
-      }
+      const dados = res.data;
 
       setMensagens((prev) => [
         ...prev,
