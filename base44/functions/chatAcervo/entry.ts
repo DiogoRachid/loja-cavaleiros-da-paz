@@ -92,18 +92,31 @@ function montarPrompt(pergunta: string, trechos: TrechoEncontrado[]): string {
     );
   }
 
+  // Os rótulos [T1], [T2]... existem só para o modelo referenciar internamente
+  // qual trecho fundamenta qual afirmação — eles NUNCA devem aparecer na resposta final.
   const contexto = trechos
     .map(
       (t, i) =>
-        `[Fonte ${i + 1} - "${t.titulo}"]\n${t.conteudo.slice(0, 1000)}`,
+        `[T${i + 1} - fonte: "${t.titulo}"]\n${t.conteudo.slice(0, 1000)}`,
     )
     .join("\n\n---\n\n");
 
   return (
     `Você é um assistente de biblioteca digital. Responda a pergunta do usuário ` +
-    `usando APENAS as informações dos trechos abaixo, extraídos do acervo. ` +
-    `Se a resposta não estiver nos trechos, diga que não encontrou essa informação no acervo. ` +
-    `Sempre que possível, cite o título da fonte usada entre parênteses ao final da afirmação.\n\n` +
+    `usando APENAS as informações dos trechos abaixo, extraídos do acervo.\n\n` +
+    `REGRAS DE ESTILO (siga rigorosamente):\n` +
+    `- Seja direto e conciso. Priorize uma resposta curta e clara; só se estenda se a pergunta ` +
+    `realmente exigir múltiplos aspectos ou houver ambiguidade real no termo perguntado.\n` +
+    `- NUNCA escreva os rótulos internos "[T1]", "[T2]", "(Fonte 1)", "(Fonte 2)" etc. na resposta. ` +
+    `Esses rótulos são só para você localizar a informação nos trechos, não para o usuário ver.\n` +
+    `- Se quiser atribuir uma afirmação a uma fonte específica, cite o título do documento por ` +
+    `extenso e apenas quando isso agregar valor real (ex: uma data, uma autoria, uma citação direta) — ` +
+    `não cite a fonte depois de cada frase.\n` +
+    `- Não repita a mesma informação com frases diferentes. Não liste "resumindo" no final se o ` +
+    `corpo da resposta já foi objetivo.\n` +
+    `- Se o termo da pergunta for ambíguo ou tiver mais de um significado relevante nos trechos, ` +
+    `apresente isso de forma breve (1-2 frases por sentido), sem transformar em um ensaio.\n` +
+    `- Se a resposta não estiver nos trechos, diga isso claramente e não invente conteúdo.\n\n` +
     `=== TRECHOS DO ACERVO ===\n\n${contexto}\n\n=== FIM DOS TRECHOS ===\n\n` +
     `Pergunta do usuário: ${pergunta}`
   );
@@ -122,11 +135,13 @@ async function chamarLLM(prompt: string): Promise<string> {
         {
           role: "system",
           content:
-            "Você é um assistente de consulta bibliográfica, objetivo e preciso, que só responde com base nos trechos fornecidos.",
+            "Você é um assistente de consulta bibliográfica, objetivo, direto e conciso, " +
+            "que só responde com base nos trechos fornecidos. Evita repetição e não usa " +
+            "marcadores de fonte internos (tipo [T1] ou 'Fonte 1') na resposta ao usuário.",
         },
         { role: "user", content: prompt },
       ],
-      temperature: 0.3,
+      temperature: 0.2,
     }),
   });
 
