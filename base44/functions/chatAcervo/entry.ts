@@ -1,9 +1,10 @@
 // base44/functions/chatAcervo/entry.ts
 //
 // Recebe uma pergunta do usuário, busca os trechos mais relevantes do acervo
-// (via embedding + pgvector, COMPLEMENTADA por busca direta de autor/título
-// quando a pergunta contém nomes próprios) e gera uma resposta usando o LLM
-// configurado (roteado pela API própria em api.arquitetus.com -> OpenRouter).
+// (via busca HÍBRIDA: embedding/pgvector + full-text search, combinadas por
+// RRF, COMPLEMENTADA por busca direta de autor/título quando a pergunta
+// contém nomes próprios) e gera uma resposta usando o LLM configurado
+// (roteado pela API própria em api.arquitetus.com -> OpenRouter).
 //
 // Variáveis de ambiente necessárias (configurar no painel do base44):
 //   SUPABASE2_URL             - já existente no projeto
@@ -24,6 +25,7 @@ interface TrechoEncontrado {
   conteudo: string;
   titulo: string;
   similarity: number;
+  rrf_score?: number; // presente apenas nos resultados vindos da busca híbrida
 }
 
 interface DocumentoAcervo {
@@ -42,7 +44,11 @@ const ARQUITETUS_API_TOKEN = Deno.env.get("ARQUITETUS_API_TOKEN")!;
 const ARQUITETUS_MODEL = Deno.env.get("ARQUITETUS_MODEL") ?? "openrouter/free";
 
 const MATCH_COUNT = 12; // mais trechos = mais material para uma resposta completa com múltiplas fontes
-const SIMILARITY_MIN = 0.15; // abaixo disso, ignora (RPC já filtra, mas fica de guarda aqui também)
+// Com a busca híbrida (RRF), "similarity" deixa de ser o único critério de relevância —
+// um trecho pode ter similarity vetorial baixa e ainda assim ser altamente relevante por
+// ter entrado com boa posição na busca full-text (ex: menciona um nome próprio ou termo
+// exato da pergunta). Por isso não filtramos mais por SIMILARITY_MIN aqui: quem decide
+// quais trechos entram é o rrf_score, já calculado e ordenado pela própria function no banco.
 const CHUNKS_POR_DOC_AUTOR = 8; // quantos chunks trazer de cada documento achado por nome de autor/título
 
 const GRAU_ORDEM: Record<string, number> = { Aprendiz: 1, Companheiro: 2, Mestre: 3 };
@@ -78,10 +84,16 @@ function gerarEmbedding(texto: string): Promise<number[]> {
 }
 
 async function buscarTrechosSemanticos(
+  pergunta: string,
   embedding: number[],
   grauUsuario: string,
 ): Promise<TrechoEncontrado[]> {
-  const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/match_chunks`, {
+  // Trocado de match_chunks (só vetorial) para match_chunks_hybrid (vetorial +
+  // full-text, combinados por RRF) — resolve casos em que a pergunta usa
+  // vocabulário abstrato (ex: "passagem bíblica do grau de companheiro") mas
+  // o texto-fonte é dominado por uma citação concreta (ex: "Amós", "prumo"),
+  // que a busca puramente vetorial não relacionava bem.
+  const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/match_chunks_hybrid`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -90,6 +102,7 @@ async function buscarTrechosSemanticos(
     },
     body: JSON.stringify({
       query_embedding: embedding,
+      query_text: pergunta,
       match_count: MATCH_COUNT,
       grau_usuario: grauUsuario,
     }),
@@ -101,7 +114,7 @@ async function buscarTrechosSemanticos(
   }
 
   const trechos = (await resp.json()) as TrechoEncontrado[];
-  return trechos.filter((t) => t.similarity >= SIMILARITY_MIN);
+  return trechos;
 }
 
 /**
@@ -344,9 +357,9 @@ export default async function handler(req: Request): Promise<Response> {
 
     const grauUsuario = body.grau_usuario || "Aprendiz";
 
-    // 1. Embedding da pergunta + busca semântica
+    // 1. Embedding da pergunta + busca híbrida (vetorial + full-text via RRF)
     const embedding = await gerarEmbedding(body.pergunta);
-    const trechosSemanticos = await buscarTrechosSemanticos(embedding, grauUsuario);
+    const trechosSemanticos = await buscarTrechosSemanticos(body.pergunta, embedding, grauUsuario);
 
     // 2. Busca complementar: nomes próprios na pergunta podem ser autor/título
     const nomesProprios = extrairNomesProprios(body.pergunta);
