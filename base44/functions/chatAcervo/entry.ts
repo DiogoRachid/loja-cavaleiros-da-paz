@@ -253,7 +253,7 @@ function montarPrompt(pergunta: string, trechos: TrechoEncontrado[]): string {
   const contexto = trechos
     .map(
       (t, i) =>
-        `[T${i + 1} - fonte: "${t.titulo}"]\n${t.conteudo.slice(0, 1000)}`,
+        `>>> INÍCIO TRECHO INTERNO ${i + 1} (não citar este cabeçalho) — fonte: "${t.titulo}" <<<\n${t.conteudo.slice(0, 1000)}\n>>> FIM TRECHO INTERNO ${i + 1} <<<`,
     )
     .join("\n\n---\n\n");
 
@@ -267,11 +267,13 @@ function montarPrompt(pergunta: string, trechos: TrechoEncontrado[]): string {
     `- Organize a resposta em seções ou parágrafos temáticos, com um pequeno título em negrito ` +
     `quando fizer sentido separar por sub-tema ou por fonte relevante.\n` +
     `- Ao usar uma informação de um documento específico, cite o TÍTULO REAL do documento por ` +
-    `extenso (ex: "segundo 'O Livro do Aprendiz'..."), nunca um rótulo interno como "[T1]", ` +
-    `"Fonte 1" ou similar — esses rótulos são só para você localizar o trecho, o usuário não deve vê-los.\n` +
+    `extenso (ex: "segundo 'O Livro do Aprendiz'..."). NUNCA escreva os marcadores internos ` +
+    `">>> INÍCIO TRECHO..." ou similares na sua resposta — eles servem só para você localizar ` +
+    `o trecho, e citá-los seria um erro grave de formatação.\n` +
     `- Preste atenção especial a documentos cujo TÍTULO já corresponda diretamente ao tema da ` +
-    `pergunta — eles tendem a ser a fonte mais relevante e devem ser explorados com prioridade, ` +
-    `mesmo que outros trechos pareçam mais numerosos.\n` +
+    `pergunta — eles tendem a ser a fonte mais relevante e DEVEM ser lidos e discutidos no corpo ` +
+    `da resposta, mesmo que seus trechos sejam poucos ou curtos. Nunca liste um documento nas ` +
+    `fontes sem também comentar o que ele diz (ainda que brevemente) no corpo da resposta.\n` +
     `- Se a pergunta menciona um nome de autor específico e algum trecho vier de um documento ` +
     `desse autor, deixe isso claro logo no início da resposta. Se NENHUM trecho for desse autor ` +
     `específico, diga isso claramente logo no início, e só então, se fizer sentido, complemente ` +
