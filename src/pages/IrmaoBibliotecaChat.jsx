@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
+
+const CHAT_ACERVO_URL = "https://supabase.rachid.dpdns.org/functions/v1/chatAcervo";
+const CHAT_ACERVO_SECRET = import.meta.env.VITE_CHAT_ACERVO_SECRET; // configurar no .env da Vercel
 
 export default function IrmaoBibliotecaChat() {
   const [mensagens, setMensagens] = useState([]);
@@ -10,7 +12,6 @@ export default function IrmaoBibliotecaChat() {
   const [irmao, setIrmao] = useState(null);
   const fimDaListaRef = useRef(null);
 
-  // Mesmo padrão de autenticação usado em IrmaoAcervoDigital.jsx
   useEffect(() => {
     const irmaoAuth = sessionStorage.getItem("irmao_auth");
     const irmaoData = sessionStorage.getItem("irmao_data");
@@ -37,17 +38,28 @@ export default function IrmaoBibliotecaChat() {
     setCarregando(true);
 
     try {
-      // Mesmo padrão usado em src/api/db.js: base44.functions.invoke(nome, payload)
-      const res = await base44.functions.invoke("chatAcervo", {
-        pergunta: texto,
-        grau_usuario: irmao.grau,
+      const resposta = await fetch(CHAT_ACERVO_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-chat-secret": CHAT_ACERVO_SECRET,
+        },
+        body: JSON.stringify({
+          pergunta: texto,
+          grau_usuario: irmao.grau,
+        }),
       });
 
-      if (res.data?.erro) {
-        throw new Error(res.data.erro);
+      if (!resposta.ok) {
+        const textoErro = await resposta.text();
+        throw new Error(`Erro ${resposta.status}: ${textoErro}`);
       }
 
-      const dados = res.data;
+      const dados = await resposta.json();
+
+      if (dados.erro) {
+        throw new Error(dados.erro);
+      }
 
       setMensagens((prev) => [
         ...prev,
