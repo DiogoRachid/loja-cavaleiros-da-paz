@@ -121,15 +121,21 @@ export default function AdminRoteiroHarmonia() {
       };
     });
 
-    // Sincroniza etapas novas adicionadas na configuração que ainda não estão no roteiro
-    const novas = configsOrdenadas
-      .filter((c) => !configsUsadas.has(c.id))
-      .map((c) => {
-        const p = revincular(c.playlist_id, c.playlist_name);
-        return { id: genId(), nome: c.etapa_nome, tracks: [], playlist_id: p.id, playlist_name: p.nome, observacao: c.observacao || "", config_id: c.id };
-      });
+    // Etapas antigas sem vínculo adotam, por posição, as configurações ainda não usadas
+    // (assim renomear na configuração atualiza a etapa em vez de duplicar)
+    const configsLivres = configsOrdenadas.filter((c) => !configsUsadas.has(c.id));
+    migradas.forEach((e, i) => {
+      if (e.config_id) return;
+      const cfg = configsOrdenadas[i];
+      if (cfg && configsLivres.includes(cfg)) {
+        e.config_id = cfg.id;
+        e.nome = cfg.etapa_nome;
+        if (!e.observacao) e.observacao = cfg.observacao || "";
+        configsUsadas.add(cfg.id);
+      }
+    });
 
-    const combinadas = [...migradas, ...novas].map((e, i) => ({ ...e, numero: i + 1 }));
+    const combinadas = migradas.map((e, i) => ({ ...e, numero: i + 1 }));
     setEtapas(combinadas);
     setLoading(false);
   };
