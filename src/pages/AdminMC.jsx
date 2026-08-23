@@ -105,7 +105,7 @@ export default function AdminMC() {
                   <p className="font-medium text-slate-800">{s.tipo}</p>
                   <p className="text-sm text-slate-500">{s.data} às {s.hora}</p>
                 </div>
-                <Link to={createPageUrl("AdminOrdemEntrada")}>
+                <Link to={`/PrepararReuniao?sessao=${s.id}`}>
                   <Badge className="bg-[#C9A227] text-[#1B3A5F] cursor-pointer hover:bg-[#8B7019]">
                     Preparar
                   </Badge>
