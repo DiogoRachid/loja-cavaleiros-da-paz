@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { db } from "@/api/db";
+import { buscarSubstituicaoAtiva } from "@/lib/substituicao";
 import { Crown, Lock, User, ArrowLeft, Library } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -78,10 +79,14 @@ export default function AdminLogin() {
           return;
         }
         const irmao = irmaos[0];
+        let sessaoSubstituicao = null;
         if (irmao.cargo !== cargo) {
-          setErro("Cargo informado não corresponde ao cadastro.");
-          setLoading(false);
-          return;
+          sessaoSubstituicao = await buscarSubstituicaoAtiva(cargo, irmao.id);
+          if (!sessaoSubstituicao) {
+            setErro("Cargo informado não corresponde ao cadastro.");
+            setLoading(false);
+            return;
+          }
         }
         const senhaValida = irmao.senha ? irmao.senha === senha : irmao.numero_glp === senha;
         if (!senhaValida) {
@@ -92,6 +97,11 @@ export default function AdminLogin() {
         sessionStorage.setItem("admin_auth", "true");
         sessionStorage.setItem("admin_data", JSON.stringify(irmao));
         sessionStorage.setItem("admin_cargo", cargo);
+        if (sessaoSubstituicao) {
+          sessionStorage.setItem("admin_substituindo", JSON.stringify({ cargo, sessao_id: sessaoSubstituicao.id, sessao_data: sessaoSubstituicao.data }));
+        } else {
+          sessionStorage.removeItem("admin_substituindo");
+        }
         const cargoRoutes = {
           "Venerável Mestre": "AdminVM",
           "Mestre de Cerimônias": "AdminMC",
