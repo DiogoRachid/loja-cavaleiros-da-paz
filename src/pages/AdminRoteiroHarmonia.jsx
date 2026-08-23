@@ -72,6 +72,7 @@ export default function AdminRoteiroHarmonia() {
       : ETAPAS_PADRAO;
     const configMap = {};
     configsOrdenadas.forEach((c) => { configMap[c.etapa_nome] = c; });
+    const configPorId = new Map(configsOrdenadas.map((c) => [c.id, c]));
 
     let r = roteiros[0];
     if (!r) {
@@ -85,6 +86,7 @@ export default function AdminRoteiroHarmonia() {
           playlist_id: p.id,
           playlist_name: p.nome,
           observacao: configMap[nome]?.observacao || "",
+          config_id: configMap[nome]?.id || null,
         };
       });
       r = await db.RoteiroHarmonia.create({
@@ -99,28 +101,32 @@ export default function AdminRoteiroHarmonia() {
     const parsed = r.etapas ? JSON.parse(r.etapas) : [];
 
     // Migrar tracks antigos e completar playlist a partir da config quando estiver vazia
+    const configsUsadas = new Set();
     const migradas = parsed.map((e) => {
-      const cfg = configMap[e.nome];
+      // Vincula pelo id da configuração (assim renomear na config não duplica a etapa)
+      const cfg = (e.config_id && configPorId.get(e.config_id)) || configMap[e.nome];
+      if (cfg) configsUsadas.add(cfg.id);
       const p = revincular(
         e.playlist_id || cfg?.playlist_id,
         e.playlist_name || cfg?.playlist_name
       );
       return {
         ...e,
+        nome: cfg?.etapa_nome || e.nome,
         tracks: e.tracks || (e.track ? [e.track] : []),
         playlist_id: p.id,
         playlist_name: p.nome,
         observacao: e.observacao ?? cfg?.observacao ?? "",
+        config_id: cfg?.id || e.config_id || null,
       };
     });
 
     // Sincroniza etapas novas adicionadas na configuração que ainda não estão no roteiro
-    const nomesExistentes = new Set(migradas.map((e) => e.nome));
-    const novas = nomesEtapas
-      .filter((nome) => !nomesExistentes.has(nome))
-      .map((nome) => {
-        const p = revincular(configMap[nome]?.playlist_id, configMap[nome]?.playlist_name);
-        return { id: genId(), nome, tracks: [], playlist_id: p.id, playlist_name: p.nome, observacao: configMap[nome]?.observacao || "" };
+    const novas = configsOrdenadas
+      .filter((c) => !configsUsadas.has(c.id))
+      .map((c) => {
+        const p = revincular(c.playlist_id, c.playlist_name);
+        return { id: genId(), nome: c.etapa_nome, tracks: [], playlist_id: p.id, playlist_name: p.nome, observacao: c.observacao || "", config_id: c.id };
       });
 
     const combinadas = [...migradas, ...novas].map((e, i) => ({ ...e, numero: i + 1 }));
