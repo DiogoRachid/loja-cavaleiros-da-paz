@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Link } from "react-router-dom";
 import PastaSelector from "@/components/harmonia/PastaSelector";
 
@@ -79,6 +80,10 @@ export default function AdminConfigEtapasHarmonia() {
     }));
   };
 
+  const handleChangeObservacao = (cid, observacao) => {
+    setConfigs((prev) => ({ ...prev, [cid]: { ...prev[cid], observacao } }));
+  };
+
   const handleRenameEtapa = (grupoKey, cid, nome) => {
     updateGrupo(grupoKey, (lista) => lista.map((e) => (e.cid === cid ? { ...e, nome } : e)));
   };
@@ -123,6 +128,7 @@ export default function AdminConfigEtapasHarmonia() {
             etapa_nome: nome,
             playlist_id: config?.playlist_id || null,
             playlist_name: config?.playlist_name || null,
+            observacao: config?.observacao || null,
           };
           if (config?.id) {
             await db.ConfigEtapaHarmonia.update(config.id, dados);
@@ -185,7 +191,8 @@ export default function AdminConfigEtapasHarmonia() {
                     <Card>
                       <CardContent className="p-4 sm:p-6 space-y-4">
                         {lista.map((item, index) => (
-                          <div key={item.cid} className="flex items-center flex-wrap gap-2 sm:gap-3 border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+                          <div key={item.cid} className="border-b border-slate-100 pb-4 last:border-0 last:pb-0 space-y-2">
+                          <div className="flex items-center flex-wrap gap-2 sm:gap-3">
                             <div className="flex flex-col flex-shrink-0">
                               <button
                                 type="button"
@@ -225,6 +232,13 @@ export default function AdminConfigEtapasHarmonia() {
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
+                          </div>
+                          <Textarea
+                            placeholder="Observação desta etapa (aparece no roteiro da sessão)"
+                            value={configs[item.cid]?.observacao || ""}
+                            onChange={(e) => handleChangeObservacao(item.cid, e.target.value)}
+                            className="text-sm min-h-[60px]"
+                          />
                           </div>
                         ))}
 

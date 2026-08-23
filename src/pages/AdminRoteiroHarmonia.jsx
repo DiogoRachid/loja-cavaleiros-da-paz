@@ -84,6 +84,7 @@ export default function AdminRoteiroHarmonia() {
           tracks: [],
           playlist_id: p.id,
           playlist_name: p.nome,
+          observacao: configMap[nome]?.observacao || "",
         };
       });
       r = await db.RoteiroHarmonia.create({
@@ -109,6 +110,7 @@ export default function AdminRoteiroHarmonia() {
         tracks: e.tracks || (e.track ? [e.track] : []),
         playlist_id: p.id,
         playlist_name: p.nome,
+        observacao: e.observacao ?? cfg?.observacao ?? "",
       };
     });
 
@@ -118,7 +120,7 @@ export default function AdminRoteiroHarmonia() {
       .filter((nome) => !nomesExistentes.has(nome))
       .map((nome) => {
         const p = revincular(configMap[nome]?.playlist_id, configMap[nome]?.playlist_name);
-        return { id: genId(), nome, tracks: [], playlist_id: p.id, playlist_name: p.nome };
+        return { id: genId(), nome, tracks: [], playlist_id: p.id, playlist_name: p.nome, observacao: configMap[nome]?.observacao || "" };
       });
 
     const combinadas = [...migradas, ...novas].map((e, i) => ({ ...e, numero: i + 1 }));
@@ -153,6 +155,10 @@ export default function AdminRoteiroHarmonia() {
       etapa_nome: etapaNome,
       ...registro,
     });
+  };
+
+  const handleChangeObservacao = (id, observacao) => {
+    setEtapas((prev) => prev.map((e) => (e.id === id ? { ...e, observacao } : e)));
   };
 
   const handleRename = (id, novoNome) => {
@@ -255,6 +261,7 @@ export default function AdminRoteiroHarmonia() {
                 onMoveTrack={handleMoveTrack}
                 onRemove={handleRemoveEtapa}
                 onChangePlaylist={handleChangePlaylist}
+                onChangeObservacao={handleChangeObservacao}
                 onStopTimer={handleStopTimer}
               />
             ))}

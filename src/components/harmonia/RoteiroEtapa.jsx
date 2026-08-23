@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Music, Trash2, ChevronRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import PastaSelector from "./PastaSelector";
 import EtapaCronometro from "./EtapaCronometro";
 import { useMp3Playback } from "./Mp3PlaybackContext";
 import TrackRow from "./TrackRow";
 
-export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRemoveTrack, onMoveTrack, onRemove, onChangePlaylist, onStopTimer }) {
+export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRemoveTrack, onMoveTrack, onRemove, onChangePlaylist, onChangeObservacao, onStopTimer }) {
   const [editing, setEditing] = useState(false);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(etapa.nome);
@@ -104,6 +105,13 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
             value={etapa.playlist_id}
             valueName={etapa.playlist_name}
             onChange={(pasta) => onChangePlaylist(etapa.id, pasta)}
+          />
+
+          <Textarea
+            placeholder="Observação desta etapa"
+            value={etapa.observacao || ""}
+            onChange={(e) => onChangeObservacao?.(etapa.id, e.target.value)}
+            className="text-xs min-h-[56px]"
           />
 
           <EtapaCronometro
