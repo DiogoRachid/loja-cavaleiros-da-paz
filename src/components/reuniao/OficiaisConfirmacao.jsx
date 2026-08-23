@@ -1,13 +1,13 @@
 import { Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CargoIcon from "@/components/CargoIcon";
+import SubstitutoSelect from "@/components/reuniao/SubstitutoSelect";
 
 export default function OficiaisConfirmacao({ quadro, irmaos, onChange }) {
   const toggleConfirmado = (idx) => {
     const updated = quadro.map((o, i) =>
-      i === idx ? { ...o, confirmado: !o.confirmado, substituto_id: "", substituto_nome: "" } : o
+      i === idx ? { ...o, confirmado: !o.confirmado } : o
     );
     onChange(updated);
   };
@@ -27,10 +27,8 @@ export default function OficiaisConfirmacao({ quadro, irmaos, onChange }) {
     return porNome?.id || "";
   };
 
-  const titularesConfirmados = new Set(quadro.filter(o => o.confirmado && o.titular_id).map(o => o.titular_id));
   const irmaosOrdenados = [...irmaos]
-    .filter(ir => !titularesConfirmados.has(ir.id))
-    .sort((a, b) => a.nome_completo.localeCompare(b.nome_completo, "pt-BR"));
+    .sort((a, b) => (a.nome_completo || "").localeCompare(b.nome_completo || "", "pt-BR"));
 
   if (quadro.length === 0) {
     return (
@@ -71,33 +69,22 @@ export default function OficiaisConfirmacao({ quadro, irmaos, onChange }) {
                     </p>
                   </div>
                   {o.confirmado && (
-                    <Badge className="bg-green-100 text-green-800 flex-shrink-0">Confirmado</Badge>
+                    <Badge className="bg-green-100 text-green-800 flex-shrink-0">
+                      {o.substituto_nome ? `Confirmado — Substituto: ${o.substituto_nome}` : "Confirmado"}
+                    </Badge>
                   )}
                 </div>
 
-                {!o.confirmado && (
-                  <div className="mt-2">
-                    <Select value={resolverSubstitutoId(o)} onValueChange={v => setSubstituto(idx, v)}>
-                      <SelectTrigger className="h-8 text-sm w-full">
-                        <SelectValue placeholder="Selecionar substituto..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(() => {
-                          const sid = resolverSubstitutoId(o);
-                          const atual = sid && !irmaosOrdenados.some(ir => ir.id === sid)
-                            ? irmaos.find(ir => ir.id === sid) : null;
-                          return atual ? <SelectItem value={atual.id}>{atual.nome_completo}</SelectItem> : null;
-                        })()}
-                        {irmaosOrdenados.map(ir => (
-                          <SelectItem key={ir.id} value={ir.id}>{ir.nome_completo}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {o.substituto_nome && (
-                      <p className="text-xs text-amber-700 mt-1">✦ Substituto: {o.substituto_nome}</p>
-                    )}
-                  </div>
-                )}
+                <div className="mt-2">
+                  <SubstitutoSelect
+                    irmaos={irmaosOrdenados}
+                    value={resolverSubstitutoId(o)}
+                    onChange={v => setSubstituto(idx, v)}
+                  />
+                  {o.substituto_nome && (
+                    <p className="text-xs text-amber-700 mt-1">✦ Substituto: {o.substituto_nome}</p>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>

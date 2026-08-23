@@ -255,9 +255,9 @@ export default function PrepararReuniao() {
       <thead><tr><th style="width:30px"></th><th>Cargo</th><th>Irmão</th><th>Situação</th></tr></thead>
       <tbody>
         ${quadroOficiais.map(o => {
-          const nome = o.confirmado ? o.titular_nome : (o.substituto_nome || '<span class="ausente">— Vago —</span>');
+          const nome = o.substituto_nome || (o.confirmado ? o.titular_nome : '<span class="ausente">— Vago —</span>');
           const situacao = o.confirmado
-            ? '<span class="confirmado">✔ Presente</span>'
+            ? (o.substituto_nome ? '<span class="confirmado">✔ Presente (substituto)</span>' : '<span class="confirmado">✔ Presente</span>')
             : (o.substituto_nome ? '<span style="color:#855">✦ Substituto</span>' : '<span class="ausente">✘ Ausente</span>');
           return `<tr>
             <td><span class="simbolo">${svgCargo(o.cargo, 16)}</span></td>
