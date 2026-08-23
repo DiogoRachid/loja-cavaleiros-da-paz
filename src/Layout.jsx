@@ -111,7 +111,8 @@ export default function Layout({ children, currentPageName }) {
     if (adminData) {
       const admin = JSON.parse(adminData);
       setUser({ full_name: admin.nome_completo, cim: admin.cim });
-      setCargo(admin.cargo);
+      // Portal escolhido no login (pode ser substituição), com fallback ao cargo do cadastro
+      setCargo(sessionStorage.getItem("admin_cargo") || admin.cargo);
       return;
     }
     // Portal Bibliotecário
