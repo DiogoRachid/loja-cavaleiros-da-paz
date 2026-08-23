@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { db } from "@/api/db";
-import { ArrowLeft, Settings, Loader2, Save, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowLeft, Settings, Loader2, Save, Plus, Trash2, ChevronUp, ChevronDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -33,6 +33,8 @@ export default function AdminConfigEtapasHarmonia() {
   const [removidos, setRemovidos] = useState([]); // ids de registros a excluir ao salvar
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [salvo, setSalvo] = useState(false);
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
     loadConfigs();
@@ -113,32 +115,48 @@ export default function AdminConfigEtapasHarmonia() {
 
   const salvar = async () => {
     setSaving(true);
-    for (const id of removidos) {
-      await db.ConfigEtapaHarmonia.delete(id);
-    }
-    for (const grau of GRAUS) {
-      for (const tipo of TIPOS_SESSAO) {
-        const lista = etapasPorGrupo[`${grau}::${tipo}`] || [];
-        for (let i = 0; i < lista.length; i++) {
-          const item = lista[i];
-          const nome = (item.nome || "").trim() || `Etapa ${i + 1}`;
-          const config = configs[item.cid];
-          const dados = {
-            ordem: i,
-            etapa_nome: nome,
-            playlist_id: config?.playlist_id || null,
-            playlist_name: config?.playlist_name || null,
-            observacao: config?.observacao || null,
-          };
-          if (config?.id) {
-            await db.ConfigEtapaHarmonia.update(config.id, dados);
-          } else {
-            await db.ConfigEtapaHarmonia.create({ grau, tipo_sessao: tipo, ...dados });
-          }
+    setErro("");
+    setSalvo(false);
+    try {
+      const operacoes = [];
+      removidos.forEach((id) => operacoes.push(db.ConfigEtapaHarmonia.delete(id)));
+
+      for (const grau of GRAUS) {
+        for (const tipo of TIPOS_SESSAO) {
+          const lista = etapasPorGrupo[`${grau}::${tipo}`] || [];
+          lista.forEach((item, i) => {
+            const nome = (item.nome || "").trim() || `Etapa ${i + 1}`;
+            const config = configs[item.cid];
+            const dados = {
+              ordem: i,
+              etapa_nome: nome,
+              playlist_id: config?.playlist_id || null,
+              playlist_name: config?.playlist_name || null,
+              observacao: config?.observacao || null,
+            };
+            if (config?.id) {
+              // Só envia se algo mudou (evita centenas de requisições desnecessárias)
+              const igual =
+                (config.ordem ?? 0) === dados.ordem &&
+                config.etapa_nome === dados.etapa_nome &&
+                (config.playlist_id || null) === dados.playlist_id &&
+                (config.playlist_name || null) === dados.playlist_name &&
+                (config.observacao || null) === dados.observacao;
+              if (!igual) operacoes.push(db.ConfigEtapaHarmonia.update(config.id, dados));
+            } else {
+              operacoes.push(db.ConfigEtapaHarmonia.create({ grau, tipo_sessao: tipo, ...dados }));
+            }
+          });
         }
       }
+
+      await Promise.all(operacoes);
+      await loadConfigs();
+      setSalvo(true);
+      setTimeout(() => setSalvo(false), 3000);
+    } catch (e) {
+      setErro("Não foi possível salvar. Tente novamente.");
     }
-    await loadConfigs();
     setSaving(false);
   };
 
@@ -163,10 +181,14 @@ export default function AdminConfigEtapasHarmonia() {
           <h1 className="text-xl font-bold text-[#1B3A5F]">Configurações do Roteiro</h1>
           <p className="text-slate-500 text-sm">Renomeie, reordene e vincule uma pasta de músicas para cada etapa, por grau e tipo de sessão</p>
         </div>
-        <Button onClick={salvar} disabled={saving} className="ml-auto bg-[#1B3A5F] text-white hover:bg-[#152d49]">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-          Salvar
-        </Button>
+        <div className="ml-auto flex items-center gap-3">
+          {salvo && <span className="text-sm text-green-600 font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Salvo</span>}
+          {erro && <span className="text-sm text-red-600 font-medium">{erro}</span>}
+          <Button onClick={salvar} disabled={saving} className="bg-[#1B3A5F] text-white hover:bg-[#152d49]">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+            {saving ? "Salvando..." : "Salvar"}
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="Aprendiz">
