@@ -38,7 +38,8 @@ export default function AdminAgendaRitual() {
   const [formEdicao, setFormEdicao] = useState(FORM_VAZIO);
 
   const admin = JSON.parse(sessionStorage.getItem("admin_data") || "{}");
-  const isMestreHarmonia = admin.cargo === "Mestre de Harmonia";
+  const cargoAtual = sessionStorage.getItem("admin_cargo") || admin.cargo;
+  const isMestreHarmonia = cargoAtual === "Mestre de Harmonia";
 
   useEffect(() => { loadDados(); }, []);
 
