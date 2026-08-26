@@ -54,6 +54,7 @@ export default function IrmaoScan() {
   const [resultado, setResultado] = useState(null);
 
   const CODIGO_DEVOLUCAO = "LCP25-DEVOLUCAO-BIBLIOTECA";
+  const PREFIXO_PRESENCA = "LCP25-PRESENCA-";
 
   useEffect(() => {
     loadData();
@@ -204,6 +205,14 @@ export default function IrmaoScan() {
         return;
       }
 
+      // Código de presença de sessão
+      if (codigo.startsWith(PREFIXO_PRESENCA)) {
+        await registrarPresenca(codigo.replace(PREFIXO_PRESENCA, ""));
+        setProcessing(false);
+        setCodigoManual("");
+        return;
+      }
+
       // Buscar item pelo código QR
       const itens = await db.Item.filter({ codigo_qr: codigo });
       
@@ -243,6 +252,40 @@ export default function IrmaoScan() {
     
     setProcessing(false);
     setCodigoManual("");
+  };
+
+  const registrarPresenca = async (sessaoId) => {
+    const sessao = await db.Sessao.get(sessaoId);
+    if (!sessao) {
+      setResultado({ tipo: "erro", mensagem: "Sessão não encontrada para este QR Code." });
+      return;
+    }
+
+    const existentes = await db.Presenca.filter({ sessao_id: sessaoId, irmao_id: irmao.id });
+    const dados = {
+      sessao_id: sessaoId,
+      sessao_data: sessao.data,
+      irmao_id: irmao.id,
+      irmao_nome: irmao.nome_completo,
+      irmao_cim: irmao.numero_glp,
+      presente: true,
+    };
+
+    if (existentes.length > 0) {
+      if (existentes[0].presente) {
+        setResultado({ tipo: "sucesso", mensagem: "Sua presença já estava registrada nesta sessão." });
+        return;
+      }
+      await db.Presenca.update(existentes[0].id, { presente: true });
+    } else {
+      await db.Presenca.create(dados);
+    }
+
+    const dataFmt = new Date(sessao.data + "T12:00:00").toLocaleDateString("pt-BR");
+    setResultado({
+      tipo: "sucesso",
+      mensagem: `Presença registrada na Sessão ${sessao.tipo} de ${dataFmt}. Aguarde a conferência do Ir∴ Chanceler.`,
+    });
   };
 
   const confirmarRetirada = async () => {
@@ -370,7 +413,7 @@ export default function IrmaoScan() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Escanear QR Code</h1>
-          <p className="text-slate-500">Retirada ou devolução de itens</p>
+          <p className="text-slate-500">Presença na sessão, retirada ou devolução de itens</p>
         </div>
       </div>
 
@@ -483,6 +526,17 @@ export default function IrmaoScan() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-[#C9A227]/20 flex items-center justify-center text-[#1B3A5F] font-bold text-sm flex-shrink-0">
+              ★
+            </div>
+            <div>
+              <p className="font-medium text-slate-800">Para marcar presença na sessão</p>
+              <p className="text-sm text-slate-500">
+                Escaneie o QR Code da lista de presença do dia — sua presença é registrada na hora
+              </p>
+            </div>
+          </div>
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0">
               1
