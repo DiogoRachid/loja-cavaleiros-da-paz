@@ -211,7 +211,7 @@ export default function PrepararReuniao() {
 <title>Roteiro da Reunião — ${dataFormatada}</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; background: #fff; transform: scale(0.8); transform-origin: top left; width: 125%; }
+  body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; background: #fff; transform: scale(0.68); transform-origin: top left; width: 147%; }
   @page { size: A4; margin: 0.8cm 0.8cm 0.8cm 0.8cm; }
 
   .page { page-break-after: always; padding-bottom: 0.4cm; position: relative; }
@@ -233,7 +233,7 @@ export default function PrepararReuniao() {
   td { padding: 2px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
   tr:nth-child(even) td { background: #f9f9f9; }
 
-  .simbolo { width: 40px; height: 38px; display: inline-flex; align-items: center; justify-content: center; }
+  .simbolo { width: 32px; height: 30px; display: inline-flex; align-items: center; justify-content: center; }
   .simbolo svg { display: block; }
   .confirmado { color: green; font-weight: bold; }
   .ausente { color: #c00; }
@@ -276,7 +276,7 @@ export default function PrepararReuniao() {
             ? (o.substituto_nome ? '<span class="confirmado">✔ Presente (substituto)</span>' : '<span class="confirmado">✔ Presente</span>')
             : (o.substituto_nome ? '<span style="color:#855">✦ Substituto</span>' : '<span class="ausente">✘ Ausente</span>');
           return `<tr>
-            <td><span class="simbolo">${svgCargo(o.cargo, 38)}</span></td>
+            <td><span class="simbolo">${svgCargo(o.cargo, 30)}</span></td>
             <td><strong>${o.cargo}</strong></td>
             <td>${nome || "—"}</td>
             <td>${situacao}</td>
