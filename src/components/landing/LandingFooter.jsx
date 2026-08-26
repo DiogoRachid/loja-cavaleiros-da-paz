@@ -8,12 +8,13 @@ export default function LandingFooter() {
     <footer className="bg-[#0A1725] border-t border-white/10 py-14 px-6">
       <div className="max-w-5xl mx-auto flex flex-col items-center text-center gap-6">
         <div className="flex items-center gap-6">
-          <img src={LOGO_GLP_PADRAO} alt="Grande Loja do Paraná" className="w-12" />
-          <img src={LOGO_LOJA_PADRAO} alt="Cavaleiros da Paz nº25" className="w-16" />
+          <img src={LOGO_GLP_PADRAO} alt="Grande Loja do Paraná" className="w-20" />
+          <img src={LOGO_LOJA_PADRAO} alt="Cavaleiros da Paz nº25" className="w-28" />
         </div>
 
         <p className="text-slate-300 text-base md:text-lg max-w-2xl leading-relaxed">
           A.R.L.S. Cavaleiros da Paz nº25 — Grande Loja Maçônica do Estado do Paraná.
+          <br />
           Área restrita destinada aos Irmãos e Oficiais da Loja.
         </p>
 

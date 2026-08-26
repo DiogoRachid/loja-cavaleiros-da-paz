@@ -41,26 +41,15 @@ export default function LandingHero({ loja }) {
           animate="show"
           className="text-center max-w-3xl"
         >
-          <motion.div variants={item} className="flex items-center justify-center gap-8 mb-10">
-            <motion.img
-              src={LOGO_GLP_PADRAO}
-              alt="Grande Loja do Paraná"
-              className="w-20 md:w-24 drop-shadow-2xl"
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            />
+          <motion.div variants={item} className="flex items-center justify-center mb-10">
             <motion.img
               src={LOGO_LOJA_PADRAO}
               alt="A.R.L.S. Cavaleiros da Paz nº25"
-              className="w-36 md:w-52 drop-shadow-2xl"
+              className="w-48 md:w-64 drop-shadow-2xl"
               animate={{ y: [0, -12, 0] }}
               transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
             />
           </motion.div>
-
-          <motion.p variants={item} className="text-[#C9A227] text-xs md:text-sm uppercase tracking-[0.3em] mb-5">
-            Grande Loja Maçônica do Estado do Paraná
-          </motion.p>
 
           <motion.h1
             variants={item}
