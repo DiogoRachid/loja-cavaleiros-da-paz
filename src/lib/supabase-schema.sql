@@ -34,11 +34,14 @@ create table if not exists public.dados_loja (
   dia_reuniao text,
   hora_reuniao text,
   logo_url text,
+  logo_potencia_url text,
   exercicio_atual text,
   created_date timestamptz not null default now(),
   updated_date timestamptz not null default now(),
   created_by_id uuid
 );
+
+alter table public.dados_loja add column if not exists logo_potencia_url text;
 
 create table if not exists public.irmao (
   id uuid primary key default gen_random_uuid(),

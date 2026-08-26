@@ -1,3 +1,7 @@
+import { anoVerdadeiraLuz } from "@/components/secretario/gerarMinuta";
+
+const LOGO_LOJA = "https://media.base44.com/images/public/69aea997b473b479398fe231/9a3f4b5ac_LogoCavaleirosAlta.png";
+
 // Abre uma janela de impressão com o balaústre formatado
 export function imprimirBalaustre({ sessao, secoes, dadosLoja, assinaturas = {} }) {
   const nomeLoja = dadosLoja ? `ARLS ${dadosLoja.nome} nº ${dadosLoja.numero}` : "Loja";
@@ -18,7 +22,9 @@ export function imprimirBalaustre({ sessao, secoes, dadosLoja, assinaturas = {} 
     <title>Balaústre — Sessão ${sessao.numero || dataFmt}</title>
     <style>
       body { font-family: Georgia, serif; color: #1a1a1a; max-width: 720px; margin: 40px auto; line-height: 1.7; }
-      header { text-align: center; border-bottom: 2px solid #1B3A5F; padding-bottom: 16px; margin-bottom: 24px; }
+      header { display: flex; align-items: center; gap: 20px; border-bottom: 2px solid #1B3A5F; padding-bottom: 16px; margin-bottom: 24px; }
+      header .logo { width: 78px; height: 78px; object-fit: contain; flex-shrink: 0; }
+      header .titulo { flex: 1; text-align: center; }
       header h1 { font-size: 18px; color: #1B3A5F; margin: 0; }
       header p { margin: 4px 0 0; font-size: 13px; color: #555; }
       h2 { text-align: center; font-size: 16px; margin: 24px 0; }
@@ -29,7 +35,15 @@ export function imprimirBalaustre({ sessao, secoes, dadosLoja, assinaturas = {} 
       .assinaturas strong { display: block; font-size: 12px; }
       .assinaturas span { font-size: 11px; color: #555; }
     </style></head><body>
-    <header><h1>${nomeLoja}</h1><p>${oriente}</p></header>
+    <header>
+      <img class="logo" src="${dadosLoja?.logo_potencia_url || ""}" alt="" onerror="this.style.visibility='hidden'"/>
+      <div class="titulo">
+        <h1>${nomeLoja}</h1>
+        <p>${dadosLoja?.potencia || "Grande Loja do Paraná"}${oriente ? ` — ${oriente}` : ""}</p>
+        <p>Ano da Verdadeira Luz ${anoVerdadeiraLuz(sessao.data)}</p>
+      </div>
+      <img class="logo" src="${dadosLoja?.logo_url || LOGO_LOJA}" alt="" onerror="this.style.visibility='hidden'"/>
+    </header>
     <h2>Balaústre da Sessão ${sessao.tipo || ""} de ${dataFmt}${sessao.numero ? ` — nº ${sessao.numero}` : ""}</h2>
     ${corpo}
     <div class="assinaturas">

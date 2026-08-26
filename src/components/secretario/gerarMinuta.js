@@ -14,6 +14,12 @@ const fmtData = (dataStr) => {
   return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
 };
 
+// Ano da Verdadeira Luz (REAA / GLP): ano da era vulgar + 4000
+export const anoVerdadeiraLuz = (dataStr) => {
+  const ano = dataStr ? new Date(dataStr + "T12:00:00").getFullYear() : new Date().getFullYear();
+  return ano + 4000;
+};
+
 const fmtDuracao = (seg) => {
   if (!seg && seg !== 0) return "";
   const m = Math.round(seg / 60);
@@ -45,7 +51,8 @@ export function gerarSecoes({
   const oriente = dadosLoja?.oriente ? `, Oriente de ${dadosLoja.oriente}` : "";
 
   const abertura =
-    `Aos ${fmtData(sessao.data)}, ${horaAbertura ? `às ${horaAbertura}, ` : ""}` +
+    `Aos ${fmtData(sessao.data)} da Era Vulgar, correspondente ao ano de ${anoVerdadeiraLuz(sessao.data)} da Verdadeira Luz, ` +
+    `${horaAbertura ? `às ${horaAbertura}, ` : ""}` +
     `reuniu-se a ARLS ${nomeLoja}${oriente}, em Sessão ${sessao.tipo || ""} no Grau de ${sessao.grau || "Aprendiz"}, ` +
     `sob a presidência do Venerável Mestre${vmNome ? ` Ir∴ ${vmNome}` : ""}, que declarou abertos os trabalhos na forma ritualística.`;
 

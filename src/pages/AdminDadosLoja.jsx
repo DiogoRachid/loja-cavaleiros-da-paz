@@ -10,6 +10,7 @@ const FORM_VAZIO = {
   nome: "", numero: "", potencia: "", oriente: "", endereco: "",
   telefone: "", email: "", valor_mensalidade: "", dia_reuniao: "",
   hora_reuniao: "", exercicio_atual: new Date().getFullYear().toString(),
+  logo_url: "", logo_potencia_url: "",
 };
 
 export default function AdminDadosLoja() {
@@ -85,6 +86,14 @@ export default function AdminDadosLoja() {
           <div className="space-y-1 md:col-span-3">
             <Label>Endereço do Templo</Label>
             <Input value={form.endereco} onChange={e => f("endereco", e.target.value)} placeholder="Rua, número, bairro, cidade" />
+          </div>
+          <div className="space-y-1 md:col-span-3">
+            <Label>Logo da Loja (URL) — usada nos documentos impressos</Label>
+            <Input value={form.logo_url} onChange={e => f("logo_url", e.target.value)} placeholder="https://..." />
+          </div>
+          <div className="space-y-1 md:col-span-3">
+            <Label>Logo da Potência / Grande Loja do Paraná (URL)</Label>
+            <Input value={form.logo_potencia_url} onChange={e => f("logo_potencia_url", e.target.value)} placeholder="https://..." />
           </div>
         </CardContent>
       </Card>
