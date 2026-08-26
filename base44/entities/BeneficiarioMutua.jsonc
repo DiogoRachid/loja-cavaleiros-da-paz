@@ -1,0 +1,48 @@
+{
+  "name": "BeneficiarioMutua",
+  "type": "object",
+  "properties": {
+    "irmao_id": {
+      "type": "string",
+      "description": "ID do irm\u00e3o titular do testamento"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Pessoa",
+        "Entidade",
+        "Outro"
+      ],
+      "default": "Pessoa",
+      "description": "Tipo de benefici\u00e1rio"
+    },
+    "nome": {
+      "type": "string",
+      "description": "Nome da pessoa ou entidade"
+    },
+    "parentesco": {
+      "type": "string",
+      "description": "Parentesco ou v\u00ednculo"
+    },
+    "documento": {
+      "type": "string",
+      "description": "CPF/CNPJ ou documento"
+    },
+    "contato": {
+      "type": "string",
+      "description": "Telefone, email ou endere\u00e7o"
+    },
+    "percentual": {
+      "type": "number",
+      "description": "Percentual da m\u00fatua destinado"
+    },
+    "observacoes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es"
+    }
+  },
+  "required": [
+    "irmao_id",
+    "nome"
+  ]
+}

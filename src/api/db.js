@@ -68,6 +68,8 @@ export const db = {
   VisitanteSessao: tabela("visitante_sessao"),
   Parecer: tabela("parecer"),
   PedidoAcaoSocial: tabela("pedido_acao_social"),
+  CargoExercido: tabela("cargo_exercido"),
+  BeneficiarioMutua: tabela("beneficiario_mutua"),
 };
 
 export default db;

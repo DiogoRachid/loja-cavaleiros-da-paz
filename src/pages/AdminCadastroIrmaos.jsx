@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import MovimentacaoMaconica from "@/components/irmaos/MovimentacaoMaconica";
+import TestamentoIrmao from "@/components/irmaos/TestamentoIrmao";
 
 const CARGOS_SUGERIDOS = ["Nenhum","Venerável Mestre","Primeiro Vigilante","Segundo Vigilante","Orador","Secretário","Tesoureiro","Chanceler","Bibliotecário","Mestre de Cerimônias","Primeiro Diácono","Segundo Diácono","Porta Bandeira","Porta Espada","Arquiteto","Hospitaleiro","Músico","Mestre de Harmonia","Cobrador","Guarda Interno","Guarda Externo","Primeiro Experto","Segundo Experto","Mestre de Banquetes"];
 
@@ -61,6 +63,8 @@ export default function AdminCadastroIrmaos() {
     for (const campo of ["data_iniciacao", "data_elevacao", "data_exaltacao", "data_nascimento"]) {
       if (!dados[campo]) dados[campo] = null;
     }
+    // Testamento é gerenciado na própria seção, para não sobrescrever alterações
+    delete dados.testamento_desejo; delete dados.testamento_data;
     if (editando) await db.Irmao.update(editando, dados);
     else await db.Irmao.create(dados);
     await loadIrmaos();
@@ -221,6 +225,18 @@ export default function AdminCadastroIrmaos() {
               <Label>Observações</Label>
               <Input value={form.observacoes} onChange={e => setForm({ ...form, observacoes: e.target.value })} />
             </div>
+
+            {editando && (
+              <div className="space-y-4 pt-2">
+                <MovimentacaoMaconica irmao={{ ...form, id: editando }} cargosSugeridos={CARGOS_SUGERIDOS} />
+                <TestamentoIrmao irmao={{ ...form, id: editando }} />
+              </div>
+            )}
+            {!editando && (
+              <p className="text-xs text-slate-400 pt-2">
+                Salve o cadastro para registrar a movimentação maçônica e o testamento do irmão.
+              </p>
+            )}
 
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>

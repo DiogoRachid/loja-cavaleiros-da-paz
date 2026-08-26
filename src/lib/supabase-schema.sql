@@ -70,6 +70,43 @@ create table if not exists public.irmao (
 create index if not exists irmao_ativo_idx on public.irmao (ativo);
 create index if not exists irmao_grau_idx on public.irmao (grau);
 
+-- Testamento maçônico (destinação da mútua) — campos no cadastro do irmão
+alter table public.irmao add column if not exists testamento_desejo text;
+alter table public.irmao add column if not exists testamento_data date;
+
+-- Movimentação maçônica: cargos exercidos pelo irmão ao longo dos exercícios
+create table if not exists public.cargo_exercido (
+  id uuid primary key default gen_random_uuid(),
+  irmao_id uuid not null references public.irmao (id) on delete cascade,
+  irmao_nome text,
+  cargo text not null,
+  exercicio text,
+  data_inicio date,
+  data_fim date,
+  observacoes text,
+  created_date timestamptz not null default now(),
+  updated_date timestamptz not null default now(),
+  created_by_id uuid
+);
+create index if not exists cargo_exercido_irmao_idx on public.cargo_exercido (irmao_id);
+
+-- Beneficiários da mútua indicados no testamento do irmão
+create table if not exists public.beneficiario_mutua (
+  id uuid primary key default gen_random_uuid(),
+  irmao_id uuid not null references public.irmao (id) on delete cascade,
+  tipo text not null default 'Pessoa' check (tipo in ('Pessoa','Entidade','Outro')),
+  nome text not null,
+  parentesco text,
+  documento text,
+  contato text,
+  percentual numeric(5,2),
+  observacoes text,
+  created_date timestamptz not null default now(),
+  updated_date timestamptz not null default now(),
+  created_by_id uuid
+);
+create index if not exists beneficiario_mutua_irmao_idx on public.beneficiario_mutua (irmao_id);
+
 create table if not exists public.quadro_oficiais (
   id uuid primary key default gen_random_uuid(),
   exercicio text not null,
@@ -604,7 +641,8 @@ declare
     'centro_custo','mensalidade',
     'bibliotecario','item','emprestimo','acervo_digital','avaliacao','log_acesso','log_download',
     'minha_mp3','pasta_mp3','pasta_musica','config_etapa_harmonia','roteiro_harmonia',
-    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao','sugestao_acervo','parecer','pedido_acao_social'
+    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao','sugestao_acervo','parecer','pedido_acao_social',
+    'cargo_exercido','beneficiario_mutua'
   ];
 begin
   foreach t in array tabelas loop
@@ -628,7 +666,8 @@ declare
     'centro_custo','mensalidade',
     'bibliotecario','item','emprestimo','acervo_digital','avaliacao','log_acesso','log_download',
     'minha_mp3','pasta_mp3','pasta_musica','config_etapa_harmonia','roteiro_harmonia',
-    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao','sugestao_acervo','parecer','pedido_acao_social'
+    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao','sugestao_acervo','parecer','pedido_acao_social',
+    'cargo_exercido','beneficiario_mutua'
   ];
 begin
   foreach t in array tabelas loop
