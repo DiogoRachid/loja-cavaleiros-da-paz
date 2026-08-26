@@ -211,7 +211,7 @@ export default function PrepararReuniao() {
 <title>Roteiro da Reunião — ${dataFormatada}</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; background: #fff; transform: scale(0.68); transform-origin: top left; width: 147%; }
+  body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; background: #fff; }
   @page { size: A4; margin: 0.8cm 0.8cm 0.8cm 0.8cm; }
 
   .page { page-break-after: always; padding-bottom: 0.4cm; position: relative; }
@@ -228,12 +228,12 @@ export default function PrepararReuniao() {
   .section { margin-bottom: 16px; }
   .section-title { font-size: 11pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #ccc; padding-bottom: 3px; margin-bottom: 8px; }
 
-  table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+  table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
   th { background: #1B3A5F; color: white; padding: 5px 8px; text-align: left; font-size: 10pt; }
   td { padding: 2px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
   tr:nth-child(even) td { background: #f9f9f9; }
 
-  .simbolo { width: 32px; height: 30px; display: inline-flex; align-items: center; justify-content: center; }
+  .simbolo { width: 34px; height: 32px; display: inline-flex; align-items: center; justify-content: center; }
   .simbolo svg { display: block; }
   .confirmado { color: green; font-weight: bold; }
   .ausente { color: #c00; }
@@ -245,7 +245,7 @@ export default function PrepararReuniao() {
   .roteiro-subtexto { margin-top: 1px; margin-bottom: 0; padding-left: 20px; font-style: italic; color: #333; font-size: 10pt; }
   .roteiro-subtexto li { margin-bottom: 4px; list-style-type: lower-alpha; }
 
-  .page-footer { border-top: 1px solid #ccc; padding-top: 4px; margin-top: 20px; font-size: 8pt; text-align: center; color: #666; }
+  .page-footer { border-top: 1px solid #ccc; padding-top: 4px; margin-top: 10px; font-size: 8pt; text-align: center; color: #666; }
 
   .aut-item { margin-bottom: 6px; padding: 5px 8px; border-bottom: 1px solid #ddd; }
   .aut-cargo { font-weight: bold; font-size: 10pt; }
@@ -276,7 +276,7 @@ export default function PrepararReuniao() {
             ? (o.substituto_nome ? '<span class="confirmado">✔ Presente (substituto)</span>' : '<span class="confirmado">✔ Presente</span>')
             : (o.substituto_nome ? '<span style="color:#855">✦ Substituto</span>' : '<span class="ausente">✘ Ausente</span>');
           return `<tr>
-            <td><span class="simbolo">${svgCargo(o.cargo, 30)}</span></td>
+            <td><span class="simbolo">${svgCargo(o.cargo, 32)}</span></td>
             <td><strong>${o.cargo}</strong></td>
             <td>${nome || "—"}</td>
             <td>${situacao}</td>
