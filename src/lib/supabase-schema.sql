@@ -345,6 +345,27 @@ create table if not exists public.log_download (
   created_by_id uuid
 );
 
+create table if not exists public.sugestao_acervo (
+  id uuid primary key default gen_random_uuid(),
+  titulo text not null,
+  autor text,
+  tipo text not null check (tipo in ('Livro','Trabalho','Artigo','Instrução','Ritual','Outro')),
+  descricao text,
+  data_publicacao date,
+  grau_minimo text not null default 'Aprendiz' check (grau_minimo in ('Aprendiz','Companheiro','Mestre')),
+  arquivo_url text not null,
+  capa_url text,
+  irmao_id uuid references public.irmao (id) on delete set null,
+  irmao_nome text,
+  irmao_numero_glp text,
+  status text not null default 'Pendente' check (status in ('Pendente','Aprovado','Reprovado','Em Revisão')),
+  observacoes_revisao text,
+  created_date timestamptz not null default now(),
+  updated_date timestamptz not null default now(),
+  created_by_id uuid
+);
+create index if not exists sugestao_acervo_status_idx on public.sugestao_acervo (status);
+
 -- =====================================================================
 -- 5. HARMONIA (MP3, PASTAS, ROTEIROS, TEMPOS)
 -- =====================================================================
@@ -391,8 +412,10 @@ create table if not exists public.config_etapa_harmonia (
   created_date timestamptz not null default now(),
   updated_date timestamptz not null default now(),
   created_by_id uuid,
+  observacao text,
   unique (grau, tipo_sessao, etapa_nome)
 );
+alter table public.config_etapa_harmonia add column if not exists observacao text;
 
 create table if not exists public.roteiro_harmonia (
   id uuid primary key default gen_random_uuid(),
@@ -521,7 +544,7 @@ declare
     'centro_custo','mensalidade',
     'bibliotecario','item','emprestimo','acervo_digital','avaliacao','log_acesso','log_download',
     'minha_mp3','pasta_mp3','pasta_musica','config_etapa_harmonia','roteiro_harmonia',
-    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao'
+    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao','sugestao_acervo'
   ];
 begin
   foreach t in array tabelas loop
@@ -545,7 +568,7 @@ declare
     'centro_custo','mensalidade',
     'bibliotecario','item','emprestimo','acervo_digital','avaliacao','log_acesso','log_download',
     'minha_mp3','pasta_mp3','pasta_musica','config_etapa_harmonia','roteiro_harmonia',
-    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao'
+    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao','sugestao_acervo'
   ];
 begin
   foreach t in array tabelas loop
