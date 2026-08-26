@@ -1,5 +1,5 @@
 // Abre uma janela de impressão com o balaústre formatado
-export function imprimirBalaustre({ sessao, secoes, dadosLoja }) {
+export function imprimirBalaustre({ sessao, secoes, dadosLoja, assinaturas = {} }) {
   const nomeLoja = dadosLoja ? `ARLS ${dadosLoja.nome} nº ${dadosLoja.numero}` : "Loja";
   const oriente = dadosLoja?.oriente ? `Oriente de ${dadosLoja.oriente}` : "";
   const dataFmt = sessao.data
@@ -24,15 +24,18 @@ export function imprimirBalaustre({ sessao, secoes, dadosLoja }) {
       h2 { text-align: center; font-size: 16px; margin: 24px 0; }
       h3 { font-size: 13px; color: #1B3A5F; text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 4px; }
       p { font-size: 13px; text-align: justify; margin: 0; }
-      .assinaturas { display: flex; justify-content: space-between; margin-top: 80px; }
-      .assinaturas div { width: 45%; border-top: 1px solid #333; text-align: center; font-size: 12px; padding-top: 6px; }
+      .assinaturas { display: flex; justify-content: space-between; gap: 16px; margin-top: 90px; }
+      .assinaturas div { flex: 1; border-top: 1px solid #333; text-align: center; font-size: 12px; padding-top: 6px; }
+      .assinaturas strong { display: block; font-size: 12px; }
+      .assinaturas span { font-size: 11px; color: #555; }
     </style></head><body>
     <header><h1>${nomeLoja}</h1><p>${oriente}</p></header>
     <h2>Balaústre da Sessão ${sessao.tipo || ""} de ${dataFmt}${sessao.numero ? ` — nº ${sessao.numero}` : ""}</h2>
     ${corpo}
     <div class="assinaturas">
-      <div>Venerável Mestre</div>
-      <div>Secretário</div>
+      <div><strong>${assinaturas.vm || ""}</strong><span>Venerável Mestre</span></div>
+      <div><strong>${assinaturas.secretario || ""}</strong><span>Secretário</span></div>
+      <div><strong>${assinaturas.orador || ""}</strong><span>Orador</span></div>
     </div>
     <script>window.onload = () => window.print();</script>
     </body></html>`;

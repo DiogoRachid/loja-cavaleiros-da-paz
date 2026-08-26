@@ -39,7 +39,7 @@ export default function AdminBalaustre() {
         db.TempoEtapa.filter({ sessao_id: sessaoId }),
         db.OrdemEntrada.filter({ sessao_id: sessaoId }),
         db.DadosLoja.list(),
-        db.QuadroOficiais.filter({ cargo: "Venerável Mestre" }),
+        db.QuadroOficiais.filter({ exercicio: new Date().getFullYear().toString() }),
         db.VisitanteSessao.filter({ sessao_id: sessaoId }, "nome", 200),
         db.Expediente.filter({ sessao_id: sessaoId }, "data", 200),
       ]);
@@ -49,7 +49,12 @@ export default function AdminBalaustre() {
         tempos: tempos || [],
         ordemEntrada: ordemEntrada || [],
         dadosLoja: lojas?.[0] || null,
-        vmNome: quadro?.[0]?.titular_nome || "",
+        vmNome: quadro?.find((q) => q.cargo === "Venerável Mestre")?.titular_nome || "",
+        assinaturas: {
+          vm: quadro?.find((q) => q.cargo === "Venerável Mestre")?.titular_nome || "",
+          secretario: quadro?.find((q) => q.cargo === "Secretário")?.titular_nome || "",
+          orador: quadro?.find((q) => q.cargo === "Orador")?.titular_nome || "",
+        },
         visitantes: visitantes || [],
         expedientes: expedientes || [],
       };
@@ -151,7 +156,7 @@ export default function AdminBalaustre() {
               {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : salvo ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
               {salvando ? "Salvando..." : salvo ? "Salvo" : "Salvar"}
             </Button>
-            <Button variant="outline" onClick={() => imprimirBalaustre({ sessao: dados.sessao, secoes, dadosLoja: dados.dadosLoja })} className="gap-2">
+            <Button variant="outline" onClick={() => imprimirBalaustre({ sessao: dados.sessao, secoes, dadosLoja: dados.dadosLoja, assinaturas: dados.assinaturas })} className="gap-2">
               <Printer className="w-4 h-4" /> Imprimir
             </Button>
           </div>
