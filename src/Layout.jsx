@@ -87,6 +87,9 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Comunicados", page: "AdminComunicados", icon: ClipboardList },
   ],
   "Orador": [
+    { name: "Painel do Orador", page: "AdminOrador", icon: Gavel },
+    { name: "Pareceres", page: "AdminPareceres", icon: Gavel },
+    { name: "Trabalhos e Instruções", page: "AdminTrabalhos", icon: ClipboardCheck },
     { name: "Visitantes e Autoridades", page: "AdminVisitantes", icon: Users },
     { name: "Expedientes e Pranchas", page: "AdminExpedientes", icon: Mail },
     { name: "Balaústre (Ata)", page: "AdminBalaustre", icon: FileText },

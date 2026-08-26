@@ -66,6 +66,7 @@ export const db = {
   TrabalhoIrmao: tabela("trabalho_irmao"),
   Expediente: tabela("expediente"),
   VisitanteSessao: tabela("visitante_sessao"),
+  Parecer: tabela("parecer"),
 };
 
 export default db;
