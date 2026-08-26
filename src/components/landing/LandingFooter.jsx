@@ -12,19 +12,19 @@ export default function LandingFooter() {
           <img src={LOGO_LOJA_PADRAO} alt="Cavaleiros da Paz nº25" className="w-16" />
         </div>
 
-        <p className="text-slate-400 text-sm max-w-xl leading-relaxed">
+        <p className="text-slate-300 text-base md:text-lg max-w-2xl leading-relaxed">
           A.R.L.S. Cavaleiros da Paz nº25 — Grande Loja Maçônica do Estado do Paraná.
           Área restrita destinada aos Irmãos e Oficiais da Loja.
         </p>
 
         <Link to={createPageUrl("Portais")}>
-          <button className="inline-flex items-center gap-2 bg-[#C9A227] hover:bg-[#b08e1f] text-[#1B3A5F] font-semibold px-6 py-3 rounded-full transition-colors">
+          <button className="inline-flex items-center gap-2 bg-[#C9A227] hover:bg-[#b08e1f] text-[#1B3A5F] text-base font-semibold px-7 py-3.5 rounded-full transition-colors">
             <LogIn className="w-4 h-4" />
             Acessar o Sistema
           </button>
         </Link>
 
-        <p className="text-slate-600 text-xs mt-4">
+        <p className="text-slate-500 text-sm mt-4">
           © {new Date().getFullYear()} Loja Cavaleiros da Paz nº25 • Todos os direitos reservados
         </p>
       </div>

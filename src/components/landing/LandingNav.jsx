@@ -37,7 +37,7 @@ export default function LandingNav() {
             alt="Cavaleiros da Paz nº25"
             className={`object-contain transition-all duration-500 group-hover:scale-110 ${compacto ? "w-12 h-12" : "w-16 h-16"}`}
           />
-          <span className="text-white font-semibold text-base md:text-lg hidden sm:block">Cavaleiros da Paz nº25</span>
+          <span className="text-white font-semibold text-lg md:text-2xl hidden sm:block">Cavaleiros da Paz nº25</span>
         </a>
 
         <nav className="hidden md:flex items-center gap-7">
@@ -45,7 +45,7 @@ export default function LandingNav() {
             <a
               key={i.href}
               href={i.href}
-              className="relative text-slate-300 hover:text-[#C9A227] text-base transition-colors after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-[#C9A227] after:transition-all after:duration-300 hover:after:w-full"
+              className="relative text-slate-300 hover:text-[#C9A227] text-lg transition-colors after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-[#C9A227] after:transition-all after:duration-300 hover:after:w-full"
             >
               {i.label}
             </a>
@@ -56,7 +56,7 @@ export default function LandingNav() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
-            className="inline-flex items-center gap-2 bg-[#C9A227] hover:bg-[#dcb437] text-[#1B3A5F] text-sm font-semibold px-6 py-2.5 rounded-full shadow-lg shadow-[#C9A227]/20 transition-colors"
+            className="inline-flex items-center gap-2 bg-[#C9A227] hover:bg-[#dcb437] text-[#1B3A5F] text-base font-semibold px-7 py-3 rounded-full shadow-lg shadow-[#C9A227]/20 transition-colors"
           >
             <LogIn className="w-4 h-4" />
             <span className="hidden sm:inline">Acessar o Sistema</span>
