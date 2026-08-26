@@ -37,7 +37,7 @@ export function imprimirAutoridadesPorPotencia({ autoridades, dadosLoja }) {
     </tr>`;
 
   const linhas = nomesPotencias
-    .map((potencia) => {
+    .map((potencia, idx) => {
       const lista = [...grupos[potencia]].sort(
         (a, b) => (a.ordem_protocolar || 999) - (b.ordem_protocolar || 999)
       );
@@ -53,7 +53,7 @@ export function imprimirAutoridadesPorPotencia({ autoridades, dadosLoja }) {
         )
         .join("");
 
-      return `<tr class="grupo-linha"><td colspan="5">${potencia} <span class="grupo-qtd">(${lista.length})</span></td></tr>${itens}`;
+      return `<tr class="grupo-linha${idx > 0 ? " grupo-nova-pagina" : ""}"><td colspan="5">${potencia} <span class="grupo-qtd">(${lista.length})</span></td></tr>${itens}`;
     })
     .join("");
 
@@ -108,6 +108,7 @@ export function imprimirAutoridadesPorPotencia({ autoridades, dadosLoja }) {
       .rel-autoridades thead { display: table-header-group; }
       .grupo-linha td { background: #1B3A5F; color: #fff; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; border-left: 4px solid #C9A227; }
       .grupo-qtd { color: #C9A227; font-weight: normal; }
+      .grupo-nova-pagina { page-break-before: always; break-before: page; }
       .rel-autoridades tbody tr { page-break-inside: avoid; }
       @media print { .capa { min-height: 250mm; } }
     `,
