@@ -139,7 +139,7 @@ const IRMAO_LINKS = [
   { name: "Minhas Sugestões", page: "IrmaoSugestoes", icon: BookOpen },
 ];
 
-const PAGES_SEM_LAYOUT = ["Home", "ScanRetirada", "ScanDevolucao", "BibLogin", "IrmaoLogin", "AdminLogin", "AcervoPublico"];
+const PAGES_SEM_LAYOUT = ["Home", "Portais", "ScanRetirada", "ScanDevolucao", "BibLogin", "IrmaoLogin", "AdminLogin", "AcervoPublico"];
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
