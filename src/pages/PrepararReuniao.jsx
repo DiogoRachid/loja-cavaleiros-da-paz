@@ -211,8 +211,8 @@ export default function PrepararReuniao() {
 <title>Roteiro da Reunião — ${dataFormatada}</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; background: #fff; }
-  @page { size: A4; margin: 0.8cm 0.8cm 0.8cm 0.8cm; }
+  body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; background: #fff; zoom: 0.91; }
+  @page { size: A4; margin: 0.4cm; }
 
   .page { page-break-after: always; padding-bottom: 0.4cm; position: relative; }
   .page:last-child { page-break-after: avoid; }
