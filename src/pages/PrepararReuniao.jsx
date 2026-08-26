@@ -11,6 +11,7 @@ import OficiaisConfirmacao from "@/components/reuniao/OficiaisConfirmacao";
 import AutoridadesList from "@/components/reuniao/AutoridadesList";
 import RoteiroReuniao, { ITENS_PADRAO } from "@/components/reuniao/RoteiroReuniao";
 import { svgCargo } from "@/components/reuniao/cargoSvg";
+import { logoLoja, logoPotencia } from "@/lib/relatorio";
 
 // Símbolos/ícones por cargo (texto) — mantido apenas como referência
 const SIMBOLO_CARGO = {
@@ -179,6 +180,23 @@ export default function PrepararReuniao() {
     const potencia = dadosLoja?.potencia || "";
     const oriente = dadosLoja?.oriente || "";
 
+    const imgLoja = logoLoja(dadosLoja);
+    const imgGLP = logoPotencia(dadosLoja);
+
+    // Cabeçalho padrão com as logos da Loja e da Potência (GLP)
+    const cabecalho = (tituloDoc, subLinha = "") => `
+  <div class="header">
+    <img class="logo" src="${imgLoja}" alt="" onerror="this.style.visibility='hidden'"/>
+    <div class="header-info">
+      ${potencia ? `<div class="loja-potencia">${potencia}</div>` : ""}
+      <div class="loja-nome">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""}</div>
+      ${oriente ? `<div class="loja-sub">Oriente de ${oriente}</div>` : ""}
+      <div class="titulo-doc">${tituloDoc}</div>
+      ${subLinha ? `<div class="loja-sub">${subLinha}</div>` : ""}
+    </div>
+    <img class="logo" src="${imgGLP}" alt="" onerror="this.style.visibility='hidden'"/>
+  </div>`;
+
     // Separar autoridades presentes
     const autPresentes = autoridadesLista.filter(a => a.presente);
 
@@ -199,7 +217,10 @@ export default function PrepararReuniao() {
   .page { page-break-after: always; padding-bottom: 1.5cm; position: relative; }
   .page:last-child { page-break-after: avoid; }
 
-  .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+  .header { display: flex; align-items: center; gap: 14px; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+  .header .logo { height: 70px; width: 70px; object-fit: contain; flex-shrink: 0; }
+  .header .header-info { flex: 1; }
+  .header .loja-potencia { font-size: 9pt; text-transform: uppercase; letter-spacing: 1px; color: #444; }
   .header .loja-nome { font-size: 14pt; font-weight: bold; text-transform: uppercase; }
   .header .loja-sub { font-size: 10pt; color: #333; }
   .header .titulo-doc { font-size: 13pt; font-weight: bold; margin-top: 8px; }
@@ -242,12 +263,7 @@ export default function PrepararReuniao() {
 
 <!-- PÁGINA 1: Cabeçalho + Tabela de Oficiais -->
 <div class="page">
-  <div class="header">
-    <div class="loja-nome">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""}</div>
-    ${potencia ? `<div class="loja-sub">${potencia}${oriente ? ` — Oriente de ${oriente}` : ""}</div>` : ""}
-    <div class="titulo-doc">Roteiro da Reunião — ${dataFormatada}</div>
-    <div class="loja-sub">${sessao?.tipo || ""} ${sessao?.hora ? `às ${sessao.hora}` : ""} ${sessao?.local ? `| ${sessao.local}` : ""}</div>
-  </div>
+  ${cabecalho(`Roteiro da Reunião — ${dataFormatada}`, `${sessao?.tipo || ""} ${sessao?.hora ? `às ${sessao.hora}` : ""} ${sessao?.local ? `| ${sessao.local}` : ""}`)}
 
   <div class="section">
     <div class="section-title">Quadro de Oficiais Presentes</div>
@@ -275,10 +291,7 @@ export default function PrepararReuniao() {
 
 <!-- PÁGINA 2: Ordem de Entrada + Autoridades -->
 <div class="page">
-  <div class="header">
-    <div class="loja-nome">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""}</div>
-    <div class="titulo-doc">Ordem de Entrada — ${dataFormatada}</div>
-  </div>
+  ${cabecalho(`Ordem de Entrada — ${dataFormatada}`)}
 
   <div class="section">
     <div class="section-title">Protocolo de Entrada no Templo</div>
@@ -337,10 +350,7 @@ export default function PrepararReuniao() {
 
 <!-- PÁGINA 3: Roteiro da Reunião -->
 <div class="page">
-  <div class="header">
-    <div class="loja-nome">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""}</div>
-    <div class="titulo-doc">Roteiro da Reunião — ${dataFormatada}</div>
-  </div>
+  ${cabecalho(`Roteiro da Reunião — ${dataFormatada}`)}
 
   <div class="section">
     <div class="section-title">Roteiro da Reunião</div>

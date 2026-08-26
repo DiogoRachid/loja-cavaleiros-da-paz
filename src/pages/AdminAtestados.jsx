@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { logoLoja, logoPotencia } from "@/lib/relatorio";
 
 export default function AdminAtestados() {
   const [irmaos, setIrmaos] = useState([]);
@@ -36,8 +37,8 @@ export default function AdminAtestados() {
 
   const imprimir = (ir) => {
     const hoje = new Date().toLocaleDateString("pt-BR");
-    const LOGO_LOJA = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aea997b473b479398fe231/0745f3cd0_logolojafundotransparente.png";
-    const LOGO_GLP = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aea997b473b479398fe231/a206157c9_LOGOGLP2023.png";
+    const LOGO_LOJA = logoLoja(dadosLoja);
+    const LOGO_GLP = logoPotencia(dadosLoja);
     const janela = window.open("", "_blank");
     janela.document.write(`
       <!DOCTYPE html>
