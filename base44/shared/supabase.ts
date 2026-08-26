@@ -9,7 +9,8 @@ export const TABELAS = [
   "sugestao_acervo",
   "minha_mp3", "pasta_mp3", "pasta_musica", "config_etapa_harmonia", "roteiro_harmonia",
   "playlist_sessao", "tempo_etapa",
-  "trabalho_irmao", "expediente", "visitante_sessao"
+  "trabalho_irmao", "expediente", "visitante_sessao",
+  "parecer", "pedido_acao_social", "cargo_exercido", "beneficiario_mutua"
 ];
 
 function config() {
