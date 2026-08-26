@@ -19,6 +19,7 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Painel Geral", page: "AdminVM", icon: Crown },
     { name: "Quadro de Oficiais", page: "AdminQuadroOficiais", icon: Award },
     { name: "Sessões", page: "AdminSessoes", icon: Gavel },
+    { name: "Trabalhos e Instruções", page: "AdminTrabalhos", icon: ClipboardCheck },
     { name: "Comissões", page: "AdminComissoes", icon: Users },
     { name: "Membros", page: "AdminMembros", icon: Users },
     { name: "Cadastro de Irmãos", page: "AdminCadastroIrmaos", icon: Users },
@@ -37,12 +38,14 @@ const ADMIN_LINKS_BY_CARGO = {
   ],
   "Primeiro Vigilante": [
     { name: "Painel do Vigilante", page: "AdminVigilantes", icon: Users },
+    { name: "Trabalhos e Instruções", page: "AdminTrabalhos", icon: ClipboardCheck },
     { name: "Agenda Ritual", page: "AdminAgendaRitual", icon: Calendar },
     { name: "Presenças", page: "AdminPresencas", icon: ClipboardList },
     { name: "Frequências", page: "AdminFrequencias", icon: BarChart },
   ],
   "Segundo Vigilante": [
     { name: "Painel do Vigilante", page: "AdminVigilantes", icon: Users },
+    { name: "Trabalhos e Instruções", page: "AdminTrabalhos", icon: ClipboardCheck },
     { name: "Agenda Ritual", page: "AdminAgendaRitual", icon: Calendar },
     { name: "Presenças", page: "AdminPresencas", icon: ClipboardList },
     { name: "Frequências", page: "AdminFrequencias", icon: BarChart },

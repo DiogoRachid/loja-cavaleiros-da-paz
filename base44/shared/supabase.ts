@@ -8,7 +8,8 @@ export const TABELAS = [
   "bibliotecario", "item", "emprestimo", "acervo_digital", "avaliacao", "log_acesso", "log_download",
   "sugestao_acervo",
   "minha_mp3", "pasta_mp3", "pasta_musica", "config_etapa_harmonia", "roteiro_harmonia",
-  "playlist_sessao", "tempo_etapa"
+  "playlist_sessao", "tempo_etapa",
+  "trabalho_irmao"
 ];
 
 function config() {

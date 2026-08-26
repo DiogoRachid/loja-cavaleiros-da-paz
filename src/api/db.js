@@ -63,6 +63,7 @@ export const db = {
   RoteiroHarmonia: tabela("roteiro_harmonia"),
   PlaylistSessao: tabela("playlist_sessao"),
   TempoEtapa: tabela("tempo_etapa"),
+  TrabalhoIrmao: tabela("trabalho_irmao"),
 };
 
 export default db;

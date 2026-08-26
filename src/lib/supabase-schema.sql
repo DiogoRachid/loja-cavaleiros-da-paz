@@ -441,6 +441,33 @@ create table if not exists public.tempo_etapa (
 create index if not exists tempo_etapa_sessao_idx on public.tempo_etapa (sessao_id);
 
 -- =====================================================================
+-- 5.1 TRABALHOS E INSTRUÇÕES (PORTAL DOS VIGILANTES)
+-- =====================================================================
+
+create table if not exists public.trabalho_irmao (
+  id uuid primary key default gen_random_uuid(),
+  irmao_id uuid not null references public.irmao (id) on delete cascade,
+  irmao_nome text,
+  grau text,
+  tipo text not null default 'Instrução' check (tipo in ('Instrução','Trabalho','Peça de Arquitetura','Balaústre')),
+  titulo text not null,
+  sessao_id uuid references public.sessao (id) on delete set null,
+  sessao_data text,
+  data_apresentacao date,
+  arquivo_url text,
+  status text not null default 'Pendente' check (status in ('Pendente','Aprovado','Reprovado')),
+  observacoes text,
+  registrado_por text,
+  avaliado_por text,
+  data_avaliacao timestamptz,
+  created_date timestamptz not null default now(),
+  updated_date timestamptz not null default now(),
+  created_by_id uuid
+);
+create index if not exists trabalho_irmao_irmao_idx on public.trabalho_irmao (irmao_id);
+create index if not exists trabalho_irmao_status_idx on public.trabalho_irmao (status);
+
+-- =====================================================================
 -- 6. TRIGGERS DE updated_date PARA TODAS AS TABELAS
 -- =====================================================================
 do $$
@@ -452,7 +479,7 @@ declare
     'centro_custo','mensalidade',
     'bibliotecario','item','emprestimo','acervo_digital','avaliacao','log_acesso','log_download',
     'minha_mp3','pasta_mp3','pasta_musica','config_etapa_harmonia','roteiro_harmonia',
-    'playlist_sessao','tempo_etapa'
+    'playlist_sessao','tempo_etapa','trabalho_irmao'
   ];
 begin
   foreach t in array tabelas loop
@@ -476,7 +503,7 @@ declare
     'centro_custo','mensalidade',
     'bibliotecario','item','emprestimo','acervo_digital','avaliacao','log_acesso','log_download',
     'minha_mp3','pasta_mp3','pasta_musica','config_etapa_harmonia','roteiro_harmonia',
-    'playlist_sessao','tempo_etapa'
+    'playlist_sessao','tempo_etapa','trabalho_irmao'
   ];
 begin
   foreach t in array tabelas loop
