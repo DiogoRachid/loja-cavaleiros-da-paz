@@ -345,13 +345,6 @@ export default function PrepararReuniao() {
     }
   </div>
 
-  <div class="page-footer">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""} — Roteiro da Reunião de ${dataFormatada} — Mestre de Cerimônias — Pág. 2</div>
-</div>
-
-<!-- PÁGINA 3: Roteiro da Reunião -->
-<div class="page">
-  ${cabecalho(`Roteiro da Reunião — ${dataFormatada}`)}
-
   <div class="section">
     <div class="section-title">Roteiro da Reunião</div>
     <ol class="roteiro-list">
@@ -364,7 +357,7 @@ export default function PrepararReuniao() {
     </ol>
   </div>
 
-  <div class="page-footer">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""} — Roteiro da Reunião de ${dataFormatada} — Mestre de Cerimônias — Pág. 3</div>
+  <div class="page-footer">${nomeLoja}${numLoja ? ` nº${numLoja}` : ""} — Roteiro da Reunião de ${dataFormatada} — Mestre de Cerimônias — Pág. 2</div>
 </div>
 
 </body>
