@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
-import { Shield, Plus, Edit2, Trash2, X, Save, Search } from "lucide-react";
+import { Shield, Plus, Edit2, Trash2, X, Save, Search, Printer } from "lucide-react";
+import { imprimirAutoridadesPorPotencia } from "@/components/mc/imprimirAutoridades";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,13 +13,17 @@ const FORM_VAZIO = { titulo: "", nome: "", potencia: "", cargo_potencia: "", ord
 
 export default function AdminAutoridades() {
   const [autoridades, setAutoridades] = useState([]);
+  const [dadosLoja, setDadosLoja] = useState(null);
   const [busca, setBusca] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editando, setEditando] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { loadAutoridades(); }, []);
+  useEffect(() => {
+    loadAutoridades();
+    db.DadosLoja.list().then(l => setDadosLoja(l?.[0] || null)).catch(() => {});
+  }, []);
 
   const loadAutoridades = async () => {
     const data = await db.Autoridade.list("ordem_protocolar", 500);
@@ -66,9 +71,18 @@ export default function AdminAutoridades() {
             <p className="text-slate-500">{autoridades.length} autoridades cadastradas</p>
           </div>
         </div>
-        <Button onClick={abrirNova} className="bg-[#1B3A5F] text-white">
-          <Plus className="w-4 h-4 mr-2" /> Nova Autoridade
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => imprimirAutoridadesPorPotencia({ autoridades: filtradas, dadosLoja })}
+            className="border-[#C9A227] text-[#1B3A5F]"
+          >
+            <Printer className="w-4 h-4 mr-2" /> Relatório por Potência
+          </Button>
+          <Button onClick={abrirNova} className="bg-[#1B3A5F] text-white">
+            <Plus className="w-4 h-4 mr-2" /> Nova Autoridade
+          </Button>
+        </div>
       </div>
 
       {/* Busca */}
