@@ -3,6 +3,7 @@ import { db } from "@/api/db";
 import { gerarSecoes } from "@/components/secretario/gerarMinuta";
 import { imprimirBalaustre } from "@/components/secretario/imprimirBalaustre";
 import BalaustreEditor from "@/components/secretario/BalaustreEditor";
+import PalavraSelector from "@/components/secretario/PalavraSelector";
 import { FileText, Loader2, Wand2, Save, Printer, Users, Timer, Shield, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +19,7 @@ export default function AdminBalaustre() {
   const [loadingSessao, setLoadingSessao] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [salvo, setSalvo] = useState(false);
+  const [oradores, setOradores] = useState([]);
 
   useEffect(() => {
     const init = async () => {
@@ -62,15 +64,18 @@ export default function AdminBalaustre() {
 
       // Ata já salva? Carrega. Senão, gera minuta pelo andamento.
       let carregadas = null;
+      let oradoresSalvos = [];
       if (sessao.ata) {
         try {
           const parsed = JSON.parse(sessao.ata);
           if (Array.isArray(parsed?.secoes)) carregadas = parsed.secoes;
+          if (Array.isArray(parsed?.oradores)) oradoresSalvos = parsed.oradores;
         } catch {
           carregadas = [{ id: "texto", titulo: "Ata", texto: sessao.ata }];
         }
       }
       setSecoes(carregadas || gerarSecoes(contexto));
+      setOradores(oradoresSalvos);
       setLoadingSessao(false);
     };
     load();
@@ -85,7 +90,9 @@ export default function AdminBalaustre() {
 
   const salvar = async () => {
     setSalvando(true);
-    await db.Sessao.update(sessaoId, { ata: JSON.stringify({ secoes }) });
+    await db.Sessao.update(sessaoId, {
+      ata: JSON.stringify({ secoes, oradores }),
+    });
     setSalvando(false);
     setSalvo(true);
   };
@@ -97,6 +104,38 @@ export default function AdminBalaustre() {
       </div>
     );
   }
+
+  const opcoesPalavra = dados
+    ? [
+        ...dados.presencas
+          .filter((p) => p.presente)
+          .map((p) => ({ valor: `ir-${p.irmao_id}`, label: `Ir∴ ${p.irmao_nome}`, tipo: "Irmão" })),
+        ...dados.visitantes.map((v) => ({
+          valor: `vis-${v.id}`,
+          label: `Ir∴ ${v.nome}${v.loja ? ` (${v.loja})` : ""}`,
+          tipo: "Visitante",
+        })),
+        ...dados.ordemEntrada
+          .filter((o) => o.tipo_participante === "Autoridade" && (o.presente || o.confirmado))
+          .map((o) => ({
+            valor: `aut-${o.id}`,
+            label: `${o.autoridade_titulo ? o.autoridade_titulo + " " : ""}${o.autoridade_nome}`,
+            tipo: "Autoridade",
+          })),
+      ]
+    : [];
+
+  const atualizarOradores = (lista) => {
+    setOradores(lista);
+    const texto = lista.length
+      ? "Fizeram uso da palavra:\n" +
+        lista
+          .map((o) => `${o.nome}${o.tipo !== "Irmão" ? ` (${o.tipo})` : ""}${o.assunto ? ` — ${o.assunto}` : ""}`)
+          .join("\n")
+      : "";
+    setSecoes((prev) => prev.map((s) => (s.id === "palavra" ? { ...s, texto } : s)));
+    setSalvo(false);
+  };
 
   const presentes = dados?.presencas.filter((p) => p.presente).length || 0;
   const autoridades = dados?.ordemEntrada.filter((o) => o.tipo_participante === "Autoridade" && (o.presente || o.confirmado)).length || 0;
@@ -160,6 +199,8 @@ export default function AdminBalaustre() {
               <Printer className="w-4 h-4" /> Imprimir
             </Button>
           </div>
+
+          <PalavraSelector opcoes={opcoesPalavra} oradores={oradores} onChange={atualizarOradores} />
 
           <BalaustreEditor secoes={secoes} onChange={(s) => { setSecoes(s); setSalvo(false); }} />
         </>
