@@ -212,12 +212,12 @@ export default function PrepararReuniao() {
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; background: #fff; transform: scale(0.8); transform-origin: top left; width: 125%; }
-  @page { size: A4; margin: 1.5cm 1.5cm 1.5cm 1.5cm; }
+  @page { size: A4; margin: 0.8cm 0.8cm 0.8cm 0.8cm; }
 
-  .page { page-break-after: always; padding-bottom: 1.5cm; position: relative; }
+  .page { page-break-after: always; padding-bottom: 0.4cm; position: relative; }
   .page:last-child { page-break-after: avoid; }
 
-  .header { display: flex; align-items: center; gap: 14px; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+  .header { display: flex; align-items: center; gap: 14px; text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 10px; }
   .header .logo { height: 70px; width: 70px; object-fit: contain; flex-shrink: 0; }
   .header .header-info { flex: 1; }
   .header .loja-potencia { font-size: 9pt; text-transform: uppercase; letter-spacing: 1px; color: #444; }
@@ -230,7 +230,7 @@ export default function PrepararReuniao() {
 
   table { width: 100%; border-collapse: collapse; font-size: 10pt; }
   th { background: #1B3A5F; color: white; padding: 5px 8px; text-align: left; font-size: 10pt; }
-  td { padding: 4px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
+  td { padding: 2px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
   tr:nth-child(even) td { background: #f9f9f9; }
 
   .simbolo { width: 40px; height: 38px; display: inline-flex; align-items: center; justify-content: center; }
