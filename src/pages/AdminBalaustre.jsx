@@ -4,6 +4,7 @@ import { gerarSecoes } from "@/components/secretario/gerarMinuta";
 import { imprimirBalaustre } from "@/components/secretario/imprimirBalaustre";
 import BalaustreEditor from "@/components/secretario/BalaustreEditor";
 import PalavraSelector from "@/components/secretario/PalavraSelector";
+import TroncoBolsaForm from "@/components/secretario/TroncoBolsaForm";
 import { FileText, Loader2, Wand2, Save, Printer, Users, Timer, Shield, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,7 @@ export default function AdminBalaustre() {
   const [salvando, setSalvando] = useState(false);
   const [salvo, setSalvo] = useState(false);
   const [oradores, setOradores] = useState([]);
+  const [tronco, setTronco] = useState({});
 
   useEffect(() => {
     const init = async () => {
@@ -65,17 +67,20 @@ export default function AdminBalaustre() {
       // Ata já salva? Carrega. Senão, gera minuta pelo andamento.
       let carregadas = null;
       let oradoresSalvos = [];
+      let troncoSalvo = {};
       if (sessao.ata) {
         try {
           const parsed = JSON.parse(sessao.ata);
           if (Array.isArray(parsed?.secoes)) carregadas = parsed.secoes;
           if (Array.isArray(parsed?.oradores)) oradoresSalvos = parsed.oradores;
+          if (parsed?.tronco) troncoSalvo = parsed.tronco;
         } catch {
           carregadas = [{ id: "texto", titulo: "Ata", texto: sessao.ata }];
         }
       }
       setSecoes(carregadas || gerarSecoes(contexto));
       setOradores(oradoresSalvos);
+      setTronco(troncoSalvo);
       setLoadingSessao(false);
     };
     load();
@@ -91,7 +96,7 @@ export default function AdminBalaustre() {
   const salvar = async () => {
     setSalvando(true);
     await db.Sessao.update(sessaoId, {
-      ata: JSON.stringify({ secoes, oradores }),
+      ata: JSON.stringify({ secoes, oradores, tronco }),
     });
     setSalvando(false);
     setSalvo(true);
@@ -134,6 +139,23 @@ export default function AdminBalaustre() {
           .join("\n")
       : "";
     setSecoes((prev) => prev.map((s) => (s.id === "palavra" ? { ...s, texto } : s)));
+    setSalvo(false);
+  };
+
+  const atualizarTronco = (novo) => {
+    setTronco(novo);
+    const valor = parseFloat(String(novo.tronco_valor).replace(",", "."));
+    const textoTronco = !isNaN(valor)
+      ? `Passada a palavra ao Ir∴ Tesoureiro, foi informado que o Tronco de Solidariedade arrecadou o valor de R$ ${valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}${novo.tronco_informante ? `, conforme informado pelo ${novo.tronco_informante}` : ""}.`
+      : "";
+    const textoBolsa = novo.bolsa_conteudo?.trim()
+      ? `Na coleta da Bolsa de Propostas e Informações, o Venerável Mestre decifrou:\n${novo.bolsa_conteudo.trim()}`
+      : "Na coleta da Bolsa de Propostas e Informações nada foi encontrado.";
+    setSecoes((prev) =>
+      prev.map((s) =>
+        s.id === "tronco" ? { ...s, texto: textoTronco } : s.id === "bolsa" ? { ...s, texto: textoBolsa } : s
+      )
+    );
     setSalvo(false);
   };
 
@@ -201,6 +223,8 @@ export default function AdminBalaustre() {
           </div>
 
           <PalavraSelector opcoes={opcoesPalavra} oradores={oradores} onChange={atualizarOradores} />
+
+          <TroncoBolsaForm dados={tronco} onChange={atualizarTronco} />
 
           <BalaustreEditor secoes={secoes} onChange={(s) => { setSecoes(s); setSalvo(false); }} />
         </>

@@ -115,7 +115,8 @@ export function gerarSecoes({
     { id: "ordem_do_dia", titulo: "Ordem do Dia", texto: sessao.pauta || "" },
     { id: "andamento", titulo: "Andamento da Sessão", texto: andamento },
     { id: "palavra", titulo: "Palavra a Bem da Ordem", texto: "" },
-    { id: "tronco", titulo: "Tronco de Beneficência", texto: "" },
+    { id: "tronco", titulo: "Tronco de Solidariedade", texto: "" },
+    { id: "bolsa", titulo: "Bolsa de Propostas e Informações", texto: "" },
     {
       id: "encerramento",
       titulo: "Encerramento",
