@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { db } from "@/api/db";
+import ScrollProgress from "@/components/landing/ScrollProgress";
 import LandingNav from "@/components/landing/LandingNav";
 import LandingHero from "@/components/landing/LandingHero";
 import SobreSection from "@/components/landing/SobreSection";
@@ -18,7 +19,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#1B3A5F] scroll-smooth">
+    <div className="min-h-screen bg-[#1B3A5F]">
+      <style>{`html { scroll-behavior: smooth; }`}</style>
+      <ScrollProgress />
       <LandingNav />
       <LandingHero loja={loja} />
       <SobreSection loja={loja} />

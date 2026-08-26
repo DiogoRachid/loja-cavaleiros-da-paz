@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { BookOpen, HeartHandshake, Music, Users, Gavel, Library } from "lucide-react";
+import Reveal from "@/components/landing/Reveal";
 
 const ATIVIDADES = [
   { icon: Gavel, titulo: "Sessões Ritualísticas", texto: "Reuniões ordinárias e magnas conduzidas conforme o Ritual da Grande Loja do Paraná." },
@@ -12,29 +13,29 @@ const ATIVIDADES = [
 
 export default function AtividadesSection() {
   return (
-    <section id="atividades" className="py-24 px-6 bg-[#123054]">
+    <section id="atividades" className="py-28 px-6 bg-[#123054]">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-[#C9A227] text-xs uppercase tracking-[0.25em] mb-4">O que fazemos</p>
+        <Reveal className="text-center mb-16">
+          <p className="text-[#C9A227] text-xs uppercase tracking-[0.3em] mb-4">O que fazemos</p>
           <h2 className="text-3xl md:text-4xl font-bold text-white">Nossas atividades</h2>
-        </div>
+        </Reveal>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {ATIVIDADES.map(({ icon: Icon, titulo, texto }, i) => (
-            <motion.div
-              key={titulo}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: (i % 3) * 0.1 }}
-              className="bg-white/5 border border-white/10 rounded-2xl p-6"
-            >
-              <div className="w-11 h-11 mb-4 rounded-xl bg-[#C9A227]/20 flex items-center justify-center">
-                <Icon className="w-5 h-5 text-[#C9A227]" />
-              </div>
-              <h3 className="text-white font-semibold mb-2">{titulo}</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">{texto}</p>
-            </motion.div>
+            <Reveal key={titulo} delay={(i % 3) * 0.12}>
+              <motion.div
+                whileHover={{ y: -8 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                className="group relative h-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-colors duration-300 hover:border-[#C9A227]/40 hover:bg-white/[0.08] hover:shadow-xl hover:shadow-black/20"
+              >
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A227]/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="w-11 h-11 mb-4 rounded-xl bg-[#C9A227]/20 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:bg-[#C9A227]/30">
+                  <Icon className="w-5 h-5 text-[#C9A227]" />
+                </div>
+                <h3 className="text-white font-semibold mb-2">{titulo}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">{texto}</p>
+              </motion.div>
+            </Reveal>
           ))}
         </div>
       </div>

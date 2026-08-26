@@ -29,16 +29,24 @@ export default function ReunioesSection({ loja }) {
 
         {itens.length > 0 ? (
           <div className="grid sm:grid-cols-2 gap-4">
-            {itens.map(({ icon: Icon, label, valor }) => (
-              <div key={label} className="flex items-start gap-4 bg-white/5 border border-white/10 rounded-2xl p-5">
-                <div className="w-10 h-10 rounded-xl bg-[#C9A227]/20 flex items-center justify-center flex-shrink-0">
+            {itens.map(({ icon: Icon, label, valor }, i) => (
+              <motion.div
+                key={label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ y: -6 }}
+                className="group flex items-start gap-4 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm transition-colors duration-300 hover:border-[#C9A227]/40 hover:bg-white/[0.08]"
+              >
+                <div className="w-10 h-10 rounded-xl bg-[#C9A227]/20 flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110">
                   <Icon className="w-4 h-4 text-[#C9A227]" />
                 </div>
                 <div>
                   <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">{label}</p>
                   <p className="text-white text-sm leading-relaxed">{valor}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         ) : (
@@ -48,13 +56,15 @@ export default function ReunioesSection({ loja }) {
         )}
 
         <div className="text-center mt-10">
-          <a
+          <motion.a
             href={CALENDARIO_URL}
-            className="inline-flex items-center gap-2 border border-[#C9A227] text-[#C9A227] hover:bg-[#C9A227] hover:text-[#1B3A5F] font-semibold px-6 py-3 rounded-full transition-colors"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.97 }}
+            className="inline-flex items-center gap-2 border border-[#C9A227] text-[#C9A227] hover:bg-[#C9A227] hover:text-[#1B3A5F] hover:shadow-lg hover:shadow-[#C9A227]/20 font-semibold px-6 py-3 rounded-full transition-colors"
           >
             <Calendar className="w-4 h-4" />
             Assinar o calendário da Loja
-          </a>
+          </motion.a>
         </div>
       </motion.div>
     </section>
