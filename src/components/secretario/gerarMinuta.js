@@ -35,6 +35,7 @@ export function gerarSecoes({
   vmNome,
   visitantes = [],
   expedientes = [],
+  acaoSocial = [],
 }) {
   const presentes = presencas.filter((p) => p.presente);
   const ausentes = presencas.filter((p) => !p.presente && !p.dispensado);
@@ -98,6 +99,24 @@ export function gerarSecoes({
     .filter(Boolean)
     .join("\n\n");
 
+  // Somente pareceres de ação social do mesmo grau da sessão e que devem constar
+  const fmtValor = (v) =>
+    v == null ? "" : `R$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  const pareceresSociais = acaoSocial.filter(
+    (p) => p.status === "Parecer Emitido" && p.grau === sessao.grau && p.leitura_status !== "Não Constará"
+  );
+  const acaoSocialTexto = pareceresSociais.length
+    ? "Foram lidos os pareceres da Secretaria de Ação Social:\n" +
+      pareceresSociais
+        .map(
+          (p) =>
+            `${p.titulo}${p.solicitante ? ` (${p.solicitante})` : ""} — auxílio ${p.tipo_auxilio}, parecer ${p.parecer_conclusao}${
+              p.parecer_valor_sugerido != null ? `, com valor sugerido de ${fmtValor(p.parecer_valor_sugerido)}` : ""
+            }${p.leitura_status === "Pendente" ? " (pendente de leitura)" : ""}.`
+        )
+        .join("\n")
+    : "";
+
   const andamento = temposOrd.length
     ? temposOrd
         .map(
@@ -113,6 +132,7 @@ export function gerarSecoes({
     { id: "presencas", titulo: "Presenças, Visitantes e Autoridades", texto: presencasTexto },
     { id: "expediente", titulo: "Leitura do Expediente", texto: expedienteTexto },
     { id: "ordem_do_dia", titulo: "Ordem do Dia", texto: sessao.pauta || "" },
+    { id: "acao_social", titulo: "Pareceres da Ação Social", texto: acaoSocialTexto },
     { id: "andamento", titulo: "Andamento da Sessão", texto: andamento },
     { id: "palavra", titulo: "Palavra a Bem da Ordem", texto: "" },
     { id: "tronco", titulo: "Tronco de Solidariedade", texto: "" },

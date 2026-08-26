@@ -560,6 +560,39 @@ create index if not exists parecer_sessao_idx on public.parecer (sessao_id);
 create index if not exists parecer_status_idx on public.parecer (status);
 
 -- =====================================================================
+-- 5.4 AÇÃO SOCIAL (PEDIDOS EXTERNOS DE AUXÍLIO E PARECERES)
+-- =====================================================================
+
+create table if not exists public.pedido_acao_social (
+  id uuid primary key default gen_random_uuid(),
+  titulo text not null,
+  solicitante text,
+  tipo_auxilio text not null default 'Financeiro' check (tipo_auxilio in ('Financeiro','Arrecadação','Ajuda Externa','Outro')),
+  descricao text,
+  valor_solicitado numeric(10,2),
+  arquivo_url text,
+  expediente_id uuid references public.expediente (id) on delete set null,
+  prancha_referencia text,
+  grau text not null default 'Aprendiz' check (grau in ('Aprendiz','Companheiro','Mestre')),
+  data_recebimento date,
+  registrado_por text,
+  status text not null default 'Pendente' check (status in ('Pendente','Em Análise','Parecer Emitido')),
+  parecer_teor text,
+  parecer_conclusao text check (parecer_conclusao in ('Favorável','Contrário','Com ressalvas')),
+  parecer_valor_sugerido numeric(10,2),
+  parecer_autor text,
+  parecer_data date,
+  leitura_status text not null default 'Pendente' check (leitura_status in ('Pendente','Lido','Não Constará')),
+  sessao_leitura_id uuid references public.sessao (id) on delete set null,
+  sessao_leitura_data text,
+  created_date timestamptz not null default now(),
+  updated_date timestamptz not null default now(),
+  created_by_id uuid
+);
+create index if not exists pedido_acao_social_status_idx on public.pedido_acao_social (status);
+create index if not exists pedido_acao_social_grau_idx on public.pedido_acao_social (grau, leitura_status);
+
+-- =====================================================================
 -- 6. TRIGGERS DE updated_date PARA TODAS AS TABELAS
 -- =====================================================================
 do $$
@@ -571,7 +604,7 @@ declare
     'centro_custo','mensalidade',
     'bibliotecario','item','emprestimo','acervo_digital','avaliacao','log_acesso','log_download',
     'minha_mp3','pasta_mp3','pasta_musica','config_etapa_harmonia','roteiro_harmonia',
-    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao','sugestao_acervo','parecer'
+    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao','sugestao_acervo','parecer','pedido_acao_social'
   ];
 begin
   foreach t in array tabelas loop
@@ -595,7 +628,7 @@ declare
     'centro_custo','mensalidade',
     'bibliotecario','item','emprestimo','acervo_digital','avaliacao','log_acesso','log_download',
     'minha_mp3','pasta_mp3','pasta_musica','config_etapa_harmonia','roteiro_harmonia',
-    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao','sugestao_acervo','parecer'
+    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao','sugestao_acervo','parecer','pedido_acao_social'
   ];
 begin
   foreach t in array tabelas loop

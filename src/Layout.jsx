@@ -5,7 +5,7 @@ import {
   Menu, X, Home, Library, BookMarked, BarChart,
   Crown, Calendar, DollarSign, FileText, Award,
   Gavel, ClipboardList, Shield, Star, Heart, Music, ListMusic, Upload, Settings, Timer,
-  ClipboardCheck, Mail, LayoutGrid
+  ClipboardCheck, Mail, LayoutGrid, HeartHandshake
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Painel Geral", page: "AdminVM", icon: Crown },
     { name: "Portais dos Cargos", page: "AdminPortais", icon: LayoutGrid },
     { name: "Pareceres do Orador", page: "AdminPareceres", icon: Gavel },
+    { name: "Ação Social", page: "AdminAcaoSocial", icon: HeartHandshake },
     { name: "Expedientes e Pranchas", page: "AdminExpedientes", icon: Mail },
     { name: "Visitantes e Ordem do Dia", page: "AdminVisitantes", icon: Users },
     { name: "Balaústre (Ata)", page: "AdminBalaustre", icon: FileText },
@@ -78,10 +79,16 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Balaústre (Ata)", page: "AdminBalaustre", icon: FileText },
     { name: "QR de Presença", page: "AdminListaPresencaQR", icon: QrCode },
     { name: "Expedientes e Pranchas", page: "AdminExpedientes", icon: Mail },
+    { name: "Ação Social", page: "AdminAcaoSocial", icon: HeartHandshake },
     { name: "Visitantes e Ordem do Dia", page: "AdminVisitantes", icon: Users },
     { name: "Cadastro de Irmãos", page: "AdminCadastroIrmaos", icon: Users },
     { name: "Presenças", page: "AdminPresencas", icon: ClipboardList },
     { name: "Certidão de Regularidade", page: "AdminAtestados", icon: Award },
+  ],
+  "Secretário de Ação Social": [
+    { name: "Ação Social", page: "AdminAcaoSocial", icon: HeartHandshake },
+    { name: "Expedientes e Pranchas", page: "AdminExpedientes", icon: Mail },
+    { name: "Agenda Ritual", page: "AdminAgendaRitual", icon: Calendar },
   ],
   "Chanceler": [
     { name: "Painel Chancelaria", page: "AdminChanceler", icon: FileText },

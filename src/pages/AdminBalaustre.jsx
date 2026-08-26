@@ -37,7 +37,7 @@ export default function AdminBalaustre() {
     const load = async () => {
       setLoadingSessao(true);
       setSalvo(false);
-      const [sessao, presencas, tempos, ordemEntrada, lojas, quadro, visitantes, expedientes] = await Promise.all([
+      const [sessao, presencas, tempos, ordemEntrada, lojas, quadro, visitantes, expedientes, acaoSocial] = await Promise.all([
         db.Sessao.get(sessaoId),
         db.Presenca.filter({ sessao_id: sessaoId }),
         db.TempoEtapa.filter({ sessao_id: sessaoId }),
@@ -46,6 +46,7 @@ export default function AdminBalaustre() {
         db.QuadroOficiais.filter({ exercicio: new Date().getFullYear().toString() }),
         db.VisitanteSessao.filter({ sessao_id: sessaoId }, "nome", 200),
         db.Expediente.filter({ sessao_id: sessaoId }, "data", 200),
+        db.PedidoAcaoSocial.filter({ status: "Parecer Emitido" }, "-parecer_data", 200),
       ]);
       const contexto = {
         sessao,
@@ -61,6 +62,7 @@ export default function AdminBalaustre() {
         },
         visitantes: visitantes || [],
         expedientes: expedientes || [],
+        acaoSocial: acaoSocial || [],
       };
       setDados(contexto);
 
