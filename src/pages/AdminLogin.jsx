@@ -23,7 +23,6 @@ const CARGOS_ADMIN = [
   "Hospitaleiro",
   "Primeiro Diácono",
   "Segundo Diácono",
-  "Bibliotecário",
 ];
 
 export default function AdminLogin() {

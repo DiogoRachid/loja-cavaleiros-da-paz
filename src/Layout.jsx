@@ -170,7 +170,7 @@ export default function Layout({ children, currentPageName }) {
   let portalLabel = "Portal do Irmão";
 
   if (isAdmin || isBibliotecario) {
-    links = ADMIN_LINKS_BY_CARGO[cargo] || ADMIN_LINKS_BY_CARGO["Bibliotecário"];
+    links = ADMIN_LINKS_BY_CARGO[cargo] || [];
     portalLabel = cargo || "Portal Administrativo";
   }
 
