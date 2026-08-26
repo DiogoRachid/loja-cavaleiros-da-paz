@@ -28,6 +28,7 @@ export default function AdminSecretario() {
   };
 
   const modulos = [
+    { title: "Balaústre (Ata)", desc: "Montar a ata conforme a reunião", icon: FileText, page: "AdminBalaustre" },
     { title: "Cadastro de Irmãos", desc: "Adicionar e editar membros", icon: UserPlus, page: "AdminCadastroIrmaos" },
     { title: "Controle de Presenças", desc: "Marcar frequência nas sessões", icon: ClipboardList, page: "AdminPresencas" },
     { title: "Emitir Atestados", desc: "Atestado de regularidade", icon: Award, page: "AdminAtestados" },

@@ -66,6 +66,7 @@ const ADMIN_LINKS_BY_CARGO = {
   ],
   "Secretário": [
     { name: "Painel Secretaria", page: "AdminSecretario", icon: FileText },
+    { name: "Balaústre (Ata)", page: "AdminBalaustre", icon: FileText },
     { name: "Cadastro de Irmãos", page: "AdminCadastroIrmaos", icon: Users },
     { name: "Presenças", page: "AdminPresencas", icon: ClipboardList },
     { name: "Atestados", page: "AdminAtestados", icon: Award },

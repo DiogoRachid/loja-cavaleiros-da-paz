@@ -19,6 +19,7 @@ import AdminConfigPlayer from './pages/AdminConfigPlayer';
 import AdminMusicasMaisTocadas from './pages/AdminMusicasMaisTocadas';
 import IrmaoBibliotecaChat from './pages/IrmaoBibliotecaChat';
 import AdminVigilantes from './pages/AdminVigilantes';
+import AdminBalaustre from './pages/AdminBalaustre';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -84,6 +85,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminMusicasMaisTocadas" element={<LayoutWrapper currentPageName="AdminMusicasMaisTocadas"><AdminMusicasMaisTocadas /></LayoutWrapper>} />
       <Route path="/IrmaoBibliotecaChat" element={<LayoutWrapper currentPageName="IrmaoBibliotecaChat"><IrmaoBibliotecaChat /></LayoutWrapper>} />
       <Route path="/AdminVigilantes" element={<LayoutWrapper currentPageName="AdminVigilantes"><AdminVigilantes /></LayoutWrapper>} />
+      <Route path="/AdminBalaustre" element={<LayoutWrapper currentPageName="AdminBalaustre"><AdminBalaustre /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
