@@ -468,6 +468,48 @@ create index if not exists trabalho_irmao_irmao_idx on public.trabalho_irmao (ir
 create index if not exists trabalho_irmao_status_idx on public.trabalho_irmao (status);
 
 -- =====================================================================
+-- 5.2 SECRETARIA (EXPEDIENTES E VISITANTES)
+-- =====================================================================
+
+create table if not exists public.expediente (
+  id uuid primary key default gen_random_uuid(),
+  tipo text not null default 'Recebido' check (tipo in ('Recebido','Expedido')),
+  classe text not null default 'Prancha',
+  numero text,
+  data date,
+  remetente text,
+  destinatario text,
+  assunto text not null,
+  conteudo text,
+  arquivo_url text,
+  sessao_id uuid references public.sessao (id) on delete set null,
+  sessao_data text,
+  status text not null default 'Pendente' check (status in ('Pendente','Lido','Respondido','Arquivado')),
+  registrado_por text,
+  created_date timestamptz not null default now(),
+  updated_date timestamptz not null default now(),
+  created_by_id uuid
+);
+create index if not exists expediente_tipo_idx on public.expediente (tipo);
+create index if not exists expediente_sessao_idx on public.expediente (sessao_id);
+
+create table if not exists public.visitante_sessao (
+  id uuid primary key default gen_random_uuid(),
+  sessao_id uuid not null references public.sessao (id) on delete cascade,
+  sessao_data text,
+  nome text not null,
+  grau text,
+  loja text,
+  potencia text,
+  cargo text,
+  observacoes text,
+  created_date timestamptz not null default now(),
+  updated_date timestamptz not null default now(),
+  created_by_id uuid
+);
+create index if not exists visitante_sessao_sessao_idx on public.visitante_sessao (sessao_id);
+
+-- =====================================================================
 -- 6. TRIGGERS DE updated_date PARA TODAS AS TABELAS
 -- =====================================================================
 do $$
@@ -479,7 +521,7 @@ declare
     'centro_custo','mensalidade',
     'bibliotecario','item','emprestimo','acervo_digital','avaliacao','log_acesso','log_download',
     'minha_mp3','pasta_mp3','pasta_musica','config_etapa_harmonia','roteiro_harmonia',
-    'playlist_sessao','tempo_etapa','trabalho_irmao'
+    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao'
   ];
 begin
   foreach t in array tabelas loop
@@ -503,7 +545,7 @@ declare
     'centro_custo','mensalidade',
     'bibliotecario','item','emprestimo','acervo_digital','avaliacao','log_acesso','log_download',
     'minha_mp3','pasta_mp3','pasta_musica','config_etapa_harmonia','roteiro_harmonia',
-    'playlist_sessao','tempo_etapa','trabalho_irmao'
+    'playlist_sessao','tempo_etapa','trabalho_irmao','expediente','visitante_sessao'
   ];
 begin
   foreach t in array tabelas loop

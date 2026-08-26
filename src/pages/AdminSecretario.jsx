@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
-import { FileText, Users, ClipboardList, Award, UserPlus, TrendingUp } from "lucide-react";
+import { FileText, Users, ClipboardList, Award, UserPlus, TrendingUp, Mail } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
@@ -29,9 +29,11 @@ export default function AdminSecretario() {
 
   const modulos = [
     { title: "Balaústre (Ata)", desc: "Montar a ata conforme a reunião", icon: FileText, page: "AdminBalaustre" },
+    { title: "Expedientes e Pranchas", desc: "Recebidos, expedidos e emissão", icon: Mail, page: "AdminExpedientes" },
+    { title: "Visitantes e Ordem do Dia", desc: "Visitantes, autoridades e cargos", icon: Users, page: "AdminVisitantes" },
     { title: "Cadastro de Irmãos", desc: "Adicionar e editar membros", icon: UserPlus, page: "AdminCadastroIrmaos" },
     { title: "Controle de Presenças", desc: "Marcar frequência nas sessões", icon: ClipboardList, page: "AdminPresencas" },
-    { title: "Emitir Atestados", desc: "Atestado de regularidade", icon: Award, page: "AdminAtestados" },
+    { title: "Certidão de Regularidade", desc: "Emissão para os irmãos", icon: Award, page: "AdminAtestados" },
   ];
 
   return (

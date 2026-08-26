@@ -5,7 +5,7 @@ import {
   Menu, X, Home, Library, BookMarked, BarChart,
   Crown, Calendar, DollarSign, FileText, Award,
   Gavel, ClipboardList, Shield, Star, Heart, Music, ListMusic, Upload, Settings, Timer,
-  ClipboardCheck
+  ClipboardCheck, Mail
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -70,14 +70,23 @@ const ADMIN_LINKS_BY_CARGO = {
   "Secretário": [
     { name: "Painel Secretaria", page: "AdminSecretario", icon: FileText },
     { name: "Balaústre (Ata)", page: "AdminBalaustre", icon: FileText },
+    { name: "Expedientes e Pranchas", page: "AdminExpedientes", icon: Mail },
+    { name: "Visitantes e Ordem do Dia", page: "AdminVisitantes", icon: Users },
     { name: "Cadastro de Irmãos", page: "AdminCadastroIrmaos", icon: Users },
     { name: "Presenças", page: "AdminPresencas", icon: ClipboardList },
-    { name: "Atestados", page: "AdminAtestados", icon: Award },
+    { name: "Certidão de Regularidade", page: "AdminAtestados", icon: Award },
   ],
   "Chanceler": [
     { name: "Painel Chancelaria", page: "AdminChanceler", icon: FileText },
+    { name: "Visitantes e Autoridades", page: "AdminVisitantes", icon: Users },
     { name: "Frequências", page: "AdminFrequencias", icon: BarChart },
     { name: "Comunicados", page: "AdminComunicados", icon: ClipboardList },
+  ],
+  "Orador": [
+    { name: "Visitantes e Autoridades", page: "AdminVisitantes", icon: Users },
+    { name: "Expedientes e Pranchas", page: "AdminExpedientes", icon: Mail },
+    { name: "Balaústre (Ata)", page: "AdminBalaustre", icon: FileText },
+    { name: "Agenda Ritual", page: "AdminAgendaRitual", icon: Calendar },
   ],
   "Mestre de Harmonia": [
     { name: "Painel Harmonia", page: "AdminMestreHarmonia", icon: Music },

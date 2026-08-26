@@ -33,13 +33,15 @@ export default function AdminBalaustre() {
     const load = async () => {
       setLoadingSessao(true);
       setSalvo(false);
-      const [sessao, presencas, tempos, ordemEntrada, lojas, quadro] = await Promise.all([
+      const [sessao, presencas, tempos, ordemEntrada, lojas, quadro, visitantes, expedientes] = await Promise.all([
         db.Sessao.get(sessaoId),
         db.Presenca.filter({ sessao_id: sessaoId }),
         db.TempoEtapa.filter({ sessao_id: sessaoId }),
         db.OrdemEntrada.filter({ sessao_id: sessaoId }),
         db.DadosLoja.list(),
         db.QuadroOficiais.filter({ cargo: "Venerável Mestre" }),
+        db.VisitanteSessao.filter({ sessao_id: sessaoId }, "nome", 200),
+        db.Expediente.filter({ sessao_id: sessaoId }, "data", 200),
       ]);
       const contexto = {
         sessao,
@@ -48,6 +50,8 @@ export default function AdminBalaustre() {
         ordemEntrada: ordemEntrada || [],
         dadosLoja: lojas?.[0] || null,
         vmNome: quadro?.[0]?.titular_nome || "",
+        visitantes: visitantes || [],
+        expedientes: expedientes || [],
       };
       setDados(contexto);
 
@@ -124,6 +128,8 @@ export default function AdminBalaustre() {
               <Badge variant="outline" className="gap-1"><Users className="w-3 h-3" /> {presentes} presentes</Badge>
               <Badge variant="outline" className="gap-1"><Timer className="w-3 h-3" /> {dados.tempos.length} etapas cronometradas</Badge>
               <Badge variant="outline" className="gap-1"><Shield className="w-3 h-3" /> {autoridades} autoridades</Badge>
+              <Badge variant="outline" className="gap-1"><Users className="w-3 h-3" /> {dados.visitantes.length} visitantes</Badge>
+              <Badge variant="outline" className="gap-1"><FileText className="w-3 h-3" /> {dados.expedientes.length} expedientes</Badge>
             </div>
           )}
         </CardContent>

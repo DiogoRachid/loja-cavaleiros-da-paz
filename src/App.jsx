@@ -21,6 +21,8 @@ import IrmaoBibliotecaChat from './pages/IrmaoBibliotecaChat';
 import AdminVigilantes from './pages/AdminVigilantes';
 import AdminBalaustre from './pages/AdminBalaustre';
 import AdminTrabalhos from './pages/AdminTrabalhos';
+import AdminExpedientes from './pages/AdminExpedientes';
+import AdminVisitantes from './pages/AdminVisitantes';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -88,6 +90,8 @@ const AuthenticatedApp = () => {
       <Route path="/AdminVigilantes" element={<LayoutWrapper currentPageName="AdminVigilantes"><AdminVigilantes /></LayoutWrapper>} />
       <Route path="/AdminBalaustre" element={<LayoutWrapper currentPageName="AdminBalaustre"><AdminBalaustre /></LayoutWrapper>} />
       <Route path="/AdminTrabalhos" element={<LayoutWrapper currentPageName="AdminTrabalhos"><AdminTrabalhos /></LayoutWrapper>} />
+      <Route path="/AdminExpedientes" element={<LayoutWrapper currentPageName="AdminExpedientes"><AdminExpedientes /></LayoutWrapper>} />
+      <Route path="/AdminVisitantes" element={<LayoutWrapper currentPageName="AdminVisitantes"><AdminVisitantes /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

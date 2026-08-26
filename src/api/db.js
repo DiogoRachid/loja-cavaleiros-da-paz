@@ -64,6 +64,8 @@ export const db = {
   PlaylistSessao: tabela("playlist_sessao"),
   TempoEtapa: tabela("tempo_etapa"),
   TrabalhoIrmao: tabela("trabalho_irmao"),
+  Expediente: tabela("expediente"),
+  VisitanteSessao: tabela("visitante_sessao"),
 };
 
 export default db;
