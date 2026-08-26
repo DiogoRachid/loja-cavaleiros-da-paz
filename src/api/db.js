@@ -1,6 +1,21 @@
 import { base44 } from "@/api/base44Client";
 
+// Endpoint externo (deploy no Vercel, sem dependência do Base44).
+// Defina VITE_DB_API_URL no ambiente para apontar para a sua própria API
+// (ex: uma serverless function no Vercel que fala com o Supabase externo).
+const DB_API_URL = import.meta.env.VITE_DB_API_URL;
+
 async function chamar(payload) {
+  if (DB_API_URL) {
+    const res = await fetch(DB_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+    if (json?.error) throw new Error(json.error);
+    return json?.data;
+  }
   const res = await base44.functions.invoke("db", payload);
   if (res.data?.error) throw new Error(res.data.error);
   return res.data?.data;
