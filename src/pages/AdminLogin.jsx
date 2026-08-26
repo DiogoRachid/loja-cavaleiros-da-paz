@@ -104,6 +104,8 @@ export default function AdminLogin() {
         }
         const cargoRoutes = {
           "Venerável Mestre": "AdminVM",
+          "Primeiro Vigilante": "AdminVigilantes",
+          "Segundo Vigilante": "AdminVigilantes",
           "Mestre de Cerimônias": "AdminMC",
           "Mestre de Harmonia": "AdminMestreHarmonia",
           "Tesoureiro": "AdminTesoureiro",

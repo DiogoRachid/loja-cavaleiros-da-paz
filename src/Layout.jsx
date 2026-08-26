@@ -35,6 +35,18 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Dados da Loja", page: "AdminDadosLoja", icon: Star },
     { name: "Relatórios", page: "AdminRelatorios", icon: BarChart },
   ],
+  "Primeiro Vigilante": [
+    { name: "Painel do Vigilante", page: "AdminVigilantes", icon: Users },
+    { name: "Agenda Ritual", page: "AdminAgendaRitual", icon: Calendar },
+    { name: "Presenças", page: "AdminPresencas", icon: ClipboardList },
+    { name: "Frequências", page: "AdminFrequencias", icon: BarChart },
+  ],
+  "Segundo Vigilante": [
+    { name: "Painel do Vigilante", page: "AdminVigilantes", icon: Users },
+    { name: "Agenda Ritual", page: "AdminAgendaRitual", icon: Calendar },
+    { name: "Presenças", page: "AdminPresencas", icon: ClipboardList },
+    { name: "Frequências", page: "AdminFrequencias", icon: BarChart },
+  ],
   "Mestre de Cerimônias": [
     { name: "Painel MC", page: "AdminMC", icon: Star },
     { name: "Quadro de Oficiais", page: "AdminQuadroOficiais", icon: Award },
