@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Calendar, Clock, MapPin, Mail, Phone } from "lucide-react";
+import { Calendar, Clock, MapPin, Mail, Phone, Compass } from "lucide-react";
 
 const CALENDARIO_URL =
   "webcal://p133-caldav.icloud.com/published/2/MTE4OTcxMzcyMDExODk3MXpVMJXwr2vT2q1xXrvKY5Bo-F7nDiToCpUvjRHTwqnLuU7OWhwX0meCb2Ies0FOUS0jjoAPV67ObmqfQ85CmGg";
@@ -9,6 +9,7 @@ export default function ReunioesSection({ loja }) {
     { icon: Calendar, label: "Dia de reunião", valor: loja?.dia_reuniao },
     { icon: Clock, label: "Horário", valor: loja?.hora_reuniao },
     { icon: MapPin, label: "Templo", valor: loja?.endereco },
+    { icon: Compass, label: "Oriente", valor: loja?.oriente },
     { icon: Phone, label: "Telefone", valor: loja?.telefone },
     { icon: Mail, label: "E-mail", valor: loja?.email },
   ].filter((i) => i.valor);
