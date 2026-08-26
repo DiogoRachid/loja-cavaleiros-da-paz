@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { LOGO_LOJA_PADRAO, LOGO_GLP_PADRAO } from "@/lib/relatorio";
 import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -208,10 +209,7 @@ export default function BibRelatorios() {
         {/* Cabeçalho do Relatório */}
         <header className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-20 h-20 flex items-center justify-center">
-               {/* Placeholder Logo Esq */}
-               <BookOpen className="w-16 h-16 text-[#1B3A5F]" />
-            </div>
+            <img src={LOGO_LOJA_PADRAO} alt="Loja" className="w-20 h-20 object-contain" />
             <div className="text-center flex-1 px-4">
               <h1 className="text-2xl font-bold text-[#6A4C93] uppercase leading-tight">
                 Biblioteca Cavaleiros da Paz nº25
@@ -223,15 +221,7 @@ export default function BibRelatorios() {
                 Relatório de Atividades e Estatísticas
               </h3>
             </div>
-            <div className="w-20 h-20 flex items-center justify-center">
-               {/* Placeholder Logo Dir - usando ícone genérico */}
-               <div className="grid grid-cols-2 gap-1 w-12 h-12 opacity-80">
-                 <div className="bg-[#6A4C93] rounded-sm"></div>
-                 <div className="bg-[#C9A227] rounded-sm"></div>
-                 <div className="bg-[#1982C4] rounded-sm"></div>
-                 <div className="bg-[#8AC926] rounded-sm"></div>
-               </div>
-            </div>
+            <img src={LOGO_GLP_PADRAO} alt="Grande Loja do Paraná" className="w-20 h-20 object-contain" />
           </div>
           
           {/* Linha Divisória Colorida */}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
-import { BarChart2, Download, TrendingUp, AlertCircle, CheckCircle, DollarSign } from "lucide-react";
+import { BarChart2, Download, TrendingUp, AlertCircle, CheckCircle, DollarSign, Printer } from "lucide-react";
+import { imprimirRelatorio } from "@/lib/relatorio";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,16 +13,19 @@ export default function AdminRelatorioFinanceiro() {
   const [mensalidades, setMensalidades] = useState([]);
   const [irmaos, setIrmaos] = useState([]);
   const [ano, setAno] = useState(new Date().getFullYear().toString());
+  const [dadosLoja, setDadosLoja] = useState(null);
 
   useEffect(() => { loadDados(); }, []);
 
   const loadDados = async () => {
-    const [m, ir] = await Promise.all([
+    const [m, ir, lojas] = await Promise.all([
       db.Mensalidade.list("-created_date", 200),
       db.Irmao.filter({ ativo: true }),
+      db.DadosLoja.list(),
     ]);
     setMensalidades(m);
     setIrmaos(ir);
+    setDadosLoja(lojas?.[0] || null);
   };
 
   const doAno = mensalidades.filter(m => m.competencia?.endsWith(ano));
@@ -59,6 +63,36 @@ export default function AdminRelatorioFinanceiro() {
     const a = document.createElement("a"); a.href = url; a.download = `financeiro_${ano}.csv`; a.click();
   };
 
+  const imprimir = () => {
+    const rowsMes = porMes
+      .map(
+        (m) =>
+          `<tr><td>${m.mes}/${ano}</td><td>R$ ${m.recebido.toFixed(2)}</td><td>R$ ${m.pendente.toFixed(2)}</td></tr>`
+      )
+      .join("");
+    const rowsInadim = inadimplentes
+      .map((ir) => `<tr><td>${ir.nome_completo}</td><td>${ir.numero_glp || "—"}</td></tr>`)
+      .join("");
+
+    imprimirRelatorio({
+      dadosLoja,
+      titulo: "Relatório Financeiro",
+      subtitulo: `Exercício ${ano} — Emitido em ${new Date().toLocaleDateString("pt-BR")}`,
+      corpo: `
+        <p style="font-size:12px">Total recebido: <strong>R$ ${totalRecebido.toFixed(2)}</strong> —
+        A receber: <strong>R$ ${totalPendente.toFixed(2)}</strong> —
+        Quitações: <strong>${pagos.length}</strong> —
+        Inadimplentes: <strong>${inadimplentes.length}</strong></p>
+        <table class="rel" style="margin-bottom:24px">
+          <thead><tr><th>Competência</th><th>Recebido</th><th>Pendente</th></tr></thead>
+          <tbody>${rowsMes}</tbody>
+        </table>
+        ${inadimplentes.length ? `
+        <h3 style="font-size:13px;color:#dc2626;text-transform:uppercase;margin:0 0 8px">Inadimplentes do mês atual</h3>
+        <table class="rel"><thead><tr><th>Irmão</th><th>Nº GLP</th></tr></thead><tbody>${rowsInadim}</tbody></table>` : ""}`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -78,6 +112,9 @@ export default function AdminRelatorioFinanceiro() {
           </div>
           <Button variant="outline" onClick={exportarCSV} className="border-[#1B3A5F] text-[#1B3A5F]">
             <Download className="w-4 h-4 mr-2" /> Exportar CSV
+          </Button>
+          <Button onClick={imprimir} className="bg-[#1B3A5F] hover:bg-[#152e4d]">
+            <Printer className="w-4 h-4 mr-2" /> Imprimir / PDF
           </Button>
         </div>
       </div>

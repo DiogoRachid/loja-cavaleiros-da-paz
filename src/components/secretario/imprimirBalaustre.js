@@ -1,6 +1,6 @@
 import { anoVerdadeiraLuz } from "@/components/secretario/gerarMinuta";
 
-const LOGO_LOJA = "https://media.base44.com/images/public/69aea997b473b479398fe231/9a3f4b5ac_LogoCavaleirosAlta.png";
+import { logoLoja, logoPotencia } from "@/lib/relatorio";
 
 // Abre uma janela de impressão com o balaústre formatado
 export function imprimirBalaustre({ sessao, secoes, dadosLoja, assinaturas = {} }) {
@@ -36,13 +36,13 @@ export function imprimirBalaustre({ sessao, secoes, dadosLoja, assinaturas = {} 
       .assinaturas span { font-size: 11px; color: #555; }
     </style></head><body>
     <header>
-      <img class="logo" src="${dadosLoja?.logo_potencia_url || ""}" alt="" onerror="this.style.visibility='hidden'"/>
+      <img class="logo" src="${logoLoja(dadosLoja)}" alt="" onerror="this.style.visibility='hidden'"/>
       <div class="titulo">
         <h1>${nomeLoja}</h1>
         <p>${dadosLoja?.potencia || "Grande Loja do Paraná"}${oriente ? ` — ${oriente}` : ""}</p>
         <p>Ano da Verdadeira Luz ${anoVerdadeiraLuz(sessao.data)}</p>
       </div>
-      <img class="logo" src="${dadosLoja?.logo_url || LOGO_LOJA}" alt="" onerror="this.style.visibility='hidden'"/>
+      <img class="logo" src="${logoPotencia(dadosLoja)}" alt="" onerror="this.style.visibility='hidden'"/>
     </header>
     <h2>Balaústre da Sessão ${sessao.tipo || ""} de ${dataFmt}${sessao.numero ? ` — nº ${sessao.numero}` : ""}</h2>
     ${corpo}

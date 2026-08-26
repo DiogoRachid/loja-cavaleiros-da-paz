@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { db } from "@/api/db";
-import { BarChart2, Search, Download } from "lucide-react";
+import { BarChart2, Search, Download, Printer } from "lucide-react";
+import { imprimirRelatorio } from "@/lib/relatorio";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -12,18 +13,21 @@ export default function AdminFrequencias() {
   const [sessoes, setSessoes] = useState([]);
   const [presencas, setPresencas] = useState([]);
   const [busca2, setBusca2] = useState("");
+  const [dadosLoja, setDadosLoja] = useState(null);
 
   useEffect(() => { loadDados(); }, []);
 
   const loadDados = async () => {
-    const [ir, s, p] = await Promise.all([
+    const [ir, s, p, lojas] = await Promise.all([
       db.Irmao.filter({ ativo: true }, "nome_completo", 500),
       db.Sessao.filter({ status: "Realizada" }, "-data", 500),
       db.Presenca.list("-created_date", 5000),
+      db.DadosLoja.list(),
     ]);
     setIrmaos(ir);
     setSessoes(s);
     setPresencas(p);
+    setDadosLoja(lojas?.[0] || null);
   };
 
   const getFrequencia = (irmaoId) => {
@@ -53,6 +57,28 @@ export default function AdminFrequencias() {
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "frequencias.csv"; a.click();
   };
 
+  const imprimir = () => {
+    const rows = filtrados
+      .map(
+        (i, idx) =>
+          `<tr><td>${idx + 1}</td><td>${i.nome_completo}</td><td>${i.numero_glp || "—"}</td><td>${i.grau || ""}</td>
+           <td style="text-align:center">${i.freq.presentes}/${i.freq.total}</td>
+           <td style="text-align:center;font-weight:600;color:${i.freq.pct >= 50 ? "#16a34a" : "#dc2626"}">${i.freq.pct}%</td></tr>`
+      )
+      .join("");
+
+    imprimirRelatorio({
+      dadosLoja,
+      titulo: "Relatório de Frequências",
+      subtitulo: `${sessoes.length} sessões realizadas — Emitido em ${new Date().toLocaleDateString("pt-BR")}`,
+      corpo: `
+        <table class="rel">
+          <thead><tr><th>#</th><th>Irmão</th><th>Nº GLP</th><th>Grau</th><th>Presenças</th><th>Frequência</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`,
+    });
+  };
+
   const corFreq = (pct) => {
     if (pct >= 75) return "bg-green-100 text-green-800";
     if (pct >= 50) return "bg-yellow-100 text-yellow-800";
@@ -71,9 +97,14 @@ export default function AdminFrequencias() {
             <p className="text-slate-500">{sessoes.length} sessões realizadas</p>
           </div>
         </div>
-        <Button variant="outline" onClick={exportarCSV} className="border-[#1B3A5F] text-[#1B3A5F]">
-          <Download className="w-4 h-4 mr-2" /> Exportar CSV
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={exportarCSV} className="border-[#1B3A5F] text-[#1B3A5F]">
+            <Download className="w-4 h-4 mr-2" /> Exportar CSV
+          </Button>
+          <Button onClick={imprimir} className="bg-[#1B3A5F] hover:bg-[#152e4d]">
+            <Printer className="w-4 h-4 mr-2" /> Imprimir / PDF
+          </Button>
+        </div>
       </div>
 
       {dadosGrafico.length > 0 && (

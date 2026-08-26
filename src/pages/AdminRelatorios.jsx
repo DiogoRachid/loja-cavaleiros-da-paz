@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
 import { BarChart2, Users, Calendar, DollarSign, TrendingUp, FileText, Download } from "lucide-react";
+import { imprimirRelatorio } from "@/lib/relatorio";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,8 +12,6 @@ import {
 } from "recharts";
 
 const CORES = ["#1B3A5F", "#C9A227", "#2563eb", "#16a34a", "#dc2626", "#9333ea"];
-const LOGO_LOJA = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aea997b473b479398fe231/0745f3cd0_logolojafundotransparente.png";
-const LOGO_GLP = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69aea997b473b479398fe231/a206157c9_LOGOGLP2023.png";
 
 export default function AdminRelatorios() {
   const [irmaos, setIrmaos] = useState([]);
@@ -83,223 +82,98 @@ export default function AdminRelatorios() {
     return mensalidades.some(m => m.irmao_id === ir.id && m.competencia === mesAtual && (m.status === "Atrasado" || m.status === "Pendente"));
   }).length;
 
+  const cartao = (valor, label, fundo, cor = "white") => `
+    <div style="flex:1;min-width:120px;background:${fundo};color:${cor};border-radius:8px;padding:12px;text-align:center">
+      <p style="margin:0;font-size:22px;font-weight:bold">${valor}</p>
+      <p style="margin:0;font-size:11px;opacity:0.85">${label}</p>
+    </div>`;
+
   const gerarPdfIrmaos = () => {
     setGerandoPdf(true);
-    const loja = dadosLoja;
-    const dataHoje = hoje.toLocaleDateString("pt-BR");
     const rows = irmaos.map((i, idx) => `
-      <tr style="background:${idx % 2 === 0 ? "#fff" : "#f8f9fa"}">
-        <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:12px">${idx + 1}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:500">${i.nome_completo || ""}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:12px">${i.numero_glp || "—"}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:12px">${i.grau || ""}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:12px">${i.cargo && i.cargo !== "Nenhum" ? i.cargo : "—"}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:12px">${i.situacao || ""}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:12px">${i.ativo ? "Ativo" : "Inativo"}</td>
+      <tr>
+        <td>${idx + 1}</td>
+        <td>${i.nome_completo || ""}</td>
+        <td>${i.numero_glp || "—"}</td>
+        <td>${i.grau || ""}</td>
+        <td>${i.cargo && i.cargo !== "Nenhum" ? i.cargo : "—"}</td>
+        <td>${i.situacao || ""}</td>
+        <td>${i.ativo ? "Ativo" : "Inativo"}</td>
       </tr>`).join("");
 
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <title>Relatorio de Irmaos</title>
-    <style>
-      body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #1a202c; }
-      @media print { body { padding: 10px; } }
-    </style>
-    </head><body>
-    <!-- Cabeçalho -->
-    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1B3A5F;padding-bottom:16px;margin-bottom:16px">
-      <img src="${LOGO_LOJA}" style="height:80px;object-fit:contain" />
-      <div style="text-align:center;flex:1;padding:0 20px">
-        <p style="margin:0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px">${loja?.potencia || "Grande Loja Maçônica do Paraná"}</p>
-        <h1 style="margin:4px 0;font-size:18px;color:#1B3A5F;font-weight:bold">${loja?.nome || "Loja Cavaleiros da Paz"} Nº ${loja?.numero || "25"}</h1>
-        <p style="margin:0;font-size:12px;color:#475569">${loja?.oriente ? `Oriente de ${loja.oriente}` : ""}</p>
-        <p style="margin:0;font-size:12px;color:#475569">${loja?.endereco || ""}</p>
-      </div>
-      <img src="${LOGO_GLP}" style="height:80px;object-fit:contain" />
-    </div>
-    <!-- Título do relatório -->
-    <div style="text-align:center;margin-bottom:20px">
-      <h2 style="margin:0;font-size:16px;color:#1B3A5F;font-weight:bold;text-transform:uppercase;letter-spacing:1px">Quadro de Irmãos</h2>
-      <p style="margin:4px 0 0;font-size:11px;color:#64748b">Exercício ${hoje.getFullYear()} — Emitido em ${dataHoje}</p>
-    </div>
-    <!-- Resumo -->
-    <div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap">
-      <div style="flex:1;min-width:120px;background:#1B3A5F;color:white;border-radius:8px;padding:12px;text-align:center">
-        <p style="margin:0;font-size:22px;font-weight:bold">${irmaos.filter(i => i.ativo).length}</p>
-        <p style="margin:0;font-size:11px;opacity:0.8">Irmãos Ativos</p>
-      </div>
-      <div style="flex:1;min-width:120px;background:#16a34a;color:white;border-radius:8px;padding:12px;text-align:center">
-        <p style="margin:0;font-size:22px;font-weight:bold">${irmaos.filter(i => i.situacao === "Regular").length}</p>
-        <p style="margin:0;font-size:11px;opacity:0.8">Regulares</p>
-      </div>
-      <div style="flex:1;min-width:120px;background:#dc2626;color:white;border-radius:8px;padding:12px;text-align:center">
-        <p style="margin:0;font-size:22px;font-weight:bold">${irmaos.filter(i => i.situacao === "Irregular").length}</p>
-        <p style="margin:0;font-size:11px;opacity:0.8">Irregulares</p>
-      </div>
-      <div style="flex:1;min-width:120px;background:#C9A227;color:#1B3A5F;border-radius:8px;padding:12px;text-align:center">
-        <p style="margin:0;font-size:22px;font-weight:bold">${irmaos.filter(i => i.grau === "Mestre").length}</p>
-        <p style="margin:0;font-size:11px">Mestres</p>
-      </div>
-    </div>
-    <!-- Tabela -->
-    <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0">
-      <thead>
-        <tr style="background:#1B3A5F;color:white">
-          <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600">#</th>
-          <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600">Nome Completo</th>
-          <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600">Nº GLP</th>
-          <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600">Grau</th>
-          <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600">Cargo</th>
-          <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600">Situação</th>
-          <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600">Status</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <!-- Rodapé -->
-    <div style="margin-top:32px;border-top:1px solid #e2e8f0;padding-top:12px;display:flex;justify-content:space-between;font-size:10px;color:#94a3b8">
-      <span>${loja?.nome || "Loja Cavaleiros da Paz"} Nº ${loja?.numero || "25"} — ${loja?.potencia || "GLPR"}</span>
-      <span>Documento gerado em ${dataHoje}</span>
-    </div>
-    <script>window.onload = function(){ window.print(); }</script>
-    </body></html>`;
-
-    const win = window.open("", "_blank");
-    win.document.write(html);
-    win.document.close();
+    imprimirRelatorio({
+      dadosLoja,
+      titulo: "Quadro de Irmãos",
+      subtitulo: `Exercício ${hoje.getFullYear()} — Emitido em ${hoje.toLocaleDateString("pt-BR")}`,
+      corpo: `
+        <div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap">
+          ${cartao(irmaos.filter(i => i.ativo).length, "Irmãos Ativos", "#1B3A5F")}
+          ${cartao(irmaos.filter(i => i.situacao === "Regular").length, "Regulares", "#16a34a")}
+          ${cartao(irmaos.filter(i => i.situacao === "Irregular").length, "Irregulares", "#dc2626")}
+          ${cartao(irmaos.filter(i => i.grau === "Mestre").length, "Mestres", "#C9A227", "#1B3A5F")}
+        </div>
+        <table class="rel">
+          <thead><tr><th>#</th><th>Nome Completo</th><th>Nº GLP</th><th>Grau</th><th>Cargo</th><th>Situação</th><th>Status</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`,
+    });
     setGerandoPdf(false);
   };
 
   const gerarPdfFinanceiro = () => {
-    const loja = dadosLoja;
-    const dataHoje = hoje.toLocaleDateString("pt-BR");
     const mesAtual = `${String(hoje.getMonth() + 1).padStart(2, "0")}/${hoje.getFullYear()}`;
-
     const inadimList = irmaos.filter(ir =>
       mensalidades.some(m => m.irmao_id === ir.id && m.competencia === mesAtual && (m.status === "Atrasado" || m.status === "Pendente"))
     );
+    const rows6meses = ultimos6.map(m => `<tr><td>${m.mes}</td><td style="font-weight:600;color:#16a34a">R$ ${m.recebido.toFixed(2)}</td></tr>`).join("");
+    const rowsInadim = inadimList.map(ir => `<tr><td>${ir.nome_completo}</td><td>${ir.numero_glp || "—"}</td></tr>`).join("");
 
-    const rows6meses = ultimos6.map(m => `
-      <tr>
-        <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;font-size:12px">${m.mes}</td>
-        <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:600;color:#16a34a">R$ ${m.recebido.toFixed(2)}</td>
-      </tr>`).join("");
-
-    const rowsInadim = inadimList.map((ir, idx) => `
-      <tr style="background:${idx % 2 === 0 ? "#fff" : "#fef2f2"}">
-        <td style="padding:6px 10px;border-bottom:1px solid #fecaca;font-size:12px">${ir.nome_completo}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #fecaca;font-size:12px">${ir.numero_glp || "—"}</td>
-      </tr>`).join("");
-
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <title>Relatorio Financeiro</title>
-    <style>body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #1a202c; } @media print { body { padding:10px; }}</style>
-    </head><body>
-    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1B3A5F;padding-bottom:16px;margin-bottom:16px">
-      <img src="${LOGO_LOJA}" style="height:80px;object-fit:contain" />
-      <div style="text-align:center;flex:1;padding:0 20px">
-        <p style="margin:0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px">${loja?.potencia || "Grande Loja Maçônica do Paraná"}</p>
-        <h1 style="margin:4px 0;font-size:18px;color:#1B3A5F;font-weight:bold">${loja?.nome || "Loja Cavaleiros da Paz"} Nº ${loja?.numero || "25"}</h1>
-        <p style="margin:0;font-size:12px;color:#475569">${loja?.oriente ? `Oriente de ${loja.oriente}` : ""}</p>
-      </div>
-      <img src="${LOGO_GLP}" style="height:80px;object-fit:contain" />
-    </div>
-    <div style="text-align:center;margin-bottom:20px">
-      <h2 style="margin:0;font-size:16px;color:#1B3A5F;font-weight:bold;text-transform:uppercase;letter-spacing:1px">Relatório Financeiro</h2>
-      <p style="margin:4px 0 0;font-size:11px;color:#64748b">Exercício ${hoje.getFullYear()} — Emitido em ${dataHoje}</p>
-    </div>
-    <div style="display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap">
-      <div style="flex:1;min-width:140px;background:#1B3A5F;color:white;border-radius:8px;padding:14px;text-align:center">
-        <p style="margin:0;font-size:20px;font-weight:bold">R$ ${totalRecebidoAno.toFixed(2)}</p>
-        <p style="margin:0;font-size:11px;opacity:0.8">Arrecadado em ${hoje.getFullYear()}</p>
-      </div>
-      <div style="flex:1;min-width:140px;background:#dc2626;color:white;border-radius:8px;padding:14px;text-align:center">
-        <p style="margin:0;font-size:20px;font-weight:bold">${inadimList.length}</p>
-        <p style="margin:0;font-size:11px;opacity:0.8">Inadimplentes (${mesAtual})</p>
-      </div>
-    </div>
-    <h3 style="font-size:13px;font-weight:bold;color:#1B3A5F;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.5px">Arrecadação — Últimos 6 Meses</h3>
-    <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;margin-bottom:24px">
-      <thead><tr style="background:#1B3A5F;color:white">
-        <th style="padding:8px 12px;text-align:left;font-size:11px">Mês</th>
-        <th style="padding:8px 12px;text-align:left;font-size:11px">Recebido</th>
-      </tr></thead>
-      <tbody>${rows6meses}</tbody>
-    </table>
-    ${inadimList.length > 0 ? `
-    <h3 style="font-size:13px;font-weight:bold;color:#dc2626;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.5px">Inadimplentes — ${mesAtual}</h3>
-    <table style="width:100%;border-collapse:collapse;border:1px solid #fecaca">
-      <thead><tr style="background:#dc2626;color:white">
-        <th style="padding:8px 10px;text-align:left;font-size:11px">Nome</th>
-        <th style="padding:8px 10px;text-align:left;font-size:11px">Nº GLP</th>
-      </tr></thead>
-      <tbody>${rowsInadim}</tbody>
-    </table>` : ""}
-    <div style="margin-top:32px;border-top:1px solid #e2e8f0;padding-top:12px;display:flex;justify-content:space-between;font-size:10px;color:#94a3b8">
-      <span>${loja?.nome || "Loja Cavaleiros da Paz"} Nº ${loja?.numero || "25"} — ${loja?.potencia || "GLPR"}</span>
-      <span>Documento gerado em ${dataHoje}</span>
-    </div>
-    <script>window.onload = function(){ window.print(); }</script>
-    </body></html>`;
-
-    const win = window.open("", "_blank");
-    win.document.write(html);
-    win.document.close();
+    imprimirRelatorio({
+      dadosLoja,
+      titulo: "Relatório Financeiro",
+      subtitulo: `Exercício ${hoje.getFullYear()} — Emitido em ${hoje.toLocaleDateString("pt-BR")}`,
+      corpo: `
+        <div style="display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap">
+          ${cartao(`R$ ${totalRecebidoAno.toFixed(2)}`, `Arrecadado em ${hoje.getFullYear()}`, "#1B3A5F")}
+          ${cartao(inadimList.length, `Inadimplentes (${mesAtual})`, "#dc2626")}
+        </div>
+        <h3 style="font-size:13px;color:#1B3A5F;text-transform:uppercase;margin:0 0 8px">Arrecadação — Últimos 6 Meses</h3>
+        <table class="rel" style="margin-bottom:24px">
+          <thead><tr><th>Mês</th><th>Recebido</th></tr></thead>
+          <tbody>${rows6meses}</tbody>
+        </table>
+        ${inadimList.length ? `
+        <h3 style="font-size:13px;color:#dc2626;text-transform:uppercase;margin:0 0 8px">Inadimplentes — ${mesAtual}</h3>
+        <table class="rel">
+          <thead><tr><th>Nome</th><th>Nº GLP</th></tr></thead>
+          <tbody>${rowsInadim}</tbody>
+        </table>` : ""}`,
+    });
   };
 
   const gerarPdfPresencas = () => {
-    const loja = dadosLoja;
-    const dataHoje = hoje.toLocaleDateString("pt-BR");
-
-    const rows = sessRealiz.slice(0, 20).map((s, idx) => {
-      const totalPresentes = presencas.filter(p => p.sessao_id === s.id && p.presente).length;
-      const totalIrmaos = irmaos.filter(i => i.ativo).length;
-      const pct = totalIrmaos > 0 ? Math.round((totalPresentes / totalIrmaos) * 100) : 0;
-      return `<tr style="background:${idx % 2 === 0 ? "#fff" : "#f8f9fa"}">
-        <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:12px">${s.data || ""}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:12px">${s.tipo || ""}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:12px;text-align:center">${totalPresentes}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:12px;text-align:center">${totalIrmaos - totalPresentes}</td>
-        <td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:12px;text-align:center;font-weight:600;color:${pct >= 50 ? "#16a34a" : "#dc2626"}">${pct}%</td>
+    const totalIrmaos = irmaos.filter(i => i.ativo).length;
+    const rows = sessRealiz.slice(0, 20).map(s => {
+      const presentes = presencas.filter(p => p.sessao_id === s.id && p.presente).length;
+      const pct = totalIrmaos > 0 ? Math.round((presentes / totalIrmaos) * 100) : 0;
+      return `<tr>
+        <td>${s.data || ""}</td><td>${s.tipo || ""}</td>
+        <td style="text-align:center">${presentes}</td>
+        <td style="text-align:center">${totalIrmaos - presentes}</td>
+        <td style="text-align:center;font-weight:600;color:${pct >= 50 ? "#16a34a" : "#dc2626"}">${pct}%</td>
       </tr>`;
     }).join("");
 
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <title>Relatorio de Presencas</title>
-    <style>body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #1a202c; } @media print { body { padding:10px; }}</style>
-    </head><body>
-    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1B3A5F;padding-bottom:16px;margin-bottom:16px">
-      <img src="${LOGO_LOJA}" style="height:80px;object-fit:contain" />
-      <div style="text-align:center;flex:1;padding:0 20px">
-        <p style="margin:0;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px">${loja?.potencia || "Grande Loja Maçônica do Paraná"}</p>
-        <h1 style="margin:4px 0;font-size:18px;color:#1B3A5F;font-weight:bold">${loja?.nome || "Loja Cavaleiros da Paz"} Nº ${loja?.numero || "25"}</h1>
-        <p style="margin:0;font-size:12px;color:#475569">${loja?.oriente ? `Oriente de ${loja.oriente}` : ""}</p>
-      </div>
-      <img src="${LOGO_GLP}" style="height:80px;object-fit:contain" />
-    </div>
-    <div style="text-align:center;margin-bottom:20px">
-      <h2 style="margin:0;font-size:16px;color:#1B3A5F;font-weight:bold;text-transform:uppercase;letter-spacing:1px">Relatório de Presenças</h2>
-      <p style="margin:4px 0 0;font-size:11px;color:#64748b">Sessões Realizadas — Emitido em ${dataHoje}</p>
-    </div>
-    <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0">
-      <thead><tr style="background:#1B3A5F;color:white">
-        <th style="padding:8px 10px;text-align:left;font-size:11px">Data</th>
-        <th style="padding:8px 10px;text-align:left;font-size:11px">Tipo</th>
-        <th style="padding:8px 10px;text-align:center;font-size:11px">Presentes</th>
-        <th style="padding:8px 10px;text-align:center;font-size:11px">Ausentes</th>
-        <th style="padding:8px 10px;text-align:center;font-size:11px">Frequência</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div style="margin-top:32px;border-top:1px solid #e2e8f0;padding-top:12px;display:flex;justify-content:space-between;font-size:10px;color:#94a3b8">
-      <span>${loja?.nome || "Loja Cavaleiros da Paz"} Nº ${loja?.numero || "25"} — ${loja?.potencia || "GLPR"}</span>
-      <span>Documento gerado em ${dataHoje}</span>
-    </div>
-    <script>window.onload = function(){ window.print(); }</script>
-    </body></html>`;
-
-    const win = window.open("", "_blank");
-    win.document.write(html);
-    win.document.close();
+    imprimirRelatorio({
+      dadosLoja,
+      titulo: "Relatório de Presenças",
+      subtitulo: `Sessões Realizadas — Emitido em ${hoje.toLocaleDateString("pt-BR")}`,
+      corpo: `
+        <table class="rel">
+          <thead><tr><th>Data</th><th>Tipo</th><th>Presentes</th><th>Ausentes</th><th>Frequência</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`,
+    });
   };
 
   return (
