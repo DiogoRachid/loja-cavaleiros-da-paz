@@ -233,7 +233,7 @@ export default function PrepararReuniao() {
   td { padding: 4px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
   tr:nth-child(even) td { background: #f9f9f9; }
 
-  .simbolo { width: 22px; height: 16px; display: inline-flex; align-items: center; justify-content: center; }
+  .simbolo { width: 40px; height: 38px; display: inline-flex; align-items: center; justify-content: center; }
   .simbolo svg { display: block; }
   .confirmado { color: green; font-weight: bold; }
   .ausente { color: #c00; }
@@ -268,7 +268,7 @@ export default function PrepararReuniao() {
   <div class="section">
     <div class="section-title">Quadro de Oficiais Presentes</div>
     <table>
-      <thead><tr><th style="width:30px"></th><th>Cargo</th><th>Irmão</th><th>Situação</th></tr></thead>
+      <thead><tr><th style="width:48px"></th><th>Cargo</th><th>Irmão</th><th>Situação</th></tr></thead>
       <tbody>
         ${quadroOficiais.map(o => {
           const nome = o.substituto_nome || (o.confirmado ? o.titular_nome : '<span class="ausente">— Vago —</span>');
@@ -276,7 +276,7 @@ export default function PrepararReuniao() {
             ? (o.substituto_nome ? '<span class="confirmado">✔ Presente (substituto)</span>' : '<span class="confirmado">✔ Presente</span>')
             : (o.substituto_nome ? '<span style="color:#855">✦ Substituto</span>' : '<span class="ausente">✘ Ausente</span>');
           return `<tr>
-            <td><span class="simbolo">${svgCargo(o.cargo, 16)}</span></td>
+            <td><span class="simbolo">${svgCargo(o.cargo, 38)}</span></td>
             <td><strong>${o.cargo}</strong></td>
             <td>${nome || "—"}</td>
             <td>${situacao}</td>
