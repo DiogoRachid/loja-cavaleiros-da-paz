@@ -26,6 +26,7 @@ import AdminVisitantes from './pages/AdminVisitantes';
 import AdminListaPresencaQR from './pages/AdminListaPresencaQR';
 import AdminOrador from './pages/AdminOrador';
 import AdminPareceres from './pages/AdminPareceres';
+import AdminPortais from './pages/AdminPortais';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -98,6 +99,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminListaPresencaQR" element={<LayoutWrapper currentPageName="AdminListaPresencaQR"><AdminListaPresencaQR /></LayoutWrapper>} />
       <Route path="/AdminOrador" element={<LayoutWrapper currentPageName="AdminOrador"><AdminOrador /></LayoutWrapper>} />
       <Route path="/AdminPareceres" element={<LayoutWrapper currentPageName="AdminPareceres"><AdminPareceres /></LayoutWrapper>} />
+      <Route path="/AdminPortais" element={<LayoutWrapper currentPageName="AdminPortais"><AdminPortais /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { autoRealizarSessoes } from "@/utils/autoRealizarSessoes";
+import PortaisCargos from "@/components/vm/PortaisCargos";
 
 export default function AdminVM() {
   const [stats, setStats] = useState({ total: 0, regulares: 0, inadimplentes: 0, sessoes: 0 });
@@ -104,6 +105,12 @@ export default function AdminVM() {
             </Link>
           );
         })}
+      </div>
+
+      {/* Portais dos Cargos */}
+      <div className="space-y-3">
+        <h2 className="text-lg font-semibold text-[#1B3A5F]">Portais dos Cargos</h2>
+        <PortaisCargos />
       </div>
 
       {/* Próximas Sessões */}

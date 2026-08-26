@@ -5,7 +5,7 @@ import {
   Menu, X, Home, Library, BookMarked, BarChart,
   Crown, Calendar, DollarSign, FileText, Award,
   Gavel, ClipboardList, Shield, Star, Heart, Music, ListMusic, Upload, Settings, Timer,
-  ClipboardCheck, Mail
+  ClipboardCheck, Mail, LayoutGrid
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,11 @@ const LOGO_URL = "https://media.base44.com/images/public/69aea997b473b479398fe23
 const ADMIN_LINKS_BY_CARGO = {
   "Venerável Mestre": [
     { name: "Painel Geral", page: "AdminVM", icon: Crown },
+    { name: "Portais dos Cargos", page: "AdminPortais", icon: LayoutGrid },
+    { name: "Pareceres do Orador", page: "AdminPareceres", icon: Gavel },
+    { name: "Expedientes e Pranchas", page: "AdminExpedientes", icon: Mail },
+    { name: "Visitantes e Ordem do Dia", page: "AdminVisitantes", icon: Users },
+    { name: "Balaústre (Ata)", page: "AdminBalaustre", icon: FileText },
     { name: "Quadro de Oficiais", page: "AdminQuadroOficiais", icon: Award },
     { name: "Sessões", page: "AdminSessoes", icon: Gavel },
     { name: "Trabalhos e Instruções", page: "AdminTrabalhos", icon: ClipboardCheck },
