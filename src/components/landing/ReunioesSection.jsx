@@ -14,7 +14,7 @@ export default function ReunioesSection({ loja }) {
   ].filter((i) => i.valor);
 
   return (
-    <section id="reunioes" className="py-24 px-6 bg-gradient-to-b from-[#123054] to-[#0D1F33]">
+    <section id="reunioes" className="py-16 px-6 bg-gradient-to-b from-[#123054] to-[#0D1F33]">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}

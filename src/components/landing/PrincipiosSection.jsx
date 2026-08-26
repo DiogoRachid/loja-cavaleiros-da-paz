@@ -11,9 +11,9 @@ const PRINCIPIOS = [
 
 export default function PrincipiosSection() {
   return (
-    <section id="principios" className="py-28 px-6 bg-gradient-to-b from-[#0D1F33] to-[#123054]">
+    <section id="principios" className="py-16 px-6 bg-gradient-to-b from-[#0D1F33] to-[#123054]">
       <div className="max-w-5xl mx-auto">
-        <Reveal className="text-center mb-16">
+        <Reveal className="text-center mb-10">
           <p className="text-[#C9A227] text-xs uppercase tracking-[0.3em] mb-4">Nossos valores</p>
           <h2 className="text-3xl md:text-4xl font-bold text-white">Princípios que nos guiam</h2>
         </Reveal>
