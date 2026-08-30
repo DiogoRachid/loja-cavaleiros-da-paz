@@ -156,9 +156,22 @@ export function Mp3PlaybackProvider({ children }) {
     }, 30);
   };
 
-  const playTrackAt = (index) => {
+  const playTrackAt = (index, { fade = true } = {}) => {
     const track = queueRef.current[index];
     if (!track) return;
+    const cur = audioRef.current;
+    const cfg0 = cfgRef.current;
+    // Troca manual com música tocando: crossfade em vez de corte seco
+    if (fade && cfg0.crossfadeEnabled && cur && !cur.paused) {
+      clearFade();
+      clearManualFade();
+      const ok = beginCrossfade(
+        track,
+        () => { queueIndexRef.current = index; },
+        Math.max(400, cfg0.crossfadeMs)
+      );
+      if (ok) return;
+    }
     clearFade();
     clearManualFade();
     discard(audioRef.current);
@@ -192,26 +205,26 @@ export function Mp3PlaybackProvider({ children }) {
     playTrackAt(queueIndexRef.current);
   };
 
-  // Crossfade dentro da etapa: player B entra em volume 0 enquanto o A faz fade-out
-  const startCrossfade = (fadeMs) => {
+  // Crossfade genérico: player B entra em volume 0 enquanto o A faz fade-out
+  const beginCrossfade = (track, commit, fadeMs) => {
     const old = audioRef.current;
-    const nx = peekNext();
-    if (!old || !nx?.track?.file_url) return;
+    if (!old || !track?.file_url) return false;
 
     const curve = cfgRef.current.crossfadeCurve;
     crossfadingRef.current = true;
     oldAudioRef.current = old;
     old.onended = null;
 
-    const next = takePreloaded(nx.track.file_url);
+    const next = takePreloaded(track.file_url);
     next.currentTime = 0;
     next.volume = 0;
     audioRef.current = next;
-    nx.commit();
-    setCurrentTrackId(nx.track.id);
+    commit();
+    setCurrentTrackId(track.id);
     setPosition(0);
     setDuration(0);
     setNearEnd(false);
+    setError(null);
     attachEnded(next);
     next.play().catch(() => {});
 
@@ -231,6 +244,14 @@ export function Mp3PlaybackProvider({ children }) {
         next.volume = vol;
       }
     }, FADE_TICK_MS);
+    return true;
+  };
+
+  // Crossfade automático dentro da etapa (fim da faixa / loop)
+  const startCrossfade = (fadeMs) => {
+    const nx = peekNext();
+    if (!nx?.track?.file_url) return;
+    beginCrossfade(nx.track, nx.commit, fadeMs);
   };
 
   fnsRef.current = { advance, playTrackAt, stopAll, startCrossfade };
@@ -269,10 +290,12 @@ export function Mp3PlaybackProvider({ children }) {
   const playEtapa = (etapaId, tracks, startIndex = 0) => {
     const fila = (tracks || []).filter((t) => t.file_url);
     if (fila.length === 0) return;
+    const mesmaEtapa = ownerRef.current === etapaId;
     queueRef.current = fila;
     ownerRef.current = etapaId;
     setActiveQueueOwner(etapaId);
-    playTrackAt(Math.min(Math.max(startIndex, 0), fila.length - 1));
+    // Crossfade apenas dentro da mesma etapa — troca de etapa é corte seco
+    playTrackAt(Math.min(Math.max(startIndex, 0), fila.length - 1), { fade: mesmaEtapa });
   };
 
   const stopEtapa = () => stopAll();
