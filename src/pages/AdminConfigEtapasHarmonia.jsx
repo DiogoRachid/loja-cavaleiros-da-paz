@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db } from "@/api/db";
 import { ArrowLeft, Settings, Loader2, Save, Plus, Trash2, ChevronUp, ChevronDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ const uid = () => `etapa_${Date.now()}_${uidSeq++}`;
 
 export default function AdminConfigEtapasHarmonia() {
   const [configs, setConfigs] = useState({}); // cid -> { id?, playlist_id, playlist_name }
+  const originaisRef = useRef({}); // cid -> registro original do banco (para detectar mudanças)
   const [etapasPorGrupo, setEtapasPorGrupo] = useState({}); // `${grau}::${tipo}` -> [{cid, nome}]
   const [novaEtapa, setNovaEtapa] = useState({});
   const [removidos, setRemovidos] = useState([]); // ids de registros a excluir ao salvar
@@ -44,6 +45,7 @@ export default function AdminConfigEtapasHarmonia() {
     const registros = await db.ConfigEtapaHarmonia.list();
     const map = {};
     const grupos = {};
+    originaisRef.current = {};
     GRAUS.forEach((grau) => {
       TIPOS_SESSAO.forEach((tipo) => {
         const grupoKey = `${grau}::${tipo}`;
@@ -54,6 +56,7 @@ export default function AdminConfigEtapasHarmonia() {
           grupos[grupoKey] = existentes.map((r) => {
             const cid = uid();
             map[cid] = r;
+            originaisRef.current[cid] = r;
             return { cid, nome: r.etapa_nome };
           });
         } else {
@@ -135,13 +138,15 @@ export default function AdminConfigEtapasHarmonia() {
               observacao: config?.observacao || null,
             };
             if (config?.id) {
-              // Só envia se algo mudou (evita centenas de requisições desnecessárias)
+              // Só envia se algo mudou em relação ao ORIGINAL do banco
+              // (comparar com o próprio estado editado nunca detecta mudanças)
+              const orig = originaisRef.current[item.cid] || {};
               const igual =
-                (config.ordem ?? 0) === dados.ordem &&
-                config.etapa_nome === dados.etapa_nome &&
-                (config.playlist_id || null) === dados.playlist_id &&
-                (config.playlist_name || null) === dados.playlist_name &&
-                (config.observacao || null) === dados.observacao;
+                (orig.ordem ?? 0) === dados.ordem &&
+                orig.etapa_nome === dados.etapa_nome &&
+                (orig.playlist_id || null) === dados.playlist_id &&
+                (orig.playlist_name || null) === dados.playlist_name &&
+                (orig.observacao || null) === dados.observacao;
               if (!igual) operacoes.push(db.ConfigEtapaHarmonia.update(config.id, dados));
             } else {
               operacoes.push(db.ConfigEtapaHarmonia.create({ grau, tipo_sessao: tipo, ...dados }));
