@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,41 +12,22 @@ export default function OficiaisConfirmacao({ quadro, irmaos, onChange }) {
     onChange(updated);
   };
 
+  const setSubstituto = (idx, irmaoId) => {
+    const irmao = irmaos.find(ir => ir.id === irmaoId);
+    const updated = quadro.map((o, i) =>
+      i === idx ? { ...o, substituto_id: irmaoId, substituto_nome: irmao?.nome_completo || "" } : o
+    );
+    onChange(updated);
+  };
+
+  const removerSubstituto = (idx) => setSubstituto(idx, "");
+
   // Após a troca de banco os IDs mudaram: revincula o substituto pelo nome
   const resolverSubstitutoId = (o) => {
     if (o.substituto_id && irmaos.some(ir => ir.id === o.substituto_id)) return o.substituto_id;
     const porNome = irmaos.find(ir => ir.nome_completo === o.substituto_nome);
     return porNome?.id || "";
   };
-
-  const ehTitularDoCargo = (o, irmaoId) => {
-    const irmao = irmaos.find(ir => ir.id === irmaoId);
-    return irmaoId === o.titular_id || irmao?.nome_completo === o.titular_nome;
-  };
-
-  const setSubstituto = (idx, irmaoId) => {
-    const irmao = irmaos.find(ir => ir.id === irmaoId);
-    const titularSelecionado = ehTitularDoCargo(quadro[idx], irmaoId);
-    const updated = quadro.map((o, i) =>
-      i === idx
-        ? {
-            ...o,
-            substituto_id: titularSelecionado ? "" : irmaoId,
-            substituto_nome: titularSelecionado ? "" : irmao?.nome_completo || "",
-          }
-        : o
-    );
-    onChange(updated);
-  };
-
-  useEffect(() => {
-    const atualizado = quadro.map(o =>
-      ehTitularDoCargo(o, resolverSubstitutoId(o))
-        ? { ...o, substituto_id: "", substituto_nome: "" }
-        : o
-    );
-    if (atualizado.some((o, i) => o !== quadro[i])) onChange(atualizado);
-  }, [quadro, irmaos]);
 
   const irmaosOrdenados = [...irmaos]
     .sort((a, b) => (a.nome_completo || "").localeCompare(b.nome_completo || "", "pt-BR"));
@@ -100,13 +80,14 @@ export default function OficiaisConfirmacao({ quadro, irmaos, onChange }) {
                 <div className="mt-2">
                   <SubstitutoSelect
                     irmaos={irmaosOrdenados}
-                    titularId={o.titular_id}
-                    titularNome={o.titular_nome}
                     value={resolverSubstitutoId(o)}
                     onChange={v => setSubstituto(idx, v)}
                   />
                   {o.substituto_nome && (
-                    <p className="text-xs text-amber-700 mt-1">✦ Substituto: {o.substituto_nome}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-xs text-amber-700">✦ Substituto: {o.substituto_nome}</p>
+                      <button onClick={() => removerSubstituto(idx)} className="text-xs text-red-600 hover:text-red-800">Remover</button>
+                    </div>
                   )}
                 </div>
               </div>

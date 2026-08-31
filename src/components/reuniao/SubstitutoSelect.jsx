@@ -2,13 +2,12 @@ import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 
-export default function SubstitutoSelect({ irmaos, titularId, titularNome, value, onChange }) {
+export default function SubstitutoSelect({ irmaos, value, onChange }) {
   const [busca, setBusca] = useState("");
   const termo = busca.trim().toLowerCase();
-  const elegiveis = irmaos.filter(ir => ir.id !== titularId && ir.nome_completo !== titularNome);
   const lista = termo
-    ? elegiveis.filter(ir => (ir.nome_completo || "").toLowerCase().includes(termo))
-    : elegiveis;
+    ? irmaos.filter(ir => (ir.nome_completo || "").toLowerCase().includes(termo))
+    : irmaos;
 
   return (
     <Select value={value || ""} onValueChange={onChange}>
