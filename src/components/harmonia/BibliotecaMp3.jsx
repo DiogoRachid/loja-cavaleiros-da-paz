@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AudioPlayer from "@/components/harmonia/AudioPlayer";
-import FiltroPastasDropdown from "@/components/harmonia/FiltroPastasDropdown";
+import FiltroPastasDropdown, { SEM_PASTA_ID } from "@/components/harmonia/FiltroPastasDropdown";
 import PlayerListaFiltrada from "@/components/harmonia/PlayerListaFiltrada";
 
 export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUpload, onDelete, onTogglePasta }) {
@@ -39,7 +39,8 @@ export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUplo
   const dasPastasSelecionadas = pastasFiltro.length > 0
     ? mp3s.filter((m) => {
         const nas = pastasDaMusica(m.id);
-        return pastasFiltro.some((pid) => nas.has(pid));
+        if (pastasFiltro.includes(SEM_PASTA_ID) && nas.size === 0) return true;
+        return pastasFiltro.some((pid) => pid !== SEM_PASTA_ID && nas.has(pid));
       })
     : mp3s;
 

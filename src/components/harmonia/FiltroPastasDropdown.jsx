@@ -9,6 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+export const SEM_PASTA_ID = "__sem_pasta__";
+
 export default function FiltroPastasDropdown({ pastas, selectedIds, onChange }) {
   const toggle = (id) => {
     onChange(
@@ -27,23 +29,28 @@ export default function FiltroPastasDropdown({ pastas, selectedIds, onChange }) 
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="text-xs">Mostrar músicas das pastas</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {pastas.length === 0 ? (
-          <p className="px-2 py-1.5 text-xs text-slate-400">Nenhuma pasta criada</p>
-        ) : (
-          <div className="max-h-56 overflow-y-auto">
-            {pastas.map((p) => (
-              <DropdownMenuCheckboxItem
-                key={p.id}
-                checked={selectedIds.includes(p.id)}
-                onCheckedChange={() => toggle(p.id)}
-                onSelect={(e) => e.preventDefault()}
-                className="text-sm cursor-pointer"
-              >
-                {p.nome}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </div>
-        )}
+        <div className="max-h-56 overflow-y-auto">
+          <DropdownMenuCheckboxItem
+            checked={selectedIds.includes(SEM_PASTA_ID)}
+            onCheckedChange={() => toggle(SEM_PASTA_ID)}
+            onSelect={(e) => e.preventDefault()}
+            className="text-sm cursor-pointer"
+          >
+            Músicas sem pasta
+          </DropdownMenuCheckboxItem>
+          {pastas.length > 0 && <DropdownMenuSeparator />}
+          {pastas.map((p) => (
+            <DropdownMenuCheckboxItem
+              key={p.id}
+              checked={selectedIds.includes(p.id)}
+              onCheckedChange={() => toggle(p.id)}
+              onSelect={(e) => e.preventDefault()}
+              className="text-sm cursor-pointer"
+            >
+              {p.nome}
+            </DropdownMenuCheckboxItem>
+          ))}
+        </div>
         {selectedIds.length > 0 && (
           <>
             <DropdownMenuSeparator />
