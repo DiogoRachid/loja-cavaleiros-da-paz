@@ -30,17 +30,19 @@ export default function FiltroPastasDropdown({ pastas, selectedIds, onChange }) 
         {pastas.length === 0 ? (
           <p className="px-2 py-1.5 text-xs text-slate-400">Nenhuma pasta criada</p>
         ) : (
-          pastas.map((p) => (
-            <DropdownMenuCheckboxItem
-              key={p.id}
-              checked={selectedIds.includes(p.id)}
-              onCheckedChange={() => toggle(p.id)}
-              onSelect={(e) => e.preventDefault()}
-              className="text-sm cursor-pointer"
-            >
-              {p.nome}
-            </DropdownMenuCheckboxItem>
-          ))
+          <div className="max-h-56 overflow-y-auto">
+            {pastas.map((p) => (
+              <DropdownMenuCheckboxItem
+                key={p.id}
+                checked={selectedIds.includes(p.id)}
+                onCheckedChange={() => toggle(p.id)}
+                onSelect={(e) => e.preventDefault()}
+                className="text-sm cursor-pointer"
+              >
+                {p.nome}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </div>
         )}
         {selectedIds.length > 0 && (
           <>
