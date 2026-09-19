@@ -12,11 +12,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import AudioPlayer from "@/components/harmonia/AudioPlayer";
+import FiltroPastasDropdown from "@/components/harmonia/FiltroPastasDropdown";
+import PlayerListaFiltrada from "@/components/harmonia/PlayerListaFiltrada";
 
 export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUpload, onDelete, onTogglePasta }) {
   const [expanded, setExpanded] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [busca, setBusca] = useState("");
+  const [pastasFiltro, setPastasFiltro] = useState([]);
   const fileInputRef = useRef(null);
 
   const handleFiles = async (e) => {
@@ -29,14 +32,22 @@ export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUplo
   };
 
   const termo = busca.trim().toLowerCase();
-  const filtradas = termo
-    ? mp3s.filter((m) =>
-        m.nome.toLowerCase().includes(termo) || (m.artista || "").toLowerCase().includes(termo)
-      )
-    : mp3s;
 
   const pastasDaMusica = (mp3Id) =>
     new Set(vinculos.filter((v) => v.mp3_id === mp3Id).map((v) => v.pasta_id));
+
+  const dasPastasSelecionadas = pastasFiltro.length > 0
+    ? mp3s.filter((m) => {
+        const nas = pastasDaMusica(m.id);
+        return pastasFiltro.some((pid) => nas.has(pid));
+      })
+    : mp3s;
+
+  const filtradas = termo
+    ? dasPastasSelecionadas.filter((m) =>
+        m.nome.toLowerCase().includes(termo) || (m.artista || "").toLowerCase().includes(termo)
+      )
+    : dasPastasSelecionadas;
 
   return (
     <Card>
@@ -58,6 +69,8 @@ export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUplo
             className="hidden"
             onChange={handleFiles}
           />
+          <FiltroPastasDropdown pastas={pastas} selectedIds={pastasFiltro} onChange={setPastasFiltro} />
+          <PlayerListaFiltrada musicas={dasPastasSelecionadas} />
           <Button
             size="sm"
             disabled={uploading}
