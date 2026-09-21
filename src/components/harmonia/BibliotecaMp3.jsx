@@ -135,16 +135,18 @@ export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUplo
                           {pastas.length === 0 ? (
                             <DropdownMenuItem disabled className="text-xs">Nenhuma pasta criada</DropdownMenuItem>
                           ) : (
-                            pastas.map((p) => (
-                              <DropdownMenuItem
-                                key={p.id}
-                                onClick={() => onTogglePasta(m, p)}
-                                className="text-sm cursor-pointer"
-                              >
-                                <span className="flex-1 truncate">{p.nome}</span>
-                                {nasPastas.has(p.id) && <Check className="w-4 h-4 text-green-600 flex-shrink-0" />}
-                              </DropdownMenuItem>
-                            ))
+                            <div className="max-h-56 overflow-y-auto">
+                              {pastas.map((p) => (
+                                <DropdownMenuItem
+                                  key={p.id}
+                                  onClick={() => onTogglePasta(m, p)}
+                                  className="text-sm cursor-pointer"
+                                >
+                                  <span className="flex-1 truncate">{p.nome}</span>
+                                  {nasPastas.has(p.id) && <Check className="w-4 h-4 text-green-600 flex-shrink-0" />}
+                                </DropdownMenuItem>
+                              ))}
+                            </div>
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
