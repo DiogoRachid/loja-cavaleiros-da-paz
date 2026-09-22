@@ -13,7 +13,7 @@ export default function SubstitutoSelect({ irmaos, value, onChange }) {
   return (
     <div className="relative">
       <Select value={value || ""} onValueChange={onChange}>
-        <SelectTrigger className="h-8 text-sm w-full pr-8">
+        <SelectTrigger aria-label="Selecionar substituto" className="h-10 text-sm w-full pr-12 bg-background shadow-none">
           <SelectValue placeholder="Selecionar substituto..." />
         </SelectTrigger>
         <SelectContent className="max-h-72">

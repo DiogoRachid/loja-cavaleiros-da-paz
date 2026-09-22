@@ -1,8 +1,5 @@
-import { Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import CargoIcon from "@/components/CargoIcon";
-import SubstitutoSelect from "@/components/reuniao/SubstitutoSelect";
+import OficialConfirmacaoRow from "@/components/reuniao/OficialConfirmacaoRow";
 
 export default function OficiaisConfirmacao({ quadro, irmaos, onChange }) {
   const toggleConfirmado = (idx) => {
@@ -44,57 +41,10 @@ export default function OficiaisConfirmacao({ quadro, irmaos, onChange }) {
 
   return (
     <div className="space-y-2">
-      {quadro.map((o, idx) => (
-        <Card key={idx} className={`transition-all ${o.confirmado ? "border-green-300 bg-green-50" : ""}`}>
-          <CardContent className="p-3">
-            <div className="flex items-start gap-3">
-              {/* Botão confirmar */}
-              <button
-                onClick={() => toggleConfirmado(idx)}
-                className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center mt-1 transition-colors ${
-                  o.confirmado ? "bg-green-500 text-white" : "bg-slate-200 text-slate-400 hover:bg-slate-300"
-                }`}
-              >
-                <Check className="w-4 h-4" />
-              </button>
-
-              {/* Conteúdo */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2 flex-wrap">
-                  <div>
-                    <p className="font-semibold text-[#1B3A5F] text-sm flex items-center gap-2">
-                      <CargoIcon cargo={o.cargo} className="w-9 h-9 text-[#C9A227]" />
-                      {o.cargo}
-                    </p>
-                    <p className="text-sm text-slate-600 mt-0.5">
-                      {o.titular_nome || <span className="text-slate-400 italic">Não definido</span>}
-                    </p>
-                  </div>
-                  {o.confirmado && (
-                    <Badge className="bg-green-100 text-green-800 flex-shrink-0">
-                      {o.substituto_nome ? `Confirmado — Substituto: ${o.substituto_nome}` : "Confirmado"}
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="mt-2">
-                  <SubstitutoSelect
-                    irmaos={irmaosOrdenados}
-                    value={resolverSubstitutoId(o)}
-                    onChange={v => setSubstituto(idx, v)}
-                  />
-                  {o.substituto_nome && (
-                    <div className="flex items-center gap-2 mt-1">
-                      <p className="text-xs text-amber-700">✦ Substituto: {o.substituto_nome}</p>
-                      <button onClick={() => removerSubstituto(idx)} className="text-xs text-red-600 hover:text-red-800">Remover</button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+      <div className="hidden grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.1fr)_8rem] gap-4 px-4 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground xl:grid">
+        <span>Cargo</span><span>Titular</span><span>Substituto</span><span className="text-center">Presença</span>
+      </div>
+      {quadro.map((o, idx) => <OficialConfirmacaoRow key={`${o.cargo}-${idx}`} oficial={o} irmaos={irmaosOrdenados} substitutoId={resolverSubstitutoId(o)} onToggle={() => toggleConfirmado(idx)} onSubstituto={v => setSubstituto(idx, v)} onRemove={() => removerSubstituto(idx)} />)}
     </div>
   );
 }

@@ -12,6 +12,7 @@ import AutoridadesList from "@/components/reuniao/AutoridadesList";
 import RoteiroReuniao, { ITENS_PADRAO } from "@/components/reuniao/RoteiroReuniao";
 import { svgCargo } from "@/components/reuniao/cargoSvg";
 import { logoLoja, logoPotencia } from "@/lib/relatorio";
+import ReuniaoHeader from "@/components/reuniao/ReuniaoHeader";
 
 // Símbolos/ícones por cargo (texto) — mantido apenas como referência
 const SIMBOLO_CARGO = {
@@ -384,50 +385,19 @@ export default function PrepararReuniao() {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Cabeçalho */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <Link to={createPageUrl("AdminAgendaRitual")}>
-            <Button variant="ghost" size="icon" className="text-[#1B3A5F]"><ChevronLeft className="w-5 h-5" /></Button>
-          </Link>
-          <div className="w-12 h-12 rounded-xl bg-[#1B3A5F] flex items-center justify-center">
-            <FileText className="w-6 h-6 text-[#C9A227]" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-[#1B3A5F]">Preparar Reunião</h1>
-            {sessao && (
-              <p className="text-slate-500 text-sm">
-                {sessao.tipo} — {formatarData(sessao.data)} às {sessao.hora}
-                {sessao.local && ` | ${sessao.local}`}
-              </p>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {savedAt && (
-            <span className="text-xs text-green-600 flex items-center gap-1">
-              <CheckCircle className="w-3 h-3" /> Salvo
-            </span>
-          )}
-          <Button onClick={salvarDados} disabled={saving || !sessaoId} variant="outline" className="border-[#1B3A5F] text-[#1B3A5F]">
-            <Save className="w-4 h-4 mr-2" />{saving ? "Salvando..." : "Salvar"}
-          </Button>
-          <Button onClick={gerarPDF} className="bg-[#C9A227] text-[#1B3A5F] font-semibold hover:bg-[#8B7019]">
-            <Printer className="w-4 h-4 mr-2" /> Gerar PDF
-          </Button>
-        </div>
-      </div>
+    <div className="mx-auto max-w-7xl space-y-6">
+      <ReuniaoHeader sessao={sessao} dataFormatada={formatarData(sessao?.data)} savedAt={savedAt} saving={saving} canSave={!!sessaoId} onSave={salvarDados} onPrint={gerarPDF} />
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
+      <div className="flex gap-1 rounded-xl border border-border bg-card p-1.5" role="group" aria-label="Seções da preparação">
         {tabs.map(t => {
           const Icon = t.icon;
           return (
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${activeTab === t.id ? "bg-white text-[#1B3A5F] shadow" : "text-slate-500 hover:text-slate-700"}`}
+              aria-pressed={activeTab === t.id}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 px-2 sm:px-4 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lodge-gold ${activeTab === t.id ? "bg-lodge-navy text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-lodge-navy"}`}
             >
               <Icon className="w-4 h-4" /> {t.label}
             </button>

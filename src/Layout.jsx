@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import CargoIcon, { CARGO_JOIA } from "@/components/CargoIcon";
+import PortalHeader from "@/components/navigation/PortalHeader";
+import PortalNavigation from "@/components/navigation/PortalNavigation";
 
 const LOGO_URL = "https://media.base44.com/images/public/69aea997b473b479398fe231/9a3f4b5ac_LogoCavaleirosAlta.png";
 
@@ -206,10 +207,8 @@ export default function Layout({ children, currentPageName }) {
     portalLabel = cargo || "Portal Administrativo";
   }
 
-  const joia = CARGO_JOIA[cargo]?.joia;
-
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-lodge-canvas">
       <style>{`
         :root {
           --primary-gold: #C9A227;
@@ -218,93 +217,16 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
 
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#1B3A5F] shadow-lg">
-        <div className="flex items-center justify-between px-4 h-16">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden text-white p-2"
-            >
-              {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-[#C9A227]">
-                <img src={LOGO_URL} alt="Cavaleiros da Paz nº25" className="w-full h-full object-contain p-0.5" />
-              </div>
-              <div className="hidden sm:block">
-                <h1 className="text-white font-semibold text-lg">Cavaleiros da Paz nº25</h1>
-                <p className="text-[#C9A227] text-xs flex items-center gap-1.5">
-                  <CargoIcon cargo={cargo} className="w-3.5 h-3.5" />
-                  {portalLabel}
-                  {joia && <span className="text-[#C9A227]/70">• {joia}</span>}
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {user && (
-              <div className="hidden sm:flex items-center gap-3">
-                <div className="text-right">
-                  <p className="text-white text-sm font-medium">{user.full_name}</p>
-                  <p className="text-slate-300 text-xs">{user.cim ? `CIM: ${user.cim}` : ""}</p>
-                </div>
-              </div>
-            )}
-            {isIrmao && (
-              <Link to={createPageUrl("IrmaoConfiguracoes")}>
-                <Button variant="ghost" size="icon" className="text-white hover:bg-white/10" title="Configurações">
-                  <Settings className="w-5 h-5" />
-                </Button>
-              </Link>
-            )}
-            <Link to={createPageUrl("Home")}>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
-                <Home className="w-5 h-5" />
-              </Button>
-            </Link>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleLogout}
-              className="text-white hover:bg-white/10"
-            >
-              <LogOut className="w-5 h-5" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      <PortalHeader logo={LOGO_URL} cargo={cargo} portalLabel={portalLabel} user={user} isIrmao={isIrmao} sidebarOpen={sidebarOpen} onToggleMenu={() => setSidebarOpen(!sidebarOpen)} onLogout={handleLogout} />
 
       {/* Sidebar */}
-      <aside className={`
-        fixed top-16 left-0 bottom-0 w-64 bg-white shadow-xl z-40
+      <aside id="portal-navigation" className={`
+        fixed top-16 left-0 bottom-0 w-64 bg-card border-r border-border z-40
         transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0
       `}>
-        <nav className="p-4 space-y-1 overflow-y-auto h-full pb-8">
-          {links.map((link) => {
-            const Icon = link.icon;
-            const isActive = currentPageName === link.page;
-            return (
-              <Link
-                key={link.page}
-                to={createPageUrl(link.page)}
-                onClick={() => setSidebarOpen(false)}
-                className={`
-                  flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-                  ${isActive 
-                    ? "bg-[#1B3A5F] text-white shadow-lg" 
-                    : "text-slate-600 hover:bg-slate-100"}
-                `}
-              >
-                <Icon className={`w-5 h-5 ${isActive ? "text-[#C9A227]" : ""}`} />
-                <span className="font-medium text-sm">{link.name}</span>
-              </Link>
-            );
-          })}
-        </nav>
+        <PortalNavigation links={links} currentPageName={currentPageName} onNavigate={() => setSidebarOpen(false)} />
       </aside>
 
       {/* Overlay */}

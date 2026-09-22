@@ -10,6 +10,13 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+            lodge: {
+                navy: 'hsl(var(--lodge-navy))',
+                gold: 'hsl(var(--lodge-gold))',
+                canvas: 'hsl(var(--lodge-canvas))',
+                success: 'hsl(var(--lodge-success))',
+                'success-soft': 'hsl(var(--lodge-success-soft))'
+            },
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

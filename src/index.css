@@ -101,6 +101,11 @@ button:focus-visible {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --lodge-navy: 213 56% 24%;
+    --lodge-gold: 46 67% 47%;
+    --lodge-canvas: 210 25% 97%;
+    --lodge-success: 153 48% 28%;
+    --lodge-success-soft: 150 30% 96%;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -111,6 +116,11 @@ button:focus-visible {
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
   .dark {
+    --lodge-navy: 213 45% 75%;
+    --lodge-gold: 46 60% 60%;
+    --lodge-canvas: 215 25% 12%;
+    --lodge-success: 153 45% 68%;
+    --lodge-success-soft: 150 20% 16%;
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
