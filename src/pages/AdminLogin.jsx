@@ -151,7 +151,8 @@ export default function AdminLogin() {
 
         <motion.div initial={reduced ? false : { opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }} className="rounded-2xl border border-lodge-gold/30 bg-landing-surface/95 p-7 shadow-2xl backdrop-blur-sm sm:p-9">
           <div className="text-center mb-8">
-            <img src={LOGO_LOJA_PADRAO} alt="Cavaleiros da Paz nº25" className="mx-auto mb-5 h-20 w-20 object-contain" />
+            <img src={LOGO_LOJA_PADRAO} alt="Brasão da Loja Cavaleiros da Paz nº25" className="mx-auto mb-2 h-28 w-28 object-contain sm:h-32 sm:w-32" />
+            <p className="mb-5 text-sm font-semibold uppercase tracking-[0.16em] text-lodge-gold sm:text-base">Cavaleiros da Paz nº25</p>
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-lodge-gold/50 bg-lodge-gold/10 text-lodge-gold">
               {isBibliotecario ? <Library className="h-7 w-7" /> : <EsquadroCompasso className="h-10 w-10" />}
             </div>

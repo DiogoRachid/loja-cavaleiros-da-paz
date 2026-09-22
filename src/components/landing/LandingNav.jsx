@@ -31,17 +31,17 @@ export default function LandingNav() {
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className={`max-w-6xl mx-auto px-6 flex items-center justify-between transition-all duration-500 ${compacto ? "h-20" : "h-28"}`}>
+      <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between gap-4 transition-all duration-500 ${compacto ? "h-24" : "h-32"}`}>
         <a href="#top" className="group flex items-center gap-3">
           <img
             src={LOGO_LOJA_PADRAO}
             alt="Cavaleiros da Paz nº25"
-            className={`object-contain transition-all duration-500 group-hover:scale-110 ${compacto ? "w-12 h-12" : "w-16 h-16"}`}
+            className={`shrink-0 object-contain transition-all duration-500 group-hover:scale-105 ${compacto ? "w-16 h-16" : "w-20 h-20 md:w-24 md:h-24"}`}
           />
-          <span className="hidden text-base font-semibold tracking-wide text-primary-foreground sm:block lg:text-lg">Cavaleiros da Paz nº25</span>
+          <span className="hidden text-lg font-semibold tracking-wide text-primary-foreground sm:block lg:text-xl">Cavaleiros da Paz nº25</span>
         </a>
 
-        <nav className="hidden md:flex items-center gap-7">
+        <nav className="hidden lg:flex items-center gap-5 xl:gap-7">
           {ITENS.map((i) => (
             <a
               key={i.href}

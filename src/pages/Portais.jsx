@@ -20,8 +20,8 @@ export default function Portais() {
         <Link to={createPageUrl("Home")} className="inline-flex w-fit items-center gap-2 text-sm text-slate-300 transition-colors hover:text-lodge-gold"><ArrowLeft className="h-4 w-4" /> Voltar à Loja</Link>
         <div className="flex flex-1 flex-col items-center justify-center py-14">
           <motion.div initial={reduced ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mb-12 text-center">
-            <motion.img whileHover={reduced ? undefined : { scale: 1.06, rotate: 3 }} src={LOGO_LOJA_PADRAO} alt="Cavaleiros da Paz nº25" className="mx-auto mb-5 h-32 w-32 object-contain" />
-            <p className="mb-3 text-xs uppercase tracking-[0.3em] text-lodge-gold">Cavaleiros da Paz nº25</p>
+            <motion.img whileHover={reduced ? undefined : { scale: 1.06, rotate: 3 }} src={LOGO_LOJA_PADRAO} alt="Brasão da Loja Cavaleiros da Paz nº25" className="mx-auto mb-4 h-40 w-40 object-contain md:h-44 md:w-44" />
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-lodge-gold md:text-base">Cavaleiros da Paz nº25</p>
             <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">Escolha seu portal</h1>
             <p className="mt-4 text-slate-300">Um só propósito, diferentes formas de servir à Loja.</p>
           </motion.div>

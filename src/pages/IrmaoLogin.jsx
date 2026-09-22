@@ -170,7 +170,8 @@ export default function IrmaoLogin() {
       >
         <Card className="border border-lodge-gold/30 bg-landing-surface/95 text-primary-foreground shadow-2xl backdrop-blur-sm">
           <CardHeader className="pb-2 text-center">
-            <img src={LOGO_LOJA_PADRAO} alt="Cavaleiros da Paz nº25" className="mx-auto mb-5 h-20 w-20 object-contain" />
+            <img src={LOGO_LOJA_PADRAO} alt="Brasão da Loja Cavaleiros da Paz nº25" className="mx-auto mb-2 h-28 w-28 object-contain sm:h-32 sm:w-32" />
+            <p className="mb-5 text-sm font-semibold uppercase tracking-[0.16em] text-lodge-gold sm:text-base">Cavaleiros da Paz nº25</p>
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-lodge-gold/50 bg-lodge-gold/10">
               <BookOpen className="h-7 w-7 text-lodge-gold" />
             </div>
