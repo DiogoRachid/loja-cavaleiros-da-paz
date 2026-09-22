@@ -178,7 +178,13 @@ export default function Layout({ children, currentPageName }) {
   if (PAGES_SEM_LAYOUT.includes(currentPageName)) return <>{children}</>;
   if (isAdminPage && !hasAdminSession) return <Navigate to="/AdminLogin" replace />;
   if (isBibliotecaPage && !hasBibSession && !hasAdminSession) return <Navigate to="/BibLogin" replace />;
-  if (isIrmaoPage && (hasAdminSession || !hasIrmaoSession)) return <Navigate to="/IrmaoLogin" replace />;
+  if (isIrmaoPage && hasAdminSession) {
+    const adminCargo = sessionStorage.getItem("admin_cargo") || "Venerável Mestre";
+    const paginaOficial = ADMIN_LINKS_BY_CARGO[adminCargo]?.[0]?.page || "AdminVM";
+    return <Navigate to={createPageUrl(paginaOficial)} replace />;
+  }
+  if (isIrmaoPage && hasBibSession) return <Navigate to="/BibDashboard" replace />;
+  if (isIrmaoPage && !hasIrmaoSession) return <Navigate to="/IrmaoLogin" replace />;
 
   const isBibliotecario = cargo === "Bibliotecário";
   const isAdmin = isAdminPage || isBibliotecaPage;
