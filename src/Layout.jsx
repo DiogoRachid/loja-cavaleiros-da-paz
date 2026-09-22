@@ -7,7 +7,7 @@ import {
   Gavel, ClipboardList, Shield, Star, Heart, Music, ListMusic, Upload, Settings, Timer,
   ClipboardCheck, Mail, LayoutGrid, HeartHandshake
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import PortalHeader from "@/components/navigation/PortalHeader";
 import PortalNavigation from "@/components/navigation/PortalNavigation";
@@ -144,8 +144,6 @@ const PAGES_SEM_LAYOUT = ["Home", "Portais", "ScanRetirada", "ScanDevolucao", "B
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user, setUser] = useState(null);
-  const [cargo, setCargo] = useState(null);
 
   const isBibliotecaPage = currentPageName?.startsWith("Bib");
   const isAdminPage = currentPageName?.startsWith("Admin");
@@ -154,25 +152,15 @@ export default function Layout({ children, currentPageName }) {
   const hasBibSession = sessionStorage.getItem("bib_auth") === "true" && !!sessionStorage.getItem("bib_data");
   const hasIrmaoSession = sessionStorage.getItem("irmao_auth") === "true" && !!sessionStorage.getItem("irmao_data");
 
-  useEffect(() => {
-    if (PAGES_SEM_LAYOUT.includes(currentPageName)) return;
-    if (isAdminPage && hasAdminSession || isBibliotecaPage && hasAdminSession) {
-      const admin = JSON.parse(sessionStorage.getItem("admin_data"));
-      setUser({ full_name: admin.nome_completo, cim: admin.cim });
-      setCargo(sessionStorage.getItem("admin_cargo") || admin.cargo);
-    } else if (isBibliotecaPage && hasBibSession) {
-      const bib = JSON.parse(sessionStorage.getItem("bib_data"));
-      setUser({ full_name: bib.nome || bib.nome_completo, cim: bib.cim });
-      setCargo("Bibliotecário");
-    } else if (isIrmaoPage && hasIrmaoSession) {
-      const ir = JSON.parse(sessionStorage.getItem("irmao_data"));
-      setUser({ full_name: ir.nome_completo, cim: ir.cim });
-      setCargo("Irmão");
-    } else {
-      setUser(null);
-      setCargo(null);
-    }
-  }, [currentPageName]);
+  const activePortal = isIrmaoPage ? "irmao" : isBibliotecaPage && !hasAdminSession ? "biblioteca" : "admin";
+  const sessionData = activePortal === "irmao" && hasIrmaoSession
+    ? JSON.parse(sessionStorage.getItem("irmao_data"))
+    : activePortal === "biblioteca" && hasBibSession
+      ? JSON.parse(sessionStorage.getItem("bib_data"))
+      : activePortal === "admin" && hasAdminSession
+        ? JSON.parse(sessionStorage.getItem("admin_data")) : null;
+  const user = sessionData && { full_name: sessionData.nome_completo || sessionData.nome, cim: sessionData.cim };
+  const cargo = activePortal === "irmao" ? "Irmão" : activePortal === "biblioteca" ? "Bibliotecário" : sessionData ? sessionStorage.getItem("admin_cargo") || sessionData.cargo : null;
 
   const handleLogout = () => {
     sessionStorage.removeItem("admin_auth");
