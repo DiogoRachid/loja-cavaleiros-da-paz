@@ -187,7 +187,7 @@ export default function AdminLogin() {
                       value={numeroGlp}
                       onChange={e => setNumeroGlp(e.target.value)}
                       placeholder="Seu número de cadastro GLP"
-                      className="portal-login-input border-lodge-gold/30 bg-landing-deep/70 pl-10 text-white placeholder:text-slate-400 focus-visible:ring-lodge-gold"
+                      className="portal-login-input border-lodge-gold/30 bg-white pl-10 text-slate-900 placeholder:text-slate-500 focus-visible:ring-lodge-gold"
                     />
                   </div>
                 </div>
@@ -200,7 +200,7 @@ export default function AdminLogin() {
                       value={senha}
                       onChange={e => setSenha(e.target.value)}
                       placeholder="Sua senha"
-                      className="portal-login-input border-lodge-gold/30 bg-landing-deep/70 pl-10 text-white placeholder:text-slate-400 focus-visible:ring-lodge-gold"
+                      className="portal-login-input border-lodge-gold/30 bg-white pl-10 text-slate-900 placeholder:text-slate-500 focus-visible:ring-lodge-gold"
                     />
                   </div>
                 </div>

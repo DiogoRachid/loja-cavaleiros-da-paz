@@ -182,7 +182,7 @@ export default function IrmaoLogin() {
                 : "Digite seu número GLP e senha"}
             </CardDescription>
           </CardHeader>
-          <CardContent className="[&_label]:text-slate-200 [&_input]:border-lodge-gold/30 [&_input]:bg-landing-deep/70 [&_input]:text-primary-foreground [&_input]:placeholder:text-slate-400 [&_input]:focus-visible:ring-lodge-gold">
+          <CardContent className="[&_label]:text-slate-200 [&_input]:border-lodge-gold/30 [&_input]:bg-white [&_input]:text-slate-900 [&_input]:placeholder:text-slate-500 [&_input]:focus-visible:ring-lodge-gold">
             {recuperarSenha ? (
               <form onSubmit={handleRecuperarSenha} className="space-y-4">
                 <p className="text-sm text-slate-300">Informe seu número GLP. A senha será redefinida para o número GLP.</p>
