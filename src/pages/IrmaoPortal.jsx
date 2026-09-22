@@ -48,16 +48,16 @@ export default function IrmaoPortal() {
   return (
     <div className="space-y-6">
       {/* Saudação */}
-      <div className="bg-gradient-to-r from-[#1B3A5F] to-[#0D1F33] rounded-2xl p-6 text-white">
+      <div className="rounded-xl bg-lodge-navy p-6 text-primary-foreground">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-[#C9A227]/20 flex items-center justify-center text-2xl font-bold text-[#C9A227]">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-lodge-gold/20 text-2xl font-semibold text-lodge-gold">
             {irmao.nome_completo?.charAt(0)}
           </div>
           <div>
             <p className="text-slate-300 text-sm">Bem-vindo, Irmão</p>
             <h1 className="text-xl font-bold">{irmao.nome_completo}</h1>
             <div className="flex gap-2 mt-1 flex-wrap">
-              <Badge className="bg-[#C9A227]/20 text-[#C9A227] border-0">{irmao.grau}</Badge>
+              <Badge className="border-0 bg-lodge-gold/20 text-lodge-gold">{irmao.grau}</Badge>
               {irmao.cargo && irmao.cargo !== "Nenhum" && <Badge className="bg-white/10 text-white border-0">{irmao.cargo}</Badge>}
               {comissoesDoIrmao.map(mc => (
                 <Badge key={mc.id} className="bg-white/10 text-white border-0">Membro da Comissão {mc.comissao_nome}</Badge>
@@ -70,7 +70,7 @@ export default function IrmaoPortal() {
 
       {/* Alertas */}
       {pendentes.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+        <div className="flex items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-red-800">Mensalidade(s) em aberto</p>
@@ -79,7 +79,7 @@ export default function IrmaoPortal() {
         </div>
       )}
       {emprestimos.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-start gap-3">
+        <div className="flex items-start gap-3 rounded-xl border border-lodge-gold/30 bg-lodge-gold/10 p-4">
           <BookOpen className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-yellow-800">{emprestimos.length} livro(s) emprestado(s)</p>
@@ -89,15 +89,15 @@ export default function IrmaoPortal() {
       )}
 
       {/* Cards KPI */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-white" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-lodge-navy/10">
+                <Calendar className="h-5 w-5 text-lodge-navy" />
               </div>
               <div>
-                <p className="text-xl font-bold text-slate-800">{freqPct}%</p>
+                <p className="text-xl font-semibold text-lodge-navy">{freqPct}%</p>
                 <p className="text-xs text-slate-500">Frequência ({presentes}/{totalSessoes})</p>
               </div>
             </div>
@@ -106,11 +106,11 @@ export default function IrmaoPortal() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${pendentes.length > 0 ? "bg-red-500" : "bg-green-500"}`}>
-                <DollarSign className="w-5 h-5 text-white" />
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${pendentes.length > 0 ? "bg-destructive/10" : "bg-lodge-navy/10"}`}>
+                <DollarSign className={`h-5 w-5 ${pendentes.length > 0 ? "text-destructive" : "text-lodge-navy"}`} />
               </div>
               <div>
-                <p className="text-xl font-bold text-slate-800">{pendentes.length}</p>
+                <p className="text-xl font-semibold text-lodge-navy">{pendentes.length}</p>
                 <p className="text-xs text-slate-500">Mensalidades em aberto</p>
               </div>
             </div>
@@ -129,10 +129,10 @@ export default function IrmaoPortal() {
           const Icon = item.icon;
           return (
             <Link key={item.page} to={createPageUrl(item.page)}>
-              <Card className="hover:shadow-md hover:border-[#C9A227] transition-all cursor-pointer">
+              <Card className="h-full border-border shadow-sm transition-colors hover:border-lodge-gold">
                 <CardContent className="p-4 flex flex-col items-center gap-2 text-center">
-                  <div className="w-10 h-10 rounded-xl bg-[#1B3A5F]/10 flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-[#1B3A5F]" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-lodge-navy/10">
+                    <Icon className="h-5 w-5 text-lodge-navy" />
                   </div>
                   <p className="text-xs font-medium text-slate-700">{item.label}</p>
                 </CardContent>
@@ -145,15 +145,15 @@ export default function IrmaoPortal() {
       {/* Próximas Sessões */}
       {sessoes.length > 0 && (
         <Card>
-          <CardHeader><CardTitle className="text-[#1B3A5F] flex items-center gap-2 text-base"><Calendar className="w-4 h-4" /> Próximas Sessões</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2 text-base text-lodge-navy"><Calendar className="w-4 h-4" /> Próximas Sessões</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {sessoes.map(s => (
-              <div key={s.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              <div key={s.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3">
                 <div>
                   <p className="font-medium text-slate-800 text-sm">{s.tipo}</p>
                   <p className="text-xs text-slate-500">{s.data} às {s.hora}{s.local ? ` • ${s.local}` : ""}</p>
                 </div>
-                <Badge className="bg-[#1B3A5F]/10 text-[#1B3A5F]">{s.grau}</Badge>
+                <Badge className="bg-lodge-navy/10 text-lodge-navy">{s.grau}</Badge>
               </div>
             ))}
           </CardContent>
@@ -162,11 +162,11 @@ export default function IrmaoPortal() {
 
       {/* Últimas Mensalidades */}
       <Card>
-        <CardHeader><CardTitle className="text-[#1B3A5F] flex items-center gap-2 text-base"><DollarSign className="w-4 h-4" /> Minhas Mensalidades</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="flex items-center gap-2 text-base text-lodge-navy"><DollarSign className="w-4 h-4" /> Minhas Mensalidades</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           {ultimasMensalidades.length === 0 && <p className="text-slate-400 text-sm text-center py-3">Nenhum lançamento encontrado.</p>}
           {ultimasMensalidades.map(m => (
-            <div key={m.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+            <div key={m.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3">
               <div>
                 <p className="font-medium text-slate-800 text-sm">{m.competencia}</p>
                 <p className="text-xs text-slate-500">Venc: {m.vencimento}</p>
@@ -182,7 +182,7 @@ export default function IrmaoPortal() {
 
       {/* Dados Pessoais */}
       <Card>
-        <CardHeader><CardTitle className="text-[#1B3A5F] flex items-center gap-2 text-base"><User className="w-4 h-4" /> Dados Cadastrais</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="flex items-center gap-2 text-base text-lodge-navy"><User className="w-4 h-4" /> Dados Cadastrais</CardTitle></CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-3 text-sm">
           <div><span className="text-slate-500">CIM: </span><span className="font-medium">{irmao.cim}</span></div>
           <div><span className="text-slate-500">Nº GLP: </span><span className="font-medium">{irmao.numero_glp || "—"}</span></div>

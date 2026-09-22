@@ -38,49 +38,49 @@ export default function AdminMestreHarmonia() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-[#1B3A5F] flex items-center justify-center">
-          <Music className="w-6 h-6 text-[#C9A227]" />
+      <div className="flex items-center gap-4 border-b border-border pb-5">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-border bg-card">
+          <Music className="h-7 w-7 text-lodge-gold" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-[#1B3A5F]">Painel do Mestre de Harmonia</h1>
-          <p className="text-slate-500">Bem-vindo, Ir∴ {admin.nome_completo}</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-lodge-navy">Painel do Mestre de Harmonia</h1>
+          <p className="text-sm text-muted-foreground">Bem-vindo, Ir∴ {admin.nome_completo}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
         <Card>
           <CardContent className="p-5">
-            <div className="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center mb-3">
-              <Calendar className="w-5 h-5 text-white" />
+            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-lodge-navy/10">
+              <Calendar className="h-5 w-5 text-lodge-navy" />
             </div>
-            <p className="text-2xl font-bold text-slate-800">{sessoes.length}</p>
-            <p className="text-sm text-slate-500 mt-1">Sessões Agendadas</p>
+            <p className="text-2xl font-semibold text-lodge-navy">{sessoes.length}</p>
+            <p className="mt-1 text-sm text-muted-foreground">Sessões Agendadas</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-5">
-            <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center mb-3">
-              <ListMusic className="w-5 h-5 text-white" />
+            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-lodge-navy/10">
+              <ListMusic className="h-5 w-5 text-lodge-navy" />
             </div>
-            <p className="text-2xl font-bold text-slate-800">{sessoesMontadas.length}</p>
-            <p className="text-sm text-slate-500 mt-1">Sessões com Roteiro</p>
+            <p className="text-2xl font-semibold text-lodge-navy">{sessoesMontadas.length}</p>
+            <p className="mt-1 text-sm text-muted-foreground">Sessões com Roteiro</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-5">
-            <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center mb-3">
-              <Headphones className="w-5 h-5 text-white" />
+            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-lodge-navy/10">
+              <Headphones className="h-5 w-5 text-lodge-navy" />
             </div>
-            <p className="text-2xl font-bold text-slate-800">{playlists.length}</p>
-            <p className="text-sm text-slate-500 mt-1">Roteiros Criados</p>
+            <p className="text-2xl font-semibold text-lodge-navy">{playlists.length}</p>
+            <p className="mt-1 text-sm text-muted-foreground">Roteiros Criados</p>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardContent className="p-5">
-          <h2 className="text-lg font-semibold text-[#1B3A5F] mb-4 flex items-center gap-2">
+          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-lodge-navy">
             <Calendar className="w-5 h-5" /> Próximas Sessões
           </h2>
           {proximasSessoes.length === 0 ? (
@@ -90,14 +90,14 @@ export default function AdminMestreHarmonia() {
               {proximasSessoes.map(s => {
                 const temPlaylist = playlists.some(p => p.sessao_id === s.id);
                 return (
-                  <Link key={s.id} to={`/AdminRoteiroHarmonia?sessao=${s.id}`}>
-                    <div className="flex items-center justify-between gap-2 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
+                  <Link key={s.id} to={`/AdminRoteiroHarmonia?sessao=${s.id}`} className="block">
+                    <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:border-lodge-gold">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-12 h-12 rounded-xl bg-[#1B3A5F] flex flex-col items-center justify-center flex-shrink-0">
-                          <span className="text-[#C9A227] text-[10px] font-medium">
+                        <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg bg-lodge-navy">
+                          <span className="text-[10px] font-medium text-lodge-gold">
                             {s.data?.split("-")[1] && ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"][parseInt(s.data.split("-")[1]) - 1]}
                           </span>
-                          <span className="text-white text-lg font-bold">{s.data?.split("-")[2]}</span>
+                          <span className="text-lg font-bold text-primary-foreground">{s.data?.split("-")[2]}</span>
                         </div>
                         <div className="min-w-0">
                           <p className="font-medium text-slate-800 truncate">{s.tipo} {s.numero && `Nº ${s.numero}`}</p>
@@ -106,11 +106,11 @@ export default function AdminMestreHarmonia() {
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {temPlaylist ? (
-                          <Badge className="bg-green-100 text-green-800">
+                          <Badge className="border-0 bg-lodge-success-soft text-lodge-success">
                             <Music className="w-3 h-3 mr-1" />Roteiro pronto
                           </Badge>
                         ) : (
-                          <Badge className="bg-amber-100 text-amber-800">Sem roteiro</Badge>
+                          <Badge className="border border-lodge-gold/30 bg-lodge-gold/10 text-lodge-navy">Sem roteiro</Badge>
                         )}
                       </div>
                     </div>
