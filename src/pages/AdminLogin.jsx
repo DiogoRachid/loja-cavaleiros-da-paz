@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { db } from "@/api/db";
 import { buscarSubstituicaoAtiva } from "@/lib/substituicao";
-import { Crown, Lock, User, ArrowLeft, Library } from "lucide-react";
+import { Lock, User, ArrowLeft, Library } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import MasonicBackdrop from "@/components/landing/MasonicBackdrop";
+import EsquadroCompasso from "@/components/landing/EsquadroCompasso";
+import { LOGO_LOJA_PADRAO } from "@/lib/relatorio";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +32,7 @@ const CARGOS_ADMIN = [
 ];
 
 export default function AdminLogin() {
+  const reduced = useReducedMotion();
   const navigate = useNavigate();
   const [cargo, setCargo] = useState("");
   const [numeroGlp, setNumeroGlp] = useState("");
@@ -136,17 +141,19 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1B3A5F] to-[#0D1F33] flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
+    <div className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-landing-deep p-6 text-primary-foreground">
+      <MasonicBackdrop />
+      <div className="relative z-10 w-full max-w-lg py-10">
         <Link to={createPageUrl("Home")} className="flex items-center gap-2 text-slate-300 hover:text-white mb-8 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Voltar ao início
         </Link>
 
-        <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8">
+        <motion.div initial={reduced ? false : { opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }} className="rounded-2xl border border-lodge-gold/30 bg-landing-surface/95 p-7 shadow-2xl backdrop-blur-sm sm:p-9">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#C9A227]/20 flex items-center justify-center">
-              {isBibliotecario ? <Library className="w-8 h-8 text-[#C9A227]" /> : <Crown className="w-8 h-8 text-[#C9A227]" />}
+            <img src={LOGO_LOJA_PADRAO} alt="Cavaleiros da Paz nº25" className="mx-auto mb-5 h-20 w-20 object-contain" />
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-lodge-gold/50 bg-lodge-gold/10 text-lodge-gold">
+              {isBibliotecario ? <Library className="h-7 w-7" /> : <EsquadroCompasso className="h-10 w-10" />}
             </div>
             <h1 className="text-2xl font-bold text-white">
               {isBibliotecario ? "Portal Bibliotecário" : "Portal Administrativo"}
@@ -158,7 +165,7 @@ export default function AdminLogin() {
             <div className="space-y-2">
               <Label className="text-slate-200">Cargo</Label>
               <Select value={cargo} onValueChange={(v) => { setCargo(v); setErro(""); }}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectTrigger className="border-lodge-gold/30 bg-landing-deep/70 text-white focus:ring-lodge-gold [&>svg]:text-lodge-gold">
                   <SelectValue placeholder="Selecione seu cargo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -179,7 +186,7 @@ export default function AdminLogin() {
                       value={numeroGlp}
                       onChange={e => setNumeroGlp(e.target.value)}
                       placeholder="Seu número de cadastro GLP"
-                      className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                      className="border-lodge-gold/30 bg-landing-deep/70 pl-10 text-white placeholder:text-slate-400 focus-visible:ring-lodge-gold"
                     />
                   </div>
                 </div>
@@ -192,7 +199,7 @@ export default function AdminLogin() {
                       value={senha}
                       onChange={e => setSenha(e.target.value)}
                       placeholder="Sua senha"
-                      className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                      className="border-lodge-gold/30 bg-landing-deep/70 pl-10 text-white placeholder:text-slate-400 focus-visible:ring-lodge-gold"
                     />
                   </div>
                 </div>
@@ -208,12 +215,12 @@ export default function AdminLogin() {
             <Button
               type="submit"
               disabled={loading || !cargo}
-              className="w-full bg-[#C9A227] hover:bg-[#8B7019] text-[#1B3A5F] font-semibold"
+              className="w-full bg-lodge-gold font-semibold text-landing-deep hover:bg-lodge-gold/80"
             >
               {loading ? "Verificando..." : "Entrar"}
             </Button>
           </form>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

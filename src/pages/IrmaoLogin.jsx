@@ -8,9 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import MasonicBackdrop from "@/components/landing/MasonicBackdrop";
+import { LOGO_LOJA_PADRAO } from "@/lib/relatorio";
 
 export default function IrmaoLogin() {
+  const reduced = useReducedMotion();
   const [numeroGlp, setNumeroGlp] = useState("");
   const [senha, setSenha] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -156,34 +159,32 @@ export default function IrmaoLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1B3A5F] to-[#0D1F33] flex items-center justify-center p-6">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-64 h-64 bg-[#C9A227]/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#C9A227]/5 rounded-full blur-3xl" />
-      </div>
+    <div className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-landing-deep p-6 text-primary-foreground">
+      <MasonicBackdrop />
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={reduced ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md relative z-10"
+        transition={{ duration: 0.6 }}
+        className="relative z-10 w-full max-w-lg py-10"
       >
-        <Card className="border-0 shadow-2xl">
-          <CardHeader className="text-center pb-2">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#C9A227] to-[#8B7019] flex items-center justify-center">
-              <BookOpen className="w-8 h-8 text-[#1B3A5F]" />
+        <Card className="border border-lodge-gold/30 bg-landing-surface/95 text-primary-foreground shadow-2xl backdrop-blur-sm">
+          <CardHeader className="pb-2 text-center">
+            <img src={LOGO_LOJA_PADRAO} alt="Cavaleiros da Paz nº25" className="mx-auto mb-5 h-20 w-20 object-contain" />
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-lodge-gold/50 bg-lodge-gold/10">
+              <BookOpen className="h-7 w-7 text-lodge-gold" />
             </div>
-            <CardTitle className="text-2xl text-[#1B3A5F]">Portal do Irmão</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl text-primary-foreground">Portal do Irmão</CardTitle>
+            <CardDescription className="text-slate-300">
               {trocaSenha 
                 ? "Crie uma nova senha para continuar" 
                 : "Digite seu número GLP e senha"}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="[&_label]:text-slate-200 [&_input]:border-lodge-gold/30 [&_input]:bg-landing-deep/70 [&_input]:text-primary-foreground [&_input]:placeholder:text-slate-400 [&_input]:focus-visible:ring-lodge-gold">
             {recuperarSenha ? (
               <form onSubmit={handleRecuperarSenha} className="space-y-4">
-                <p className="text-sm text-slate-600">Informe seu número GLP. A senha será redefinida para o número GLP.</p>
+                <p className="text-sm text-slate-300">Informe seu número GLP. A senha será redefinida para o número GLP.</p>
                 {error && (
                   <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                     <AlertTriangle className="w-4 h-4 flex-shrink-0" />{error}
@@ -208,11 +209,11 @@ export default function IrmaoLogin() {
                   </div>
                 </div>
                 {!msgRecuperar && (
-                  <Button type="submit" className="w-full bg-[#1B3A5F] hover:bg-[#15304d]" disabled={loading || !glpRecuperar}>
+                  <Button type="submit" className="w-full bg-lodge-gold font-semibold text-landing-deep hover:bg-lodge-gold/80" disabled={loading || !glpRecuperar}>
                     {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Redefinindo...</> : "Redefinir Senha"}
                   </Button>
                 )}
-                <Button type="button" variant="outline" className="w-full" onClick={() => { setRecuperarSenha(false); setError(""); setMsgRecuperar(""); }}>
+                <Button type="button" variant="outline" className="w-full border-lodge-gold/40 bg-transparent text-primary-foreground hover:bg-landing-bright/50 hover:text-primary-foreground" onClick={() => { setRecuperarSenha(false); setError(""); setMsgRecuperar(""); }}>
                   Voltar ao login
                 </Button>
               </form>
@@ -267,12 +268,12 @@ export default function IrmaoLogin() {
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  <p className="text-xs text-slate-500">No primeiro acesso, use seu número GLP como senha</p>
+                  <p className="text-xs text-slate-300">No primeiro acesso, use seu número GLP como senha</p>
                 </div>
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-[#1B3A5F] hover:bg-[#15304d]"
+                  className="w-full bg-lodge-gold font-semibold text-landing-deep hover:bg-lodge-gold/80"
                   disabled={loading || !numeroGlp || !senha}
                 >
                   {loading ? (
@@ -338,7 +339,7 @@ export default function IrmaoLogin() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-[#1B3A5F] hover:bg-[#15304d]"
+                  className="w-full bg-lodge-gold font-semibold text-landing-deep hover:bg-lodge-gold/80"
                   disabled={loading || !novaSenha || !confirmarSenha}
                 >
                   {loading ? (
@@ -358,7 +359,7 @@ export default function IrmaoLogin() {
                 <button
                   type="button"
                   onClick={() => { setRecuperarSenha(true); setError(""); }}
-                  className="text-sm text-[#C9A227] hover:text-[#b08c1e] flex items-center justify-center gap-1 w-full"
+                  className="flex w-full items-center justify-center gap-1 text-sm text-lodge-gold hover:text-primary-foreground"
                 >
                   <RotateCcw className="w-4 h-4" />
                   Recuperar senha
@@ -366,7 +367,7 @@ export default function IrmaoLogin() {
               )}
               <Link 
                 to={createPageUrl("Home")}
-                className="text-sm text-slate-500 hover:text-[#1B3A5F] flex items-center justify-center gap-1"
+                className="flex items-center justify-center gap-1 text-sm text-slate-300 hover:text-lodge-gold"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Voltar para o início
@@ -375,7 +376,7 @@ export default function IrmaoLogin() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-slate-400 text-xs mt-6">
+        <p className="mt-6 text-center text-xs text-slate-300">
           Loja Cavaleiros da Paz nº25
         </p>
       </motion.div>
