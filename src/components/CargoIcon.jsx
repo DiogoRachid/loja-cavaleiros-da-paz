@@ -31,7 +31,7 @@ export const CARGO_JOIA = {
   "Mestre de Harmonia": { icon: Music, joia: "Uma lira" },
   "Mestre de Banquetes": { icon: Utensils, joia: "Uma cornucópia" },
   "Bibliotecário": { icon: BookMarked, joia: "Um livro com uma pena de escrever" },
-  "Secretário de Ação Social": { icon: Heart, joia: "Coração" },
+  "Secretário de Ação Social": { icon: Heart, joia: "Duas mãos amparando um coração" },
 };
 
 // Joias oficiais do ritual (imagens extraídas do documento da Loja)
@@ -64,6 +64,7 @@ export const CARGO_JOIA_IMG = {
   "Mestre de Banquetes": `${B}550de7d94_joia20.jpeg`,
   "Bibliotecário": `${B}5e13b6f6f_joia21.jpeg`,
   "Mestre Instalado": `${B}1d0da6c01_joia22.jpeg`,
+  "Secretário de Ação Social": "https://media.base44.com/images/public/69aea997b473b479398fe231/c2415641e_generated_image.png",
 };
 
 export default function CargoIcon({ cargo, className = "w-5 h-5" }) {
