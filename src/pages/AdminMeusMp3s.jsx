@@ -177,13 +177,11 @@ export default function AdminMeusMp3s() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-[#1B3A5F] flex items-center justify-center">
-          <ListMusic className="w-6 h-6 text-[#C9A227]" />
-        </div>
+      <div className="flex items-center gap-4 border-b border-border pb-5">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-border bg-card"><ListMusic className="h-7 w-7 text-lodge-gold" /></div>
         <div>
-          <h1 className="text-2xl font-bold text-[#1B3A5F]">Pastas de Músicas</h1>
-          <p className="text-slate-500 text-sm">Envie MP3s para a biblioteca e vincule-os a quantas pastas quiser</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-lodge-navy">Pastas de Músicas</h1>
+          <p className="text-sm text-muted-foreground">Envie MP3s para a biblioteca e vincule-os a quantas pastas quiser</p>
         </div>
       </div>
 
@@ -208,14 +206,14 @@ export default function AdminMeusMp3s() {
       />
 
       <Card>
-        <CardContent className="p-4 flex items-center gap-2">
+        <CardContent className="flex flex-wrap items-center gap-2 p-4">
           <Input
             placeholder="Nome da nova pasta (ex: Abertura, Tronco...)"
             value={novaPasta}
             onChange={(e) => setNovaPasta(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && criarPasta()}
           />
-          <Button onClick={criarPasta} disabled={criando || !novaPasta.trim()} className="bg-[#1B3A5F] text-white hover:bg-[#152d49] flex-shrink-0">
+          <Button onClick={criarPasta} disabled={criando || !novaPasta.trim()} className="shrink-0 bg-lodge-navy text-primary-foreground hover:bg-lodge-navy/90">
             {criando ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <FolderPlus className="w-4 h-4 mr-1" />}
             Criar Pasta
           </Button>

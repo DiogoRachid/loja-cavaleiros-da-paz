@@ -6,7 +6,7 @@ import { LOGO_LOJA_PADRAO } from "@/lib/relatorio";
 
 export default function Portais() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1B3A5F] to-[#0D1F33] relative overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-lodge-navy">
       <Link
         to={createPageUrl("Home")}
         className="fixed top-6 left-6 z-50 flex items-center gap-2 text-slate-300 hover:text-[#C9A227] text-sm transition-colors"
@@ -43,7 +43,7 @@ export default function Portais() {
         >
           <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             <Link to={createPageUrl("IrmaoLogin")}>
-              <div className="group bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 hover:bg-white/20 transition-all duration-300 cursor-pointer h-full">
+              <div className="group h-full rounded-xl border border-white/20 bg-white/5 p-8 transition-colors hover:border-lodge-gold/50 hover:bg-white/10">
                 <div className="w-16 h-16 mb-6 rounded-xl bg-[#C9A227]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Users className="w-8 h-8 text-[#C9A227]" />
                 </div>
@@ -55,7 +55,7 @@ export default function Portais() {
             </Link>
 
             <Link to={createPageUrl("AdminLogin")}>
-              <div className="group bg-white/10 backdrop-blur-sm border border-[#C9A227]/40 rounded-2xl p-8 hover:bg-[#C9A227]/10 transition-all duration-300 cursor-pointer h-full">
+              <div className="group h-full rounded-xl border border-white/20 bg-white/5 p-8 transition-colors hover:border-lodge-gold/50 hover:bg-white/10">
                 <div className="w-16 h-16 mb-6 rounded-xl bg-[#C9A227]/30 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Crown className="w-8 h-8 text-[#C9A227]" />
                 </div>

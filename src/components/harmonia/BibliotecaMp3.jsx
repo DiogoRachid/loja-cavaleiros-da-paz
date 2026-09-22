@@ -51,11 +51,11 @@ export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUplo
     : dasPastasSelecionadas;
 
   return (
-    <Card>
+    <Card className="border-border shadow-sm">
       <CardContent className="p-4">
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="w-10 h-10 rounded-lg bg-[#C9A227] flex items-center justify-center flex-shrink-0">
-            <Library className="w-5 h-5 text-[#1B3A5F]" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-lodge-navy/10">
+            <Library className="h-5 w-5 text-lodge-navy" />
           </div>
           <button className="flex-1 min-w-0 text-left" onClick={() => setExpanded(!expanded)}>
             <p className="font-semibold text-slate-800 text-sm">Biblioteca de Músicas</p>
@@ -75,13 +75,13 @@ export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUplo
           <Button
             size="sm"
             disabled={uploading}
-            className="bg-[#1B3A5F] text-white hover:bg-[#152d49]"
+            className="bg-lodge-navy text-primary-foreground hover:bg-lodge-navy/90"
             onClick={() => fileInputRef.current?.click()}
           >
             {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />}
             Enviar MP3s
           </Button>
-          <Button size="icon" variant="ghost" onClick={() => setExpanded(!expanded)}>
+          <Button size="icon" variant="ghost" onClick={() => setExpanded(!expanded)} aria-label={expanded ? "Recolher biblioteca" : "Expandir biblioteca"} aria-expanded={expanded}>
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </Button>
         </div>
@@ -106,7 +106,7 @@ export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUplo
               filtradas.map((m) => {
                 const nasPastas = pastasDaMusica(m.id);
                 return (
-                  <div key={m.id} className="flex flex-col sm:flex-row sm:items-center gap-2 p-2 rounded-lg bg-slate-50">
+                  <div key={m.id} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center flex-shrink-0">
                         <Music className="w-3 h-3 text-slate-400" />

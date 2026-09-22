@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { LogIn } from "lucide-react";
-import { motion, useScroll, useMotionValueEvent } from "framer-motion";
+import { motion, useScroll, useMotionValueEvent, useReducedMotion } from "framer-motion";
 import { useState } from "react";
 import { LOGO_LOJA_PADRAO } from "@/lib/relatorio";
 
@@ -14,6 +14,7 @@ const ITENS = [
 ];
 
 export default function LandingNav() {
+  const reduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
   const [compacto, setCompacto] = useState(false);
 
@@ -21,7 +22,7 @@ export default function LandingNav() {
 
   return (
     <motion.header
-      initial={{ y: -80, opacity: 0 }}
+      initial={reduceMotion ? false : { y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
@@ -54,9 +55,10 @@ export default function LandingNav() {
 
         <Link to={createPageUrl("Portais")}>
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.97 }}
-            className="inline-flex items-center gap-2 bg-[#C9A227] hover:bg-[#dcb437] text-[#1B3A5F] text-base font-semibold px-7 py-3 rounded-full shadow-lg shadow-[#C9A227]/20 transition-colors"
+            whileHover={reduceMotion ? undefined : { scale: 1.05 }}
+            whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+            aria-label="Acessar o Sistema"
+            className="inline-flex items-center gap-2 rounded-full bg-lodge-gold px-4 py-3 text-base font-semibold text-lodge-navy shadow-lg shadow-lodge-gold/20 transition-colors hover:bg-lodge-gold/90 sm:px-7"
           >
             <LogIn className="w-4 h-4" />
             <span className="hidden sm:inline">Acessar o Sistema</span>

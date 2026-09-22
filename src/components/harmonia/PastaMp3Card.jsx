@@ -8,11 +8,11 @@ export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMus
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <Card>
+    <Card className="border-border shadow-sm">
       <CardContent className="p-4">
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="w-10 h-10 rounded-lg bg-[#1B3A5F] flex items-center justify-center flex-shrink-0">
-            <FolderOpen className="w-5 h-5 text-[#C9A227]" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-lodge-navy/10">
+            <FolderOpen className="h-5 w-5 text-lodge-navy" />
           </div>
           <button className="flex-1 min-w-0 text-left" onClick={() => setExpanded(!expanded)}>
             <p className="font-semibold text-slate-800 text-sm truncate">{pasta.nome}</p>
@@ -22,7 +22,7 @@ export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMus
           <Button
             size="sm"
             variant="outline"
-            className="border-[#1B3A5F] text-[#1B3A5F] hover:bg-[#1B3A5F] hover:text-white"
+            className="border-lodge-navy/30 text-lodge-navy hover:bg-lodge-navy hover:text-primary-foreground"
             onClick={() => onAddMusicas(pasta)}
           >
             <Plus className="w-4 h-4 mr-1" />
@@ -36,7 +36,7 @@ export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMus
           >
             <Trash2 className="w-4 h-4" />
           </Button>
-          <Button size="icon" variant="ghost" onClick={() => setExpanded(!expanded)}>
+          <Button size="icon" variant="ghost" onClick={() => setExpanded(!expanded)} aria-label={expanded ? "Recolher pasta" : "Expandir pasta"} aria-expanded={expanded}>
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </Button>
         </div>
@@ -49,7 +49,7 @@ export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMus
               </p>
             ) : (
               musicas.map((m, i) => (
-                <div key={m.id} className="flex flex-col sm:flex-row sm:items-center gap-2 p-2 rounded-lg bg-slate-50">
+                <div key={m.id} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className="text-[#1B3A5F] text-xs font-bold w-6 text-right flex-shrink-0">
                       {String(i + 1).padStart(2, "0")}

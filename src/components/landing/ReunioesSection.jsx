@@ -1,10 +1,11 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Calendar, Clock, MapPin, Mail, Phone, Compass } from "lucide-react";
 
 const CALENDARIO_URL =
   "webcal://p133-caldav.icloud.com/published/2/MTE4OTcxMzcyMDExODk3MXpVMJXwr2vT2q1xXrvKY5Bo-F7nDiToCpUvjRHTwqnLuU7OWhwX0meCb2Ies0FOUS0jjoAPV67ObmqfQ85CmGg";
 
 export default function ReunioesSection({ loja }) {
+  const reduceMotion = useReducedMotion();
   const itens = [
     { icon: Calendar, label: "Dia de reunião", valor: loja?.dia_reuniao },
     { icon: Clock, label: "Horário", valor: loja?.hora_reuniao },
@@ -15,9 +16,9 @@ export default function ReunioesSection({ loja }) {
   ].filter((i) => i.valor);
 
   return (
-    <section id="reunioes" className="py-16 px-6 bg-gradient-to-b from-[#123054] to-[#0D1F33]">
+    <section id="reunioes" className="scroll-mt-20 bg-gradient-to-b from-[#123054] to-[#0D1F33] px-6 py-20 md:py-24">
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
@@ -33,11 +34,11 @@ export default function ReunioesSection({ loja }) {
             {itens.map(({ icon: Icon, label, valor }, i) => (
               <motion.div
                 key={label}
-                initial={{ opacity: 0, y: 20 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{ y: -6 }}
+                whileHover={reduceMotion ? undefined : { y: -4 }}
                 className="group flex items-start gap-4 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm transition-colors duration-300 hover:border-[#C9A227]/40 hover:bg-white/[0.08]"
               >
                 <div className="w-10 h-10 rounded-xl bg-[#C9A227]/20 flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110">
@@ -59,8 +60,8 @@ export default function ReunioesSection({ loja }) {
         <div className="text-center mt-10">
           <motion.a
             href={CALENDARIO_URL}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={reduceMotion ? undefined : { scale: 1.03 }}
+            whileTap={reduceMotion ? undefined : { scale: 0.97 }}
             className="inline-flex items-center gap-2 border border-[#C9A227] text-[#C9A227] hover:bg-[#C9A227] hover:text-[#1B3A5F] hover:shadow-lg hover:shadow-[#C9A227]/20 font-semibold px-6 py-3 rounded-full transition-colors"
           >
             <Calendar className="w-4 h-4" />
