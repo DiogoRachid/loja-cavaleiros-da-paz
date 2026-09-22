@@ -203,7 +203,7 @@ export default function IrmaoLogin() {
                       value={glpRecuperar}
                       onChange={(e) => setGlpRecuperar(e.target.value)}
                       placeholder="Seu número GLP"
-                      className="pl-10"
+                      className="portal-login-input pl-10"
                       autoFocus
                       required
                     />
@@ -241,7 +241,7 @@ export default function IrmaoLogin() {
                       value={numeroGlp}
                       onChange={(e) => setNumeroGlp(e.target.value)}
                       placeholder="Seu número de cadastro GLP"
-                      className="pl-10"
+                      className="portal-login-input pl-10"
                       autoFocus
                       required
                     />
@@ -258,7 +258,7 @@ export default function IrmaoLogin() {
                       value={senha}
                       onChange={(e) => setSenha(e.target.value)}
                       placeholder="Sua senha"
-                      className="pl-10 pr-10"
+                      className="portal-login-input pl-10 pr-10"
                       required
                     />
                     <button
@@ -309,7 +309,7 @@ export default function IrmaoLogin() {
                       value={novaSenha}
                       onChange={(e) => setNovaSenha(e.target.value)}
                       placeholder="Digite sua nova senha"
-                      className="pl-10"
+                      className="portal-login-input pl-10"
                       required
                     />
                   </div>
@@ -325,7 +325,7 @@ export default function IrmaoLogin() {
                       value={confirmarSenha}
                       onChange={(e) => setConfirmarSenha(e.target.value)}
                       placeholder="Confirme sua nova senha"
-                      className="pl-10 pr-10"
+                      className="portal-login-input pl-10 pr-10"
                       required
                     />
                     <button

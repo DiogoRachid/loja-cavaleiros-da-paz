@@ -176,3 +176,13 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+/* Keep browser-saved credentials legible on the dark portal login forms. */
+input.portal-login-input:-webkit-autofill,
+input.portal-login-input:-webkit-autofill:hover,
+input.portal-login-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: hsl(var(--primary-foreground));
+  caret-color: hsl(var(--primary-foreground));
+  -webkit-box-shadow: 0 0 0 1000px hsl(var(--landing-deep)) inset;
+  box-shadow: 0 0 0 1000px hsl(var(--landing-deep)) inset;
+}
