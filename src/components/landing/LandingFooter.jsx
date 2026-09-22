@@ -5,7 +5,7 @@ import { LOGO_LOJA_PADRAO, LOGO_GLP_PADRAO } from "@/lib/relatorio";
 
 export default function LandingFooter() {
   return (
-    <footer className="bg-[#0A1725] border-t border-white/10 py-14 px-6">
+    <footer className="border-t border-lodge-gold/20 bg-lodge-surface px-6 py-14">
       <div className="max-w-5xl mx-auto flex flex-col items-center text-center gap-6">
         <div className="flex items-center gap-6">
           <img src={LOGO_GLP_PADRAO} alt="Grande Loja do Paraná" className="w-20" />

@@ -2,15 +2,15 @@ import Reveal from "@/components/landing/Reveal";
 
 export default function SobreSection({ loja }) {
   return (
-    <section id="sobre" className="relative scroll-mt-20 bg-[#0D1F33] px-6 py-20 md:py-24">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-[#C9A227]/[0.06] to-transparent" />
-      <div className="relative max-w-4xl mx-auto text-center">
+    <section id="sobre" className="relative scroll-mt-20 border-t border-lodge-gold/15 bg-lodge-surface px-6 py-24 md:py-32">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-lodge-gold/50 to-transparent" />
+      <div className="relative mx-auto grid max-w-6xl gap-10 md:grid-cols-[1fr_1.5fr] md:gap-20">
         <Reveal>
-          <p className="text-[#C9A227] text-xs uppercase tracking-[0.3em] mb-4">A Loja</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">Quem somos</h2>
+          <p className="mb-4 text-xs uppercase tracking-[0.3em] text-lodge-gold">A Loja</p>
+          <h2 className="mb-8 text-4xl font-semibold tracking-tight text-primary-foreground md:text-5xl">Quem somos</h2>
         </Reveal>
 
-        <div className="space-y-5 text-slate-300 text-base md:text-lg leading-relaxed text-left md:text-center">
+        <div className="space-y-6 border-l border-lodge-gold/40 pl-7 text-left text-base leading-relaxed text-slate-300 md:pl-10 md:text-lg">
           <Reveal delay={0.1}>
             <p>
               A Augusta e Respeitável Loja Simbólica Cavaleiros da Paz nº25 é uma Oficina regular

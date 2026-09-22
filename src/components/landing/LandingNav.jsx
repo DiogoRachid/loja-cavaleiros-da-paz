@@ -27,7 +27,7 @@ export default function LandingNav() {
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         compacto
-          ? "bg-[#0D1F33]/85 backdrop-blur-xl border-b border-[#C9A227]/20 shadow-lg shadow-black/30"
+          ? "bg-lodge-deep/95 backdrop-blur-xl border-b border-lodge-gold/20"
           : "bg-transparent border-b border-transparent"
       }`}
     >
@@ -38,7 +38,7 @@ export default function LandingNav() {
             alt="Cavaleiros da Paz nº25"
             className={`object-contain transition-all duration-500 group-hover:scale-110 ${compacto ? "w-12 h-12" : "w-16 h-16"}`}
           />
-          <span className="text-white font-semibold text-lg md:text-2xl hidden sm:block">Cavaleiros da Paz nº25</span>
+          <span className="hidden text-base font-semibold tracking-wide text-primary-foreground sm:block lg:text-lg">Cavaleiros da Paz nº25</span>
         </a>
 
         <nav className="hidden md:flex items-center gap-7">
@@ -46,7 +46,7 @@ export default function LandingNav() {
             <a
               key={i.href}
               href={i.href}
-              className="relative text-slate-300 hover:text-[#C9A227] text-lg transition-colors after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-[#C9A227] after:transition-all after:duration-300 hover:after:w-full"
+              className="relative text-sm font-medium text-slate-300 transition-colors hover:text-lodge-gold after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-lodge-gold after:transition-all after:duration-300 hover:after:w-full"
             >
               {i.label}
             </a>
@@ -58,7 +58,7 @@ export default function LandingNav() {
             whileHover={reduceMotion ? undefined : { scale: 1.05 }}
             whileTap={reduceMotion ? undefined : { scale: 0.97 }}
             aria-label="Acessar o Sistema"
-            className="inline-flex items-center gap-2 rounded-full bg-lodge-gold px-4 py-3 text-base font-semibold text-lodge-navy shadow-lg shadow-lodge-gold/20 transition-colors hover:bg-lodge-gold/90 sm:px-7"
+            className="inline-flex items-center gap-2 rounded-md border border-lodge-gold bg-lodge-gold px-4 py-3 text-sm font-semibold text-lodge-deep transition-colors hover:bg-lodge-gold/90 sm:px-6"
           >
             <LogIn className="w-4 h-4" />
             <span className="hidden sm:inline">Acessar o Sistema</span>

@@ -16,7 +16,7 @@ export default function ReunioesSection({ loja }) {
   ].filter((i) => i.valor);
 
   return (
-    <section id="reunioes" className="scroll-mt-20 bg-gradient-to-b from-[#123054] to-[#0D1F33] px-6 py-20 md:py-24">
+    <section id="reunioes" className="scroll-mt-20 bg-lodge-deep px-6 py-24 md:py-32">
       <motion.div
         initial={reduceMotion ? false : { opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -39,7 +39,7 @@ export default function ReunioesSection({ loja }) {
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={reduceMotion ? undefined : { y: -4 }}
-                className="group flex items-start gap-4 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm transition-colors duration-300 hover:border-[#C9A227]/40 hover:bg-white/[0.08]"
+                className="group flex items-start gap-4 rounded-lg border border-lodge-gold/15 bg-lodge-surface p-5 transition-colors duration-300 hover:border-lodge-gold/40"
               >
                 <div className="w-10 h-10 rounded-xl bg-[#C9A227]/20 flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110">
                   <Icon className="w-4 h-4 text-[#C9A227]" />

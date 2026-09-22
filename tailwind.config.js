@@ -12,6 +12,8 @@ module.exports = {
   		colors: {
             lodge: {
                 navy: 'hsl(var(--lodge-navy))',
+                deep: 'hsl(var(--lodge-deep))',
+                surface: 'hsl(var(--lodge-surface))',
                 gold: 'hsl(var(--lodge-gold))',
                 canvas: 'hsl(var(--lodge-canvas))',
                 success: 'hsl(var(--lodge-success))',

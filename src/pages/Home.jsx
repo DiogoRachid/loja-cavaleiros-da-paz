@@ -19,7 +19,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-lodge-navy">
+    <div className="min-h-screen bg-lodge-deep">
       <style>{`html { scroll-behavior: smooth; }`}</style>
       <ScrollProgress />
       <LandingNav />

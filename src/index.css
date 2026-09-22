@@ -102,6 +102,8 @@ button:focus-visible {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
     --lodge-navy: 213 56% 24%;
+    --lodge-deep: 216 43% 8%;
+    --lodge-surface: 215 38% 13%;
     --lodge-gold: 46 67% 47%;
     --lodge-canvas: 210 25% 97%;
     --lodge-success: 153 48% 28%;
@@ -117,6 +119,8 @@ button:focus-visible {
   }
   .dark {
     --lodge-navy: 213 45% 75%;
+    --lodge-deep: 216 43% 8%;
+    --lodge-surface: 215 38% 13%;
     --lodge-gold: 46 60% 60%;
     --lodge-canvas: 215 25% 12%;
     --lodge-success: 153 45% 68%;

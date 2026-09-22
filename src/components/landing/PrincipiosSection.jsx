@@ -12,7 +12,7 @@ const PRINCIPIOS = [
 export default function PrincipiosSection() {
   const reduceMotion = useReducedMotion();
   return (
-    <section id="principios" className="scroll-mt-20 bg-gradient-to-b from-[#0D1F33] to-[#123054] px-6 py-20 md:py-24">
+    <section id="principios" className="scroll-mt-20 bg-lodge-deep px-6 py-24 md:py-32">
       <div className="max-w-5xl mx-auto">
         <Reveal className="text-center mb-10">
           <p className="text-[#C9A227] text-xs uppercase tracking-[0.3em] mb-4">Nossos valores</p>
@@ -25,9 +25,9 @@ export default function PrincipiosSection() {
               <motion.div
                 whileHover={reduceMotion ? undefined : { y: -4 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                className="group h-full rounded-2xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm transition-colors duration-300 hover:border-[#C9A227]/40 hover:bg-white/[0.08] hover:shadow-xl hover:shadow-[#C9A227]/10"
+                className="group h-full border-t border-lodge-gold/30 p-6 text-left transition-colors duration-300 hover:bg-lodge-surface"
               >
-                <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-[#C9A227]/20 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:bg-[#C9A227]/30">
+                <div className="mb-6 flex h-11 w-11 items-center justify-center rounded-full border border-lodge-gold/40 transition-transform duration-300 group-hover:scale-110">
                   <Icon className="w-5 h-5 text-[#C9A227]" />
                 </div>
                 <h3 className="text-white font-semibold mb-2">{titulo}</h3>
