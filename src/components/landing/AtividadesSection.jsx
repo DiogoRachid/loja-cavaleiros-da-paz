@@ -14,7 +14,7 @@ const ATIVIDADES = [
 export default function AtividadesSection() {
   const reduceMotion = useReducedMotion();
   return (
-    <section id="atividades" className="scroll-mt-20 border-y border-lodge-gold/10 bg-lodge-surface px-6 py-24 md:py-32">
+    <section id="atividades" className="scroll-mt-20 border-y border-lodge-gold/10 bg-landing-surface px-6 py-24 md:py-32">
       <div className="max-w-6xl mx-auto">
         <Reveal className="text-center mb-10">
           <p className="text-[#C9A227] text-xs uppercase tracking-[0.3em] mb-4">O que fazemos</p>
@@ -27,7 +27,7 @@ export default function AtividadesSection() {
               <motion.div
                 whileHover={reduceMotion ? undefined : { y: -4 }}
                 transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                className="group relative h-full overflow-hidden rounded-lg border border-lodge-gold/15 bg-lodge-deep p-7 transition-colors duration-300 hover:border-lodge-gold/50"
+                className="group relative h-full overflow-hidden rounded-lg border border-lodge-gold/15 bg-landing-deep p-7 transition-colors duration-300 hover:border-lodge-gold/50 hover:bg-landing-bright/40"
               >
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A227]/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <div className="w-11 h-11 mb-4 rounded-xl bg-[#C9A227]/20 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:bg-[#C9A227]/30">

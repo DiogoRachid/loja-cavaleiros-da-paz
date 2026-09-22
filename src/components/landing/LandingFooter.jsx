@@ -5,7 +5,7 @@ import { LOGO_LOJA_PADRAO, LOGO_GLP_PADRAO } from "@/lib/relatorio";
 
 export default function LandingFooter() {
   return (
-    <footer className="border-t border-lodge-gold/20 bg-lodge-surface px-6 py-14">
+    <footer className="border-t border-lodge-gold/20 bg-landing-surface px-6 py-14">
       <div className="max-w-5xl mx-auto flex flex-col items-center text-center gap-6">
         <div className="flex items-center gap-6">
           <img src={LOGO_GLP_PADRAO} alt="Grande Loja do Paraná" className="w-20" />
@@ -19,7 +19,7 @@ export default function LandingFooter() {
         </p>
 
         <Link to={createPageUrl("Portais")}>
-          <button className="inline-flex items-center gap-2 bg-[#C9A227] hover:bg-[#b08e1f] text-[#1B3A5F] text-base font-semibold px-7 py-3.5 rounded-full transition-colors">
+          <button className="inline-flex items-center gap-2 rounded-md bg-lodge-gold px-7 py-3.5 text-base font-semibold text-landing-deep transition-colors hover:bg-lodge-gold/80">
             <LogIn className="w-4 h-4" />
             Acessar o Sistema
           </button>

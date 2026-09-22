@@ -2,7 +2,7 @@ import Reveal from "@/components/landing/Reveal";
 
 export default function SobreSection({ loja }) {
   return (
-    <section id="sobre" className="relative scroll-mt-20 border-t border-lodge-gold/15 bg-lodge-surface px-6 py-24 md:py-32">
+    <section id="sobre" className="relative scroll-mt-20 border-t border-lodge-gold/15 bg-landing-surface px-6 py-24 md:py-32">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-lodge-gold/50 to-transparent" />
       <div className="relative mx-auto grid max-w-6xl gap-10 md:grid-cols-[1fr_1.5fr] md:gap-20">
         <Reveal>

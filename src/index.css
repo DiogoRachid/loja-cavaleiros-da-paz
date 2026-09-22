@@ -108,6 +108,9 @@ button:focus-visible {
     --lodge-canvas: 210 25% 97%;
     --lodge-success: 153 48% 28%;
     --lodge-success-soft: 150 30% 96%;
+    --landing-deep: 218 70% 13%;
+    --landing-surface: 219 62% 19%;
+    --landing-bright: 213 74% 32%;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -125,6 +128,9 @@ button:focus-visible {
     --lodge-canvas: 215 25% 12%;
     --lodge-success: 153 45% 68%;
     --lodge-success-soft: 150 20% 16%;
+    --landing-deep: 218 70% 13%;
+    --landing-surface: 219 62% 19%;
+    --landing-bright: 213 74% 32%;
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;

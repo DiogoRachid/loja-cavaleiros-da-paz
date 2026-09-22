@@ -16,7 +16,7 @@ export default function ReunioesSection({ loja }) {
   ].filter((i) => i.valor);
 
   return (
-    <section id="reunioes" className="scroll-mt-20 bg-lodge-deep px-6 py-24 md:py-32">
+    <section id="reunioes" className="scroll-mt-20 bg-landing-deep px-6 py-24 md:py-32">
       <motion.div
         initial={reduceMotion ? false : { opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -39,7 +39,7 @@ export default function ReunioesSection({ loja }) {
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={reduceMotion ? undefined : { y: -4 }}
-                className="group flex items-start gap-4 rounded-lg border border-lodge-gold/15 bg-lodge-surface p-5 transition-colors duration-300 hover:border-lodge-gold/40"
+                className="group flex items-start gap-4 rounded-lg border border-lodge-gold/15 bg-landing-surface p-5 transition-colors duration-300 hover:border-lodge-gold/40 hover:bg-landing-bright/30"
               >
                 <div className="w-10 h-10 rounded-xl bg-[#C9A227]/20 flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110">
                   <Icon className="w-4 h-4 text-[#C9A227]" />
@@ -62,7 +62,7 @@ export default function ReunioesSection({ loja }) {
             href={CALENDARIO_URL}
             whileHover={reduceMotion ? undefined : { scale: 1.03 }}
             whileTap={reduceMotion ? undefined : { scale: 0.97 }}
-            className="inline-flex items-center gap-2 border border-[#C9A227] text-[#C9A227] hover:bg-[#C9A227] hover:text-[#1B3A5F] hover:shadow-lg hover:shadow-[#C9A227]/20 font-semibold px-6 py-3 rounded-full transition-colors"
+            className="inline-flex items-center gap-2 rounded-md border border-lodge-gold px-6 py-3 font-semibold text-lodge-gold transition-colors hover:bg-lodge-gold hover:text-landing-deep"
           >
             <Calendar className="w-4 h-4" />
             Assinar o calendário da Loja

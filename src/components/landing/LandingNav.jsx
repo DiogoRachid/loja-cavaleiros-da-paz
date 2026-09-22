@@ -27,7 +27,7 @@ export default function LandingNav() {
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         compacto
-          ? "bg-lodge-deep/95 backdrop-blur-xl border-b border-lodge-gold/20"
+          ? "bg-landing-deep/95 backdrop-blur-xl border-b border-lodge-gold/20"
           : "bg-transparent border-b border-transparent"
       }`}
     >
@@ -58,7 +58,7 @@ export default function LandingNav() {
             whileHover={reduceMotion ? undefined : { scale: 1.05 }}
             whileTap={reduceMotion ? undefined : { scale: 0.97 }}
             aria-label="Acessar o Sistema"
-            className="inline-flex items-center gap-2 rounded-md border border-lodge-gold bg-lodge-gold px-4 py-3 text-sm font-semibold text-lodge-deep transition-colors hover:bg-lodge-gold/90 sm:px-6"
+            className="inline-flex items-center gap-2 rounded-md border border-lodge-gold bg-lodge-gold px-4 py-3 text-sm font-semibold text-landing-deep transition-colors hover:bg-lodge-gold/90 sm:px-6"
           >
             <LogIn className="w-4 h-4" />
             <span className="hidden sm:inline">Acessar o Sistema</span>

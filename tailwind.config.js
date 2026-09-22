@@ -10,6 +10,11 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+            landing: {
+                deep: 'hsl(var(--landing-deep))',
+                surface: 'hsl(var(--landing-surface))',
+                bright: 'hsl(var(--landing-bright))'
+            },
             lodge: {
                 navy: 'hsl(var(--lodge-navy))',
                 deep: 'hsl(var(--lodge-deep))',
