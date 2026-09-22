@@ -66,9 +66,14 @@ export default function AdminLogin() {
           setLoading(false);
           return;
         }
+        sessionStorage.removeItem("admin_auth");
+        sessionStorage.removeItem("admin_data");
+        sessionStorage.removeItem("admin_cargo");
+        sessionStorage.removeItem("admin_substituindo");
+        sessionStorage.removeItem("irmao_auth");
+        sessionStorage.removeItem("irmao_data");
         sessionStorage.setItem("bib_auth", "true");
         sessionStorage.setItem("bib_data", JSON.stringify({ nome: irmao.nome_completo, ...irmao }));
-        sessionStorage.setItem("admin_cargo", "Bibliotecário");
         navigate(createPageUrl("BibDashboard"));
       } else {
         // Login via entidade Irmao
@@ -95,6 +100,11 @@ export default function AdminLogin() {
           setLoading(false);
           return;
         }
+        sessionStorage.removeItem("bib_auth");
+        sessionStorage.removeItem("bib_data");
+        sessionStorage.removeItem("bib_auth_time");
+        sessionStorage.removeItem("irmao_auth");
+        sessionStorage.removeItem("irmao_data");
         sessionStorage.setItem("admin_auth", "true");
         sessionStorage.setItem("admin_data", JSON.stringify(irmao));
         sessionStorage.setItem("admin_cargo", cargo);

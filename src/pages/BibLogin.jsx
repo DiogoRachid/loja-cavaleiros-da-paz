@@ -37,7 +37,13 @@ export default function BibLogin() {
         return;
       }
 
-      // Salvar autenticação na sessão
+      // Salvar somente o portal escolhido na sessão
+      sessionStorage.removeItem("admin_auth");
+      sessionStorage.removeItem("admin_data");
+      sessionStorage.removeItem("admin_cargo");
+      sessionStorage.removeItem("admin_substituindo");
+      sessionStorage.removeItem("irmao_auth");
+      sessionStorage.removeItem("irmao_data");
       sessionStorage.setItem("bib_auth", "true");
       sessionStorage.setItem("bib_data", JSON.stringify(bibliotecarios[0]));
       

@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { 
   BookOpen, Users, History, QrCode, LogOut, 
@@ -147,42 +147,38 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [cargo, setCargo] = useState(null);
 
-  useEffect(() => {
-    loadUser();
-  }, [currentPageName]);
+  const isBibliotecaPage = currentPageName?.startsWith("Bib");
+  const isAdminPage = currentPageName?.startsWith("Admin");
+  const isIrmaoPage = currentPageName?.startsWith("Irmao");
+  const hasAdminSession = sessionStorage.getItem("admin_auth") === "true" && !!sessionStorage.getItem("admin_data");
+  const hasBibSession = sessionStorage.getItem("bib_auth") === "true" && !!sessionStorage.getItem("bib_data");
+  const hasIrmaoSession = sessionStorage.getItem("irmao_auth") === "true" && !!sessionStorage.getItem("irmao_data");
 
-  const loadUser = () => {
-    // Portal Administrativo
-    const adminData = sessionStorage.getItem("admin_data");
-    if (adminData) {
-      const admin = JSON.parse(adminData);
+  useEffect(() => {
+    if (PAGES_SEM_LAYOUT.includes(currentPageName)) return;
+    if (isAdminPage && hasAdminSession || isBibliotecaPage && hasAdminSession) {
+      const admin = JSON.parse(sessionStorage.getItem("admin_data"));
       setUser({ full_name: admin.nome_completo, cim: admin.cim });
-      // Portal escolhido no login (pode ser substituição), com fallback ao cargo do cadastro
       setCargo(sessionStorage.getItem("admin_cargo") || admin.cargo);
-      return;
-    }
-    // Portal Bibliotecário
-    const bibData = sessionStorage.getItem("bib_data");
-    if (bibData) {
-      const bib = JSON.parse(bibData);
-      setUser({ full_name: bib.nome });
+    } else if (isBibliotecaPage && hasBibSession) {
+      const bib = JSON.parse(sessionStorage.getItem("bib_data"));
+      setUser({ full_name: bib.nome || bib.nome_completo, cim: bib.cim });
       setCargo("Bibliotecário");
-      return;
-    }
-    // Portal Irmão
-    const irmaoData = sessionStorage.getItem("irmao_data");
-    if (irmaoData) {
-      const ir = JSON.parse(irmaoData);
+    } else if (isIrmaoPage && hasIrmaoSession) {
+      const ir = JSON.parse(sessionStorage.getItem("irmao_data"));
       setUser({ full_name: ir.nome_completo, cim: ir.cim });
       setCargo("Irmão");
-      return;
+    } else {
+      setUser(null);
+      setCargo(null);
     }
-  };
+  }, [currentPageName]);
 
   const handleLogout = () => {
     sessionStorage.removeItem("admin_auth");
     sessionStorage.removeItem("admin_data");
     sessionStorage.removeItem("admin_cargo");
+    sessionStorage.removeItem("admin_substituindo");
     sessionStorage.removeItem("bib_auth");
     sessionStorage.removeItem("bib_data");
     sessionStorage.removeItem("bib_auth_time");
@@ -191,13 +187,14 @@ export default function Layout({ children, currentPageName }) {
     window.location.href = createPageUrl("Home");
   };
 
-  if (PAGES_SEM_LAYOUT.includes(currentPageName)) {
-    return <>{children}</>;
-  }
+  if (PAGES_SEM_LAYOUT.includes(currentPageName)) return <>{children}</>;
+  if (isAdminPage && !hasAdminSession) return <Navigate to="/AdminLogin" replace />;
+  if (isBibliotecaPage && !hasBibSession && !hasAdminSession) return <Navigate to="/BibLogin" replace />;
+  if (isIrmaoPage && !hasIrmaoSession) return <Navigate to="/IrmaoLogin" replace />;
 
   const isBibliotecario = cargo === "Bibliotecário";
-  const isAdmin = currentPageName?.startsWith("Admin") || currentPageName?.startsWith("Bib");
-  const isIrmao = currentPageName?.startsWith("Irmao");
+  const isAdmin = isAdminPage || isBibliotecaPage;
+  const isIrmao = isIrmaoPage;
 
   let links = IRMAO_LINKS;
   let portalLabel = "Portal do Irmão";

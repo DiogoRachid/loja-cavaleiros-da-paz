@@ -86,7 +86,14 @@ export default function IrmaoLogin() {
         tipo_acesso: "Login"
       });
 
-      // Login normal
+      // Login normal: mantém somente o portal escolhido nesta sessão.
+      sessionStorage.removeItem("admin_auth");
+      sessionStorage.removeItem("admin_data");
+      sessionStorage.removeItem("admin_cargo");
+      sessionStorage.removeItem("admin_substituindo");
+      sessionStorage.removeItem("bib_auth");
+      sessionStorage.removeItem("bib_data");
+      sessionStorage.removeItem("bib_auth_time");
       sessionStorage.setItem("irmao_auth", "true");
       sessionStorage.setItem("irmao_data", JSON.stringify(irmao));
       navigate(createPageUrl("IrmaoEmprestimos"));
@@ -130,6 +137,13 @@ export default function IrmaoLogin() {
       });
 
       const irmaoAtualizado = { ...irmaoLogado, senha: novaSenha, primeiro_acesso: false };
+      sessionStorage.removeItem("admin_auth");
+      sessionStorage.removeItem("admin_data");
+      sessionStorage.removeItem("admin_cargo");
+      sessionStorage.removeItem("admin_substituindo");
+      sessionStorage.removeItem("bib_auth");
+      sessionStorage.removeItem("bib_data");
+      sessionStorage.removeItem("bib_auth_time");
       sessionStorage.setItem("irmao_auth", "true");
       sessionStorage.setItem("irmao_data", JSON.stringify(irmaoAtualizado));
       navigate(createPageUrl("IrmaoEmprestimos"));

@@ -23,10 +23,10 @@ export default function PortaisCargos() {
         const Icon = item.icon;
         return (
           <Link key={item.page} to={createPageUrl(item.page)}>
-            <Card className="hover:shadow-md hover:border-[#C9A227] transition-all cursor-pointer h-full">
+            <Card className="h-full border-border shadow-sm transition-colors hover:border-lodge-gold">
               <CardContent className="p-5 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#C9A227]/15 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-6 h-6 text-[#1B3A5F]" />
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-lodge-navy/10">
+                  <Icon className="h-5 w-5 text-lodge-navy" />
                 </div>
                 <div>
                   <p className="font-semibold text-slate-800">{item.title}</p>

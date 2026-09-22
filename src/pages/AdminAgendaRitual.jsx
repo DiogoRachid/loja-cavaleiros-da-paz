@@ -85,18 +85,16 @@ export default function AdminAgendaRitual() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[#1B3A5F] flex items-center justify-center">
-            <Calendar className="w-6 h-6 text-[#C9A227]" />
-          </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-5">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-border bg-card"><Calendar className="h-7 w-7 text-lodge-gold" /></div>
           <div>
-            <h1 className="text-2xl font-bold text-[#1B3A5F]">Agenda Ritual</h1>
-            <p className="text-slate-500">{agendadas.length} sessões agendadas</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-lodge-navy">Agenda Ritual</h1>
+            <p className="text-sm text-muted-foreground">{agendadas.length} sessões agendadas</p>
           </div>
         </div>
         {!isMestreHarmonia && (
-          <Button onClick={() => setShowForm(!showForm)} className="bg-[#1B3A5F] text-white">
+          <Button onClick={() => setShowForm(!showForm)} className="bg-lodge-navy text-primary-foreground hover:bg-lodge-navy/90">
             <Plus className="w-4 h-4 mr-2" /> Nova Sessão
           </Button>
         )}
@@ -146,7 +144,7 @@ export default function AdminAgendaRitual() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
-              <Button onClick={salvarSessao} disabled={saving} className="bg-[#1B3A5F] text-white">
+              <Button onClick={salvarSessao} disabled={saving} className="bg-lodge-navy text-primary-foreground hover:bg-lodge-navy/90">
                 <Save className="w-4 h-4 mr-2" />{saving ? "Salvando..." : "Salvar"}
               </Button>
             </div>
@@ -157,10 +155,10 @@ export default function AdminAgendaRitual() {
       {/* Próximas Sessões */}
       {agendadas.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-[#1B3A5F] mb-3">Próximas Sessões</h2>
+          <h2 className="mb-3 text-lg font-semibold text-lodge-navy">Próximas Sessões</h2>
           <div className="space-y-3">
             {agendadas.map(s => (
-              <Card key={s.id} className={`cursor-pointer hover:shadow-md transition-all ${selecionada?.id === s.id ? "border-[#C9A227]" : ""}`}
+              <Card key={s.id} className={`cursor-pointer border-border shadow-sm transition-colors hover:border-lodge-gold ${selecionada?.id === s.id ? "border-lodge-gold" : ""}`}
                 onClick={() => setSelecionada(selecionada?.id === s.id ? null : s)}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
@@ -222,7 +220,7 @@ export default function AdminAgendaRitual() {
                       </div>
                       <div className="flex justify-end gap-2">
                         <Button variant="outline" size="sm" onClick={() => setEditando(null)}>Cancelar</Button>
-                        <Button size="sm" onClick={salvarEdicao} disabled={saving} className="bg-[#1B3A5F] text-white">
+                        <Button size="sm" onClick={salvarEdicao} disabled={saving} className="bg-lodge-navy text-primary-foreground hover:bg-lodge-navy/90">
                           <Save className="w-3 h-3 mr-1" />{saving ? "Salvando..." : "Salvar"}
                         </Button>
                       </div>
@@ -260,7 +258,7 @@ export default function AdminAgendaRitual() {
           <h2 className="text-lg font-semibold text-slate-500 mb-3">Sessões Realizadas</h2>
           <div className="space-y-3">
             {realizadas.map(s => (
-              <Card key={s.id} className={`cursor-pointer hover:shadow-md transition-all ${selecionada?.id === s.id ? "border-[#C9A227]" : ""}`}
+              <Card key={s.id} className={`cursor-pointer border-border shadow-sm transition-colors hover:border-lodge-gold ${selecionada?.id === s.id ? "border-lodge-gold" : ""}`}
                 onClick={() => setSelecionada(selecionada?.id === s.id ? null : s)}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
@@ -321,7 +319,7 @@ export default function AdminAgendaRitual() {
                       </div>
                       <div className="flex justify-end gap-2">
                         <Button variant="outline" size="sm" onClick={() => setEditando(null)}>Cancelar</Button>
-                        <Button size="sm" onClick={salvarEdicao} disabled={saving} className="bg-[#1B3A5F] text-white">
+                        <Button size="sm" onClick={salvarEdicao} disabled={saving} className="bg-lodge-navy text-primary-foreground hover:bg-lodge-navy/90">
                           <Save className="w-3 h-3 mr-1" />{saving ? "Salvando..." : "Salvar"}
                         </Button>
                       </div>
