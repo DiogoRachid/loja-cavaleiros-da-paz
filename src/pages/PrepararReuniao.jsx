@@ -13,6 +13,7 @@ import RoteiroReuniao, { ITENS_PADRAO } from "@/components/reuniao/RoteiroReunia
 import { svgCargo } from "@/components/reuniao/cargoSvg";
 import { logoLoja, logoPotencia } from "@/lib/relatorio";
 import ReuniaoHeader from "@/components/reuniao/ReuniaoHeader";
+import ordenarAutoridades from "@/components/reuniao/ordenarAutoridades";
 
 // Símbolos/ícones por cargo (texto) — mantido apenas como referência
 const SIMBOLO_CARGO = {
@@ -139,7 +140,7 @@ export default function PrepararReuniao() {
           } else {
             setQuadroOficiais(linhaOficiais);
           }
-          if (salvo.autoridadesLista) setAutoridadesLista(salvo.autoridadesLista);
+          if (salvo.autoridadesLista) setAutoridadesLista(ordenarAutoridades(salvo.autoridadesLista, auts));
           if (salvo.roteiro) setRoteiro(salvo.roteiro);
           setSavedAt(salvo.savedAt || null);
         } catch (e) {
@@ -159,7 +160,7 @@ export default function PrepararReuniao() {
     const agora = new Date().toISOString();
     const dados = {
       quadroOficiais: quadroOficiais.map(o => ({ cargo: o.cargo, confirmado: o.confirmado, substituto_id: o.substituto_id, substituto_nome: o.substituto_nome })),
-      autoridadesLista,
+      autoridadesLista: ordenarAutoridades(autoridadesLista, autoridades),
       roteiro,
       savedAt: agora,
     };
@@ -199,7 +200,7 @@ export default function PrepararReuniao() {
   </div>`;
 
     // Separar autoridades presentes
-    const autPresentes = autoridadesLista.filter(a => a.presente);
+    const autPresentes = ordenarAutoridades(autoridadesLista.filter(a => a.presente), autoridades);
 
     // Ordenar roteiro por número
     const roteiroOrdenado = [...roteiro].sort((a, b) => a.numero - b.numero);
@@ -417,7 +418,7 @@ export default function PrepararReuniao() {
       {activeTab === "autoridades" && (
         <div className="space-y-3">
           <p className="text-sm text-slate-500">Adicione as autoridades esperadas. Confirme as presentes antes de gerar o PDF.</p>
-          <AutoridadesList autoridades={autoridades} lista={autoridadesLista} onChange={setAutoridadesLista} />
+          <AutoridadesList autoridades={autoridades} lista={autoridadesLista} onChange={novaLista => setAutoridadesLista(ordenarAutoridades(novaLista, autoridades))} />
         </div>
       )}
 

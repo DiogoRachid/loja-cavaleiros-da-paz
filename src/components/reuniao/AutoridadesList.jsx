@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,7 @@ export default function AutoridadesList({ autoridades, lista, onChange }) {
         nome: a.nome,
         potencia: a.potencia || "",
         cargo_potencia: a.cargo_potencia || "",
+        ordem_protocolar: a.ordem_protocolar,
         presente: false,
       }]);
       setNovaAut({ tipo: "cadastrada", potencia: novaAut.potencia, id: "", nome_custom: "", titulo_custom: "" });
@@ -47,14 +48,6 @@ export default function AutoridadesList({ autoridades, lista, onChange }) {
 
   const remover = (idx) => onChange(lista.filter((_, i) => i !== idx));
   const togglePresente = (idx) => onChange(lista.map((a, i) => i === idx ? { ...a, presente: !a.presente } : a));
-  const mover = (idx, dir) => {
-    const n = [...lista];
-    const target = idx + dir;
-    if (target < 0 || target >= n.length) return;
-    [n[idx], n[target]] = [n[target], n[idx]];
-    onChange(n);
-  };
-
   return (
     <div className="space-y-3">
       {/* Formulário de adição */}
@@ -164,8 +157,6 @@ export default function AutoridadesList({ autoridades, lista, onChange }) {
             {a.presente ? "Presente" : "Confirmar"}
           </button>
           <div className="flex gap-1">
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => mover(idx, -1)} disabled={idx === 0}><ArrowUp className="w-3 h-3" /></Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => mover(idx, 1)} disabled={idx === lista.length - 1}><ArrowDown className="w-3 h-3" /></Button>
             <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500" onClick={() => remover(idx)}><Trash2 className="w-3 h-3" /></Button>
           </div>
         </div>
