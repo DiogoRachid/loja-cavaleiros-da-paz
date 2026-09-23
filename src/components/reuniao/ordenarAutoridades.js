@@ -6,5 +6,11 @@ export default function ordenarAutoridades(lista, autoridades) {
       ? Number(valor)
       : Infinity;
   };
-  return [...lista].sort((a, b) => ordem(a) - ordem(b));
+  return [...lista].sort((a, b) => {
+    const ordemA = ordem(a);
+    const ordemB = ordem(b);
+    if (ordemA === Infinity) return ordemB === Infinity ? 0 : 1;
+    if (ordemB === Infinity) return -1;
+    return ordemB - ordemA;
+  });
 }
