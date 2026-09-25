@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FolderOpen, Music, Plus, Trash2, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import AudioPlayer from "@/components/harmonia/AudioPlayer";
+import PastaPlayer from "@/components/harmonia/PastaPlayer";
 
 export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMusica, onMoveMusica, onDeletePasta }) {
   const [expanded, setExpanded] = useState(false);
@@ -42,23 +42,22 @@ export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMus
         </div>
 
         {expanded && (
-          <div className="mt-4 space-y-2">
+          <div className="mt-4">
             {musicas.length === 0 ? (
               <p className="text-center text-slate-400 text-sm py-4">
                 Nenhuma música vinculada. Use "Adicionar Músicas".
               </p>
             ) : (
-              musicas.map((m, i) => (
-                <div key={m.id} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <span className="text-[#1B3A5F] text-xs font-bold w-6 text-right flex-shrink-0">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <div className="flex flex-col flex-shrink-0">
+              <PastaPlayer
+                musicas={musicas}
+                expanded={expanded}
+                renderRowActions={(m, i) => (
+                  <>
+                    <div className="flex flex-col">
                       <button
                         title="Mover para cima"
                         disabled={i === 0}
-                        className="text-slate-400 hover:text-[#1B3A5F] disabled:opacity-20 disabled:cursor-default"
+                        className="text-[#94a3b8] hover:text-[#D6B45E] disabled:opacity-20 disabled:cursor-default"
                         onClick={() => onMoveMusica(pasta, m, -1)}
                       >
                         <ChevronUp className="w-4 h-4" />
@@ -66,32 +65,24 @@ export default function PastaMp3Card({ pasta, musicas, onAddMusicas, onRemoveMus
                       <button
                         title="Mover para baixo"
                         disabled={i === musicas.length - 1}
-                        className="text-slate-400 hover:text-[#1B3A5F] disabled:opacity-20 disabled:cursor-default"
+                        className="text-[#94a3b8] hover:text-[#D6B45E] disabled:opacity-20 disabled:cursor-default"
                         onClick={() => onMoveMusica(pasta, m, 1)}
                       >
                         <ChevronDown className="w-4 h-4" />
                       </button>
                     </div>
-                    <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center flex-shrink-0">
-                      <Music className="w-3 h-3 text-slate-400" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm text-slate-800 truncate">{m.nome}</p>
-                      {m.artista && <p className="text-xs text-slate-400 truncate">{m.artista}</p>}
-                    </div>
-                  </div>
-                  <AudioPlayer src={m.file_url} />
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    title="Remover da pasta (o arquivo continua na biblioteca)"
-                    className="h-7 w-7 text-red-400 hover:text-red-500 hover:bg-red-50 flex-shrink-0"
-                    onClick={() => onRemoveMusica(pasta, m)}
-                  >
-                    <X className="w-3 h-3" />
-                  </Button>
-                </div>
-              ))
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Remover da pasta (o arquivo continua na biblioteca)"
+                      className="h-7 w-7 text-red-400 hover:text-red-500 hover:bg-red-50/10"
+                      onClick={() => onRemoveMusica(pasta, m)}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </>
+                )}
+              />
             )}
           </div>
         )}

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -101,6 +103,8 @@ button:focus-visible {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
     --lodge-navy: 213 56% 24%;
     --lodge-deep: 216 43% 8%;
     --lodge-surface: 215 38% 13%;
@@ -128,6 +132,8 @@ button:focus-visible {
     --lodge-canvas: 215 25% 12%;
     --lodge-success: 153 45% 68%;
     --lodge-success-soft: 150 20% 16%;
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
     --landing-deep: 218 70% 13%;
     --landing-surface: 219 62% 19%;
     --landing-bright: 213 74% 32%;
@@ -185,4 +191,14 @@ input.portal-login-input:-webkit-autofill:focus {
   caret-color: hsl(var(--landing-deep));
   -webkit-box-shadow: 0 0 0 1000px white inset;
   box-shadow: 0 0 0 1000px white inset;
+}
+
+/* Equalizador animado do player de pasta */
+@keyframes eq-bar {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+.eq-bar {
+  animation: eq-bar 0.8s ease-in-out infinite;
+  transform-origin: bottom;
 }
