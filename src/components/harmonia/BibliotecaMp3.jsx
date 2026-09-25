@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Music, Upload, Trash2, Loader2, ChevronDown, ChevronUp, Library, Search, FolderPlus, Check } from "lucide-react";
+import { Upload, Trash2, Loader2, ChevronDown, ChevronUp, Library, Search, FolderPlus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,9 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import AudioPlayer from "@/components/harmonia/AudioPlayer";
+import PastaPlayer from "@/components/harmonia/PastaPlayer";
 import FiltroPastasDropdown, { SEM_PASTA_ID } from "@/components/harmonia/FiltroPastasDropdown";
-import PlayerListaFiltrada from "@/components/harmonia/PlayerListaFiltrada";
 
 export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUpload, onDelete, onTogglePasta }) {
   const [expanded, setExpanded] = useState(false);
@@ -71,7 +70,6 @@ export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUplo
             onChange={handleFiles}
           />
           <FiltroPastasDropdown pastas={pastas} selectedIds={pastasFiltro} onChange={setPastasFiltro} />
-          <PlayerListaFiltrada musicas={dasPastasSelecionadas} />
           <Button
             size="sm"
             disabled={uploading}
@@ -103,27 +101,19 @@ export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUplo
                 {termo ? "Nenhuma música encontrada." : "Nenhuma música enviada ainda."}
               </p>
             ) : (
-              filtradas.map((m) => {
-                const nasPastas = pastasDaMusica(m.id);
-                return (
-                  <div key={m.id} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-8 h-8 rounded bg-slate-200 flex items-center justify-center flex-shrink-0">
-                        <Music className="w-3 h-3 text-slate-400" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm text-slate-800 truncate">{m.nome}</p>
-                        {m.artista && <p className="text-xs text-slate-400 truncate">{m.artista}</p>}
-                      </div>
-                    </div>
-                    <AudioPlayer src={m.file_url} />
-                    <div className="flex items-center gap-1 flex-shrink-0">
+              <PastaPlayer
+                musicas={filtradas}
+                expanded={expanded}
+                renderRowActions={(m) => {
+                  const nasPastas = pastasDaMusica(m.id);
+                  return (
+                    <>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-7 w-7 text-[#1B3A5F] hover:bg-blue-50"
+                            className="h-7 w-7 text-[#94a3b8] hover:text-[#D6B45E] hover:bg-transparent"
                             title="Adicionar a uma pasta"
                           >
                             <FolderPlus className="w-4 h-4" />
@@ -153,15 +143,15 @@ export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUplo
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-7 w-7 text-red-400 hover:text-red-500 hover:bg-red-50"
+                        className="h-7 w-7 text-red-400 hover:text-red-500 hover:bg-red-50/10"
                         onClick={() => onDelete(m)}
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
-                    </div>
-                  </div>
-                );
-              })
+                    </>
+                  );
+                }}
+              />
             )}
           </div>
         )}
