@@ -1,5 +1,6 @@
 import { createContext, useContext, useRef, useState, useEffect } from "react";
 import { getPlayerConfig, subscribePlayerConfig, fadeGains } from "@/lib/playerConfig";
+import { useSilenceTrim } from "@/lib/useSilenceTrim";
 
 const FADE_TICK_MS = 50;      // resolução do fade
 const PRELOAD_LEAD_MS = 8000; // antecedência do pré-carregamento da próxima faixa
@@ -25,6 +26,7 @@ export function Mp3PlaybackProvider({ children }) {
   const [config, setConfig] = useState(cfgRef.current);
   const [activeQueueOwner, setActiveQueueOwner] = useState(null);
   const [currentTrackId, setCurrentTrackId] = useState(null);
+  const [currentTrack, setCurrentTrack] = useState(null);
   const [isPaused, setIsPaused] = useState(true);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -32,6 +34,20 @@ export function Mp3PlaybackProvider({ children }) {
   const [volume, setVolumeState] = useState(cfgRef.current.defaultVolume);
   const [repeatTrack, setRepeatTrack] = useState(false);
   const [nearEnd, setNearEnd] = useState(false);
+
+  // Corte de silêncio da faixa atual
+  const derivePersistId = (t) => {
+    if (!t?.id) return null;
+    if (typeof t.id === "string" && t.id.startsWith("mp3_")) return t.id.slice(4);
+    return t.is_mp3 ? t.id : null;
+  };
+  const { start: trimStart, end: trimEnd, analyzing } = useSilenceTrim(currentTrack?.file_url, {
+    savedStart: currentTrack?.silence_start,
+    savedEnd: currentTrack?.silence_end,
+    persistId: derivePersistId(currentTrack),
+  });
+  const trimRef = useRef({ start: 0, end: 0 });
+  trimRef.current = { start: trimStart, end: trimEnd };
 
   // Volume inicial vindo das configurações + reatividade imediata às mudanças
   useEffect(() => {
@@ -88,6 +104,7 @@ export function Mp3PlaybackProvider({ children }) {
     ownerRef.current = null;
     setActiveQueueOwner(null);
     setCurrentTrackId(null);
+    setCurrentTrack(null);
     setIsPaused(true);
     setPosition(0);
     setDuration(0);
@@ -181,6 +198,7 @@ export function Mp3PlaybackProvider({ children }) {
     audioRef.current = a;
     queueIndexRef.current = index;
     setCurrentTrackId(track.id);
+    setCurrentTrack(track);
     setPosition(0);
     setDuration(0);
     setNearEnd(false);
@@ -221,6 +239,7 @@ export function Mp3PlaybackProvider({ children }) {
     audioRef.current = next;
     commit();
     setCurrentTrackId(track.id);
+    setCurrentTrack(track);
     setPosition(0);
     setDuration(0);
     setNearEnd(false);
@@ -262,14 +281,33 @@ export function Mp3PlaybackProvider({ children }) {
       const a = audioRef.current;
       if (!a || a.paused) return;
       const cfg = cfgRef.current;
-      setPosition(a.currentTime * 1000);
-      if (a.duration) setDuration(a.duration * 1000);
+      const tr = trimRef.current;
+      const tStart = tr.start || 0;
+      const tEnd = tr.end > tStart ? tr.end : (a.duration || 0);
+
+      // Aplicar offset de silêncio no início assim que os limites ficam prontos
+      if (!crossfadingRef.current && tStart > 0 && a.currentTime < tStart) {
+        try { a.currentTime = tStart; } catch {}
+      }
+
+      setPosition(Math.max(0, a.currentTime - tStart) * 1000);
+      if (a.duration) {
+        const usefulMs = Math.max(0, tEnd - tStart) * 1000;
+        setDuration(usefulMs || a.duration * 1000);
+      }
+
       if (crossfadingRef.current || !a.duration || !isFinite(a.duration)) return;
 
-      const totalMs = a.duration * 1000;
+      const totalMs = tEnd * 1000;
       const remaining = totalMs - a.currentTime * 1000;
 
       setNearEnd(cfg.warnBeforeEnd && remaining <= cfg.warnLeadMs);
+
+      // Avanço manual no fim do trecho útil (quando não há crossfade)
+      if (tEnd > tStart && a.currentTime >= tEnd) {
+        fnsRef.current.advance();
+        return;
+      }
 
       const nx = peekNext();
       const podeCrossfade =
@@ -340,7 +378,8 @@ export function Mp3PlaybackProvider({ children }) {
     const a = audioRef.current;
     if (!a) return;
     clearFade();
-    a.currentTime = ms / 1000;
+    const tStart = trimRef.current.start || 0;
+    a.currentTime = tStart + ms / 1000;
     setPosition(ms);
   };
 
@@ -373,6 +412,7 @@ export function Mp3PlaybackProvider({ children }) {
     duration,
     nearEnd,
     error,
+    analyzing,
     playEtapa,
     stopEtapa,
     togglePauseEtapa,

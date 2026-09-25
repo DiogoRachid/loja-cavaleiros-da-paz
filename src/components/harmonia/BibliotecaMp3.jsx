@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, Trash2, Loader2, ChevronDown, ChevronUp, Library, Search, FolderPlus, Check } from "lucide-react";
+import { Upload, Trash2, Loader2, ChevronDown, ChevronUp, Library, Search, FolderPlus, Check, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import {
 import PastaPlayer from "@/components/harmonia/PastaPlayer";
 import FiltroPastasDropdown, { SEM_PASTA_ID } from "@/components/harmonia/FiltroPastasDropdown";
 
-export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUpload, onDelete, onTogglePasta }) {
+export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUpload, onDelete, onTogglePasta, onRecalcSilence }) {
   const [expanded, setExpanded] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [busca, setBusca] = useState("");
@@ -140,6 +140,17 @@ export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUplo
                           )}
                         </DropdownMenuContent>
                       </DropdownMenu>
+                      {onRecalcSilence && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 text-[#94a3b8] hover:text-[#D6B45E] hover:bg-transparent"
+                          title="Recalcular silêncio"
+                          onClick={() => onRecalcSilence(m)}
+                        >
+                          <RefreshCw className="w-3 h-3" />
+                        </Button>
+                      )}
                       <Button
                         size="icon"
                         variant="ghost"

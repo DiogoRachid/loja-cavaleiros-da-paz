@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { uploadFile } from "@/lib/upload";
 import { db } from "@/api/db";
 import { FolderPlus, ListMusic, Loader2 } from "lucide-react";
+import { clearCachedSilence } from "@/lib/silenceDetect";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -152,6 +153,14 @@ export default function AdminMeusMp3s() {
     setVinculos((prev) => prev.filter((v) => v.id !== vinculo.id));
   };
 
+  const handleRecalcSilence = async (mp3) => {
+    clearCachedSilence(mp3.file_url);
+    await db.MinhaMp3.update(mp3.id, { silence_start: 0, silence_end: 0 });
+    setMp3s((prev) =>
+      prev.map((m) => (m.id === mp3.id ? { ...m, silence_start: 0, silence_end: 0 } : m))
+    );
+  };
+
   const handleDeletePasta = async (pasta) => {
     if (!confirm(`Excluir a pasta "${pasta.nome}"? As músicas continuam na biblioteca.`)) return;
     await db.PastaMusica.deleteMany({ pasta_id: pasta.id });
@@ -203,6 +212,7 @@ export default function AdminMeusMp3s() {
         onUpload={handleUpload}
         onDelete={handleDeleteMp3}
         onTogglePasta={handleTogglePasta}
+        onRecalcSilence={handleRecalcSilence}
       />
 
       <Card>

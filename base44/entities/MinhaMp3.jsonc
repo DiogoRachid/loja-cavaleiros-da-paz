@@ -13,6 +13,14 @@
     "file_url": {
       "type": "string",
       "description": "URL do arquivo mp3"
+    },
+    "silence_start": {
+      "type": "number",
+      "description": "Segundo em que o \u00e1udio realmente come\u00e7a (sil\u00eancio inicial removido)"
+    },
+    "silence_end": {
+      "type": "number",
+      "description": "Segundo em que o \u00e1udio realmente termina (sil\u00eancio final removido)"
     }
   },
   "required": [

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, VolumeX, Music } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { useSilenceTrim } from "@/lib/useSilenceTrim";
 
 const fmt = (s) => {
   if (!s || isNaN(s)) return "0:00";
@@ -43,9 +44,16 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
   const [muted, setMuted] = useState(false);
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState(false);
+  const endedGuardRef = useRef(false);
 
   const atualIdx = order[orderPos];
   const atual = musicas[atualIdx];
+
+  const { start: trimStart, end: trimEnd, analyzing } = useSilenceTrim(atual?.file_url, {
+    savedStart: atual?.silence_start,
+    savedEnd: atual?.silence_end,
+    persistId: atual?.id,
+  });
 
   // Reset quando a lista de músicas muda
   useEffect(() => {
@@ -72,11 +80,21 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
   useEffect(() => {
     const a = audioRef.current;
     if (!a) return;
+    endedGuardRef.current = false;
     setCurrent(0);
     if (playing) {
       a.play().catch(() => setPlaying(false));
     }
   }, [orderPos, order]);
+
+  // Aplicar offset de silêncio quando os limites ficam prontos
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a || !atual) return;
+    if (trimStart > 0 && a.currentTime < trimStart) {
+      try { a.currentTime = trimStart; } catch {}
+    }
+  }, [trimStart, trimEnd]);
 
   // Rolar a lista para colocar a faixa ativa no topo
   useEffect(() => {
@@ -122,7 +140,8 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
     if (repeat) {
       const a = audioRef.current;
       if (a) {
-        a.currentTime = 0;
+        a.currentTime = trimStart || 0;
+        endedGuardRef.current = false;
         a.play().catch(() => setPlaying(false));
       }
       return;
@@ -151,7 +170,8 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
     if (i === atualIdx) {
       const a = audioRef.current;
       if (a) {
-        a.currentTime = 0;
+        a.currentTime = trimStart || 0;
+        endedGuardRef.current = false;
         a.play().catch(() => setPlaying(false));
         setPlaying(true);
       }
@@ -169,9 +189,10 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
 
   const seek = ([v]) => {
     const a = audioRef.current;
-    if (!a || !duration) return;
-    a.currentTime = v;
-    setCurrent(v);
+    if (!a) return;
+    const t = (trimStart || 0) + v;
+    a.currentTime = t;
+    setCurrent(t);
   };
 
   const changeVolume = ([v]) => {
@@ -187,6 +208,9 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
 
   if (musicas.length === 0) return null;
 
+  const dispCurrent = Math.max(0, current - (trimStart || 0));
+  const dispDuration = Math.max(0, (trimEnd > (trimStart || 0) ? trimEnd : duration) - (trimStart || 0)) || duration;
+
   const btnGold = "text-[#D6B45E] hover:text-[#f0d88d] transition-colors";
   const ctrlBtn =
     "w-9 h-9 rounded-full border border-[#334366] text-[#D6B45E] hover:bg-[#D6B45E] hover:text-[#1a243b] flex items-center justify-center transition-colors";
@@ -200,8 +224,19 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         onEnded={handleEnded}
-        onTimeUpdate={(e) => setCurrent(e.target.currentTime)}
-        onLoadedMetadata={(e) => setDuration(e.target.duration)}
+        onTimeUpdate={(e) => {
+          const t = e.target.currentTime;
+          setCurrent(t);
+          if (trimEnd > trimStart && t >= trimEnd && !endedGuardRef.current) {
+            endedGuardRef.current = true;
+            if (audioRef.current) audioRef.current.pause();
+            handleEnded();
+          }
+        }}
+        onLoadedMetadata={(e) => {
+          setDuration(e.target.duration);
+          if (trimStart > 0) { try { e.target.currentTime = trimStart; } catch {} }
+        }}
       />
 
       {/* Banner do player */}
@@ -218,6 +253,9 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
             <p className="text-[0.75rem] uppercase tracking-wider text-[#94a3b8] truncate">
               {atual?.artista || `Faixa ${(atualIdx ?? 0) + 1} de ${musicas.length}`}
             </p>
+            {analyzing && (
+              <span className="text-[0.7rem] text-[#D6B45E] animate-pulse">Analisando áudio…</span>
+            )}
           </div>
 
           {/* Controles + progresso - centro (desktop) */}
@@ -232,17 +270,17 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
               <SkipForward className="w-4 h-4" />
             </button>
             <span className="text-[0.875rem] tabular-nums text-[#94a3b8] w-10 text-right">
-              {fmt(current)}
+              {fmt(dispCurrent)}
             </span>
             <Slider
-              value={[current]}
-              max={duration || 1}
+              value={[dispCurrent]}
+              max={dispDuration || 1}
               step={1}
               onValueChange={seek}
               className="flex-1 cursor-pointer [&>span:first-child]:bg-[#334366] [&>span:first-child>span]:bg-[#D6B45E] [&_[role=slider]]:border-[#D6B45E] [&_[role=slider]]:bg-[#D6B45E]"
             />
             <span className="text-[0.875rem] tabular-nums text-[#94a3b8] w-10">
-              {fmt(duration)}
+              {fmt(dispDuration)}
             </span>
           </div>
 
@@ -305,26 +343,26 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
             <SkipForward className="w-4 h-4" />
           </button>
           <span className="text-[0.875rem] tabular-nums text-[#94a3b8] w-10 text-right">
-            {fmt(current)}
+            {fmt(dispCurrent)}
           </span>
           <Slider
-            value={[current]}
-            max={duration || 1}
+            value={[dispCurrent]}
+            max={dispDuration || 1}
             step={1}
             onValueChange={seek}
             className="flex-1 cursor-pointer [&>span:first-child]:bg-[#334366] [&>span:first-child>span]:bg-[#D6B45E] [&_[role=slider]]:border-[#D6B45E] [&_[role=slider]]:bg-[#D6B45E]"
           />
           <span className="text-[0.875rem] tabular-nums text-[#94a3b8] w-10">
-            {fmt(duration)}
+          {fmt(dispDuration)}
           </span>
-        </div>
-      </div>
+          </div>
+          </div>
 
       {/* Lista de faixas */}
       <div ref={listRef} className="relative divide-y divide-[#334366] max-h-72 overflow-y-auto">
         {musicas.map((m, i) => {
           const isActive = i === atualIdx;
-          const progress = isActive && duration ? (current / duration) * 100 : 0;
+          const progress = isActive && dispDuration ? (dispCurrent / dispDuration) * 100 : 0;
           return (
             <div
               key={m.id}

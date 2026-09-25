@@ -150,6 +150,9 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
           )}
 
           {playback?.error && <p className="text-xs text-red-500">{playback.error}</p>}
+          {isEtapaPlaying && playback?.analyzing && (
+            <p className="text-xs text-[#C9A227] animate-pulse">Analisando áudio…</p>
+          )}
         </div>
       )}
     </div>
