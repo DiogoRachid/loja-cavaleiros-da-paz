@@ -32,6 +32,8 @@ const Equalizer = ({ className = "" }) => (
 
 export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
   const audioRef = useRef(null);
+  const listRef = useRef(null);
+  const rowRefs = useRef([]);
   const [order, setOrder] = useState(() => musicas.map((_, i) => i));
   const [orderPos, setOrderPos] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -75,6 +77,14 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
       a.play().catch(() => setPlaying(false));
     }
   }, [orderPos, order]);
+
+  // Rolar a lista para colocar a faixa ativa no topo
+  useEffect(() => {
+    const list = listRef.current;
+    const el = rowRefs.current[atualIdx];
+    if (!list || !el) return;
+    list.scrollTo({ top: el.offsetTop, behavior: "smooth" });
+  }, [atualIdx]);
 
   const toggle = () => {
     const a = audioRef.current;
@@ -311,13 +321,14 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
       </div>
 
       {/* Lista de faixas */}
-      <div className="divide-y divide-[#334366]">
+      <div ref={listRef} className="relative divide-y divide-[#334366] max-h-72 overflow-y-auto">
         {musicas.map((m, i) => {
           const isActive = i === atualIdx;
           const progress = isActive && duration ? (current / duration) * 100 : 0;
           return (
             <div
               key={m.id}
+              ref={(el) => (rowRefs.current[i] = el)}
               className={`relative flex items-center gap-3 px-3 sm:px-4 py-2.5 cursor-pointer transition-colors ${
                 isActive ? "bg-[#2d3e63]" : "hover:bg-[#1f2c4a]"
               }`}
