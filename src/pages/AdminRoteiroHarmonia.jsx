@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
-import { ArrowLeft, Plus, Save, Loader2, Music } from "lucide-react";
+import { ArrowLeft, Plus, Save, Loader2, Music, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 import RoteiroEtapa from "@/components/harmonia/RoteiroEtapa";
 import TrackSearchModal from "@/components/harmonia/TrackSearchModal";
 import { Mp3PlaybackProvider } from "@/components/harmonia/Mp3PlaybackContext";
 import EtapaChain from "@/components/harmonia/EtapaChain";
+import { carregarMaisTocadasPorEtapa } from "@/lib/musicasMaisTocadas";
 
 const ETAPAS_PADRAO = [
   "Entrada",
@@ -34,6 +36,8 @@ export default function AdminRoteiroHarmonia() {
   const [etapas, setEtapas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [montando, setMontando] = useState(false);
+  const { toast } = useToast();
 
   // Track search modal
   const [searchModalEtapa, setSearchModalEtapa] = useState(null);
@@ -158,6 +162,57 @@ export default function AdminRoteiroHarmonia() {
     setSaving(false);
   };
 
+  const montarSessaoAutomatico = async () => {
+    setMontando(true);
+    try {
+      const maisTocadas = await carregarMaisTocadasPorEtapa({
+        grau: roteiro?.grau || sessao?.grau || "Aprendiz",
+        tipoSessao: sessao?.tipo || "",
+        limite: 3,
+      });
+
+      let totalAdicionadas = 0;
+      let etapasComMusicas = 0;
+      setEtapas((prev) =>
+        prev.map((e) => {
+          const ranking = maisTocadas.get((e.nome || "").trim());
+          if (!ranking || ranking.length === 0) return e;
+          etapasComMusicas += 1;
+          const tracksAtuais = e.tracks || [];
+          // Adiciona apenas músicas que ainda não estão na etapa
+          const existentes = new Set(tracksAtuais.map((t) => (t.name || t.nome || "").trim()));
+          const novas = ranking
+            .filter((r) => !existentes.has(r.track.name.trim()))
+            .map((r) => r.track);
+          totalAdicionadas += novas.length;
+          return { ...e, tracks: [...tracksAtuais, ...novas] };
+        })
+      );
+
+      if (etapasComMusicas === 0) {
+        toast({
+          title: "Sem histórico suficiente",
+          description: "Ainda não há sessões realizadas deste grau/tipo com músicas para montar automaticamente.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Sessão montada automaticamente",
+          description: `${totalAdicionadas} música(s) adicionada(s) em ${etapasComMusicas} etapa(s) com base nas mais tocadas.`,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Erro ao montar sessão",
+        description: "Não foi possível carregar as músicas mais tocadas.",
+        variant: "destructive",
+      });
+    } finally {
+      setMontando(false);
+    }
+  };
+
   const handleStopTimer = async (etapaNome, registro) => {
     await db.TempoEtapa.create({
       sessao_id: sessaoId,
@@ -253,10 +308,23 @@ export default function AdminRoteiroHarmonia() {
             {sessao.tipo} {sessao.numero && `Nº ${sessao.numero}`}{roteiro?.grau && ` • ${roteiro.grau}`} • {sessao.data} às {sessao.hora}
           </p>
         </div>
-        <Button onClick={salvar} disabled={saving} size="sm" className="ml-auto bg-[#1B3A5F] text-white hover:bg-[#152d49]">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-          Salvar Roteiro
-        </Button>
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            onClick={montarSessaoAutomatico}
+            disabled={montando || saving}
+            size="sm"
+            variant="outline"
+            className="border-[#C9A227] text-[#C9A227] hover:bg-[#C9A227] hover:text-white"
+            title="Adiciona automaticamente as 3 músicas mais tocadas em cada etapa (deste grau/tipo)"
+          >
+            {montando ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+            Montar Sessão Automático
+          </Button>
+          <Button onClick={salvar} disabled={saving} size="sm" className="bg-[#1B3A5F] text-white hover:bg-[#152d49]">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+            Salvar Roteiro
+          </Button>
+        </div>
       </div>
 
       <Card>
