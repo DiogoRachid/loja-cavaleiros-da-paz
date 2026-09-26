@@ -129,7 +129,7 @@ export default function IrmaoForm({ irmao, onSave, onCancel }) {
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" disabled={saving} className="bg-[#1B3A5F] hover:bg-[#15304d]">
+        <Button type="submit" disabled={saving} className="bg-lodge-navy dark:bg-primary text-primary-foreground hover:opacity-90">
           {saving ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />

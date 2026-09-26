@@ -189,24 +189,24 @@ export default function IrmaoBibliotecaChat() {
 
   if (!irmao) {
     return (
-      <div className="flex items-center justify-center h-64 text-sm text-gray-400">
+      <div className="flex items-center justify-center h-64 text-sm text-muted-foreground">
         Carregando...
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-[600px] max-w-2xl mx-auto border rounded-lg bg-white shadow-sm">
+    <div className="flex flex-col h-[600px] max-w-2xl mx-auto border rounded-lg bg-card shadow-sm">
       <div className="px-4 py-3 border-b">
         <h2 className="text-lg font-semibold">Consulta ao Acervo Digital</h2>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           Pergunte sobre os livros e artigos disponíveis no acervo (grau: {irmao.grau})
         </p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
         {mensagens.length === 0 && (
-          <p className="text-sm text-gray-400 text-center mt-8">
+          <p className="text-sm text-muted-foreground text-center mt-8">
             Faça uma pergunta sobre o conteúdo do acervo digital.
           </p>
         )}
@@ -219,24 +219,24 @@ export default function IrmaoBibliotecaChat() {
             <div
               className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
                 msg.autor === "usuario"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-primary text-primary-foreground"
                   : msg.erro
-                  ? "bg-red-50 text-red-700 border border-red-200"
-                  : "bg-gray-100 text-gray-800"
+                  ? "bg-danger-soft text-danger border border-danger/30"
+                  : "bg-muted text-foreground"
               }`}
             >
               {msg.autor === "agente" && msg.texto === "" && msg.streaming ? (
-                <span className="text-gray-400">Consultando o acervo...</span>
+                <span className="text-muted-foreground">Consultando o acervo...</span>
               ) : (
                 <ReactMarkdown>{msg.texto}</ReactMarkdown>
               )}
 
               {msg.streaming && msg.texto !== "" && (
-                <span className="inline-block w-1.5 h-3.5 bg-gray-400 ml-0.5 animate-pulse align-middle" />
+                <span className="inline-block w-1.5 h-3.5 bg-muted-foreground ml-0.5 animate-pulse align-middle" />
               )}
 
               {msg.fontes && msg.fontes.length > 0 && !msg.streaming && (
-                <div className="mt-2 pt-2 border-t border-gray-300 text-xs text-gray-500">
+                <div className="mt-2 pt-2 border-t border-border text-xs text-muted-foreground">
                   <strong>Fontes:</strong>
                   <ul className="list-disc list-inside">
                     {msg.fontes.map((f) => (
@@ -259,12 +259,12 @@ export default function IrmaoBibliotecaChat() {
           onKeyDown={aoTeclar}
           placeholder="Digite sua pergunta..."
           rows={1}
-          className="flex-1 resize-none border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 resize-none border border-input bg-background text-foreground rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
         <button
           onClick={enviarPergunta}
           disabled={carregando || !pergunta.trim()}
-          className="bg-blue-600 text-white rounded-md px-4 py-2 text-sm disabled:opacity-50"
+          className="bg-primary text-primary-foreground rounded-md px-4 py-2 text-sm disabled:opacity-50"
         >
           Enviar
         </button>

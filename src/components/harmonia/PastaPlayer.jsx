@@ -24,7 +24,7 @@ const Equalizer = ({ className = "" }) => (
     {[0, 1, 2, 3].map((b) => (
       <span
         key={b}
-        className="eq-bar w-[3px] bg-[#D6B45E] h-full rounded-sm"
+        className="eq-bar w-[3px] bg-lodge-gold h-full rounded-sm"
         style={{ animationDelay: `${b * 0.15}s` }}
       />
     ))}
@@ -211,12 +211,12 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
   const dispCurrent = Math.max(0, current - (trimStart || 0));
   const dispDuration = Math.max(0, (trimEnd > (trimStart || 0) ? trimEnd : duration) - (trimStart || 0)) || duration;
 
-  const btnGold = "text-[#D6B45E] hover:text-[#f0d88d] transition-colors";
+  const btnGold = "text-warning hover:text-warning transition-colors";
   const ctrlBtn =
-    "w-9 h-9 rounded-full border border-[#334366] text-[#D6B45E] hover:bg-[#D6B45E] hover:text-[#1a243b] flex items-center justify-center transition-colors";
+    "w-9 h-9 rounded-full border border-border text-warning hover:bg-lodge-gold hover:text-landing-deep flex items-center justify-center transition-colors";
 
   return (
-    <div className="rounded-xl border border-[#334366] bg-[#1a243b] overflow-hidden">
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
       <audio
         ref={audioRef}
         src={atual?.file_url}
@@ -240,21 +240,21 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
       />
 
       {/* Banner do player */}
-      <div className="bg-[#253251] border-b border-[#334366] px-3 sm:px-4 py-3">
+      <div className="bg-muted border-b border-border px-3 sm:px-4 py-3">
         <div className="flex items-center gap-3">
           {/* Arte / meta - esquerda */}
-          <div className="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#1a243b] border border-[#334366]">
-            <Music className="h-5 w-5 text-[#D6B45E]" />
+          <div className="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-card border border-border">
+            <Music className="h-5 w-5 text-warning" />
           </div>
           <div className="min-w-0 flex-1 sm:flex-none sm:w-44 lg:w-56">
-            <p className="font-display text-[1.25rem] leading-tight text-[#f1f5f9] truncate">
+            <p className="font-display text-[1.25rem] leading-tight text-foreground truncate">
               {atual?.nome || "—"}
             </p>
-            <p className="text-[0.75rem] uppercase tracking-wider text-[#94a3b8] truncate">
+            <p className="text-[0.75rem] uppercase tracking-wider text-muted-foreground truncate">
               {atual?.artista || `Faixa ${(atualIdx ?? 0) + 1} de ${musicas.length}`}
             </p>
             {analyzing && (
-              <span className="text-[0.7rem] text-[#D6B45E] animate-pulse">Analisando áudio…</span>
+              <span className="text-[0.7rem] text-warning animate-pulse">Analisando áudio…</span>
             )}
           </div>
 
@@ -269,7 +269,7 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
             <button onClick={proxima} className={btnGold} title="Próxima">
               <SkipForward className="w-4 h-4" />
             </button>
-            <span className="text-[0.875rem] tabular-nums text-[#94a3b8] w-10 text-right">
+            <span className="text-[0.875rem] tabular-nums text-muted-foreground w-10 text-right">
               {fmt(dispCurrent)}
             </span>
             <Slider
@@ -277,9 +277,9 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
               max={dispDuration || 1}
               step={1}
               onValueChange={seek}
-              className="flex-1 cursor-pointer [&>span:first-child]:bg-[#334366] [&>span:first-child>span]:bg-[#D6B45E] [&_[role=slider]]:border-[#D6B45E] [&_[role=slider]]:bg-[#D6B45E]"
+              className="flex-1 cursor-pointer [&>span:first-child]:bg-border [&>span:first-child>span]:bg-lodge-gold [&_[role=slider]]:border-lodge-gold [&_[role=slider]]:bg-lodge-gold"
             />
-            <span className="text-[0.875rem] tabular-nums text-[#94a3b8] w-10">
+            <span className="text-[0.875rem] tabular-nums text-muted-foreground w-10">
               {fmt(dispDuration)}
             </span>
           </div>
@@ -289,18 +289,18 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
             <button
               onClick={toggleShuffle}
               title="Aleatório"
-              className={`transition-colors ${shuffle ? "text-[#D6B45E] drop-shadow-[0_0_6px_#D6B45E]" : "text-[#94a3b8] hover:text-[#D6B45E]"}`}
+              className={`transition-colors ${shuffle ? "text-warning drop-shadow-[0_0_6px_hsl(var(--lodge-gold)/0.4)]" : "text-muted-foreground hover:text-warning"}`}
             >
               <Shuffle className="w-4 h-4" />
             </button>
             <button
               onClick={toggleRepeat}
               title="Repetir"
-              className={`transition-colors ${repeat ? "text-[#D6B45E] drop-shadow-[0_0_6px_#D6B45E]" : "text-[#94a3b8] hover:text-[#D6B45E]"}`}
+              className={`transition-colors ${repeat ? "text-warning drop-shadow-[0_0_6px_hsl(var(--lodge-gold)/0.4)]" : "text-muted-foreground hover:text-warning"}`}
             >
               <Repeat className="w-4 h-4" />
             </button>
-            <button onClick={toggleMute} className="text-[#94a3b8] hover:text-[#D6B45E] transition-colors" title="Silenciar">
+            <button onClick={toggleMute} className="text-muted-foreground hover:text-warning transition-colors" title="Silenciar">
               {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
             <Slider
@@ -308,7 +308,7 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
               max={1}
               step={0.05}
               onValueChange={changeVolume}
-              className="w-16 cursor-pointer [&>span:first-child]:bg-[#334366] [&>span:first-child>span]:bg-[#D6B45E] [&_[role=slider]]:border-[#D6B45E] [&_[role=slider]]:bg-[#D6B45E]"
+              className="w-16 cursor-pointer [&>span:first-child]:bg-border [&>span:first-child>span]:bg-lodge-gold [&_[role=slider]]:border-lodge-gold [&_[role=slider]]:bg-lodge-gold"
             />
           </div>
 
@@ -320,14 +320,14 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
             <button
               onClick={toggleShuffle}
               title="Aleatório"
-              className={`transition-colors ${shuffle ? "text-[#D6B45E]" : "text-[#94a3b8]"}`}
+              className={`transition-colors ${shuffle ? "text-warning" : "text-muted-foreground"}`}
             >
               <Shuffle className="w-4 h-4" />
             </button>
             <button
               onClick={toggleRepeat}
               title="Repetir"
-              className={`transition-colors ${repeat ? "text-[#D6B45E]" : "text-[#94a3b8]"}`}
+              className={`transition-colors ${repeat ? "text-warning" : "text-muted-foreground"}`}
             >
               <Repeat className="w-4 h-4" />
             </button>
@@ -342,7 +342,7 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
           <button onClick={proxima} className={btnGold} title="Próxima">
             <SkipForward className="w-4 h-4" />
           </button>
-          <span className="text-[0.875rem] tabular-nums text-[#94a3b8] w-10 text-right">
+          <span className="text-[0.875rem] tabular-nums text-muted-foreground w-10 text-right">
             {fmt(dispCurrent)}
           </span>
           <Slider
@@ -350,16 +350,16 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
             max={dispDuration || 1}
             step={1}
             onValueChange={seek}
-            className="flex-1 cursor-pointer [&>span:first-child]:bg-[#334366] [&>span:first-child>span]:bg-[#D6B45E] [&_[role=slider]]:border-[#D6B45E] [&_[role=slider]]:bg-[#D6B45E]"
+            className="flex-1 cursor-pointer [&>span:first-child]:bg-border [&>span:first-child>span]:bg-lodge-gold [&_[role=slider]]:border-lodge-gold [&_[role=slider]]:bg-lodge-gold"
           />
-          <span className="text-[0.875rem] tabular-nums text-[#94a3b8] w-10">
+          <span className="text-[0.875rem] tabular-nums text-muted-foreground w-10">
           {fmt(dispDuration)}
           </span>
           </div>
           </div>
 
       {/* Lista de faixas */}
-      <div ref={listRef} className="relative divide-y divide-[#334366] max-h-72 overflow-y-auto">
+      <div ref={listRef} className="relative divide-y divide-border max-h-72 overflow-y-auto">
         {musicas.map((m, i) => {
           const isActive = i === atualIdx;
           const progress = isActive && dispDuration ? (dispCurrent / dispDuration) * 100 : 0;
@@ -368,19 +368,19 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
               key={m.id}
               ref={(el) => (rowRefs.current[i] = el)}
               className={`relative flex items-center gap-3 px-3 sm:px-4 py-2.5 cursor-pointer transition-colors ${
-                isActive ? "bg-[#2d3e63]" : "hover:bg-[#1f2c4a]"
+                isActive ? "bg-warning-soft" : "hover:bg-muted"
               }`}
               onClick={() => playTrack(i)}
             >
-              <span className="w-6 shrink-0 text-right text-[0.875rem] tabular-nums text-[#94a3b8]">
+              <span className="w-6 shrink-0 text-right text-[0.875rem] tabular-nums text-muted-foreground">
                 {isActive && playing ? <Equalizer /> : i + 1}
               </span>
               <div className="min-w-0 flex-1">
-                <p className={`text-[0.95rem] truncate ${isActive ? "text-[#f0d88d]" : "text-[#f1f5f9]"}`}>
+                <p className={`text-[0.95rem] truncate ${isActive ? "text-warning" : "text-foreground"}`}>
                   {m.nome}
                 </p>
                 {m.artista && (
-                  <p className="text-[0.75rem] text-[#94a3b8] truncate">{m.artista}</p>
+                  <p className="text-[0.75rem] text-muted-foreground truncate">{m.artista}</p>
                 )}
               </div>
               {renderRowActions && (
@@ -390,7 +390,7 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
               )}
               {isActive && (
                 <div
-                  className="absolute bottom-0 left-0 h-0.5 bg-[#D6B45E]"
+                  className="absolute bottom-0 left-0 h-0.5 bg-lodge-gold"
                   style={{ width: `${progress}%` }}
                 />
               )}

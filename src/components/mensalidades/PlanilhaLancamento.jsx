@@ -162,13 +162,13 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
   ];
 
   return (
-    <Card className="border-[#C9A227]">
+    <Card className="border-lodge-gold">
       <CardHeader className="pb-2">
-        <CardTitle className="text-[#1B3A5F]">Planilha de Lançamento</CardTitle>
+        <CardTitle className="text-lodge-navy">Planilha de Lançamento</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Config do mês */}
-        <div className="flex flex-wrap gap-3 items-end bg-slate-50 p-3 rounded-lg">
+        <div className="flex flex-wrap gap-3 items-end bg-muted p-3 rounded-lg">
           <div className="space-y-1">
             <Label className="text-xs">Competência *</Label>
             <Input value={competencia} onChange={e => setCompetencia(e.target.value)} placeholder="MM/AAAA" className="w-32" />
@@ -181,7 +181,7 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
             <Label className="text-xs">Mensalidade padrão (R$)</Label>
             <div className="flex gap-1">
               <Input type="number" step="0.01" value={valorMensalidade} onChange={e => setValorMensalidade(e.target.value)} placeholder="0.00" className="w-28" />
-              <Button size="sm" variant="outline" onClick={aplicarMensalidadeGlobal} className="text-xs border-[#1B3A5F] text-[#1B3A5F]">
+              <Button size="sm" variant="outline" onClick={aplicarMensalidadeGlobal} className="text-xs border-border text-lodge-navy">
                 Aplicar a todos
               </Button>
             </div>
@@ -193,7 +193,7 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
         </div>
 
         {/* Planilha */}
-        <div className="overflow-x-auto rounded-lg border border-slate-200">
+        <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-[#1B3A5F] text-white">
@@ -218,10 +218,10 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
               {sortedLinhas.map((linha, idx) => {
                 const total = calcularTotal(linha);
                 return (
-                  <tr key={linha.irmao_id} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
+                  <tr key={linha.irmao_id} className={idx % 2 === 0 ? "bg-card" : "bg-muted"}>
                     <td className="px-3 py-1.5 sticky left-0 bg-inherit">
-                      <p className="font-medium text-slate-800 text-xs leading-tight">{linha.irmao_nome}</p>
-                      <p className="text-slate-400 text-xs">GLP: {linha.irmao_cim}</p>
+                      <p className="font-medium text-foreground text-xs leading-tight">{linha.irmao_nome}</p>
+                      <p className="text-muted-foreground text-xs">GLP: {linha.irmao_cim}</p>
                     </td>
                     <td className="px-2 py-1">
                       <Input
@@ -244,7 +244,7 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
                       </td>
                     ))}
                     <td className="px-3 py-1 text-center">
-                      <span className={`font-bold text-sm ${total > 0 ? "text-[#1B3A5F]" : "text-slate-400"}`}>
+                      <span className={`font-bold text-sm ${total > 0 ? "text-lodge-navy" : "text-muted-foreground"}`}>
                         R$ {total.toFixed(2)}
                       </span>
                     </td>
@@ -253,10 +253,10 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
                         value={linha.status}
                         onChange={e => setStatusLinha(linha.irmao_id, e.target.value)}
                         className={`text-xs rounded-full px-2 py-0.5 border-0 font-medium cursor-pointer ${
-                          linha.status === "Pago" ? "bg-green-100 text-green-800" :
-                          linha.status === "Atrasado" ? "bg-red-100 text-red-800" :
-                          linha.status === "Isento" ? "bg-slate-100 text-slate-600" :
-                          "bg-yellow-100 text-yellow-800"
+                          linha.status === "Pago" ? "bg-lodge-success-soft text-lodge-success" :
+                          linha.status === "Atrasado" ? "bg-danger-soft text-danger" :
+                          linha.status === "Isento" ? "bg-muted text-muted-foreground" :
+                          "bg-warning-soft text-warning"
                         }`}
                       >
                         {["Pendente","Pago","Atrasado","Isento"].map(s => (
@@ -270,10 +270,10 @@ export default function PlanilhaLancamento({ irmaos, centrosAtivos, onSalvo }) {
             </tbody>
             <tfoot>
               <tr className="bg-[#1B3A5F]/10 font-semibold">
-                <td className="px-3 py-2 text-[#1B3A5F] text-xs">Totais</td>
+                <td className="px-3 py-2 text-lodge-navy text-xs">Totais</td>
                 <td></td>
                 {centrosAtivos.map(c => <td key={c.id}></td>)}
-                <td className="px-3 py-2 text-center text-[#1B3A5F]">R$ {totalGeral.toFixed(2)}</td>
+                <td className="px-3 py-2 text-center text-lodge-navy">R$ {totalGeral.toFixed(2)}</td>
                 <td className="px-3 py-2 text-center text-green-700 text-xs">Pago: R$ {totalPago.toFixed(2)}</td>
               </tr>
             </tfoot>

@@ -67,7 +67,7 @@ export default function AudioPlayer({ src }) {
   const dispDuration = Math.max(0, (trimEnd > (trimStart || 0) ? trimEnd : duration) - (trimStart || 0)) || duration;
 
   return (
-    <div className="flex items-center gap-2 w-full sm:w-[260px] bg-[#253251] rounded-lg px-2 py-1.5 flex-shrink-0">
+    <div className="flex items-center gap-2 w-full sm:w-[260px] bg-muted rounded-lg px-2 py-1.5 flex-shrink-0">
       <audio
         ref={audioRef}
         src={src}
@@ -91,20 +91,20 @@ export default function AudioPlayer({ src }) {
       />
       <button
         onClick={toggle}
-        className="w-8 h-8 rounded-full border-2 border-[#D6B45E] text-[#D6B45E] hover:bg-[#D6B45E] hover:text-[#253251] flex items-center justify-center flex-shrink-0 transition-colors"
+        className="w-8 h-8 rounded-full border-2 border-lodge-gold text-warning hover:bg-lodge-gold hover:text-landing-deep flex items-center justify-center flex-shrink-0 transition-colors"
       >
         {playing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
       </button>
-      <span className="text-[11px] text-white tabular-nums flex-shrink-0 w-9 text-right">{fmt(dispCurrent)}</span>
+      <span className="text-[11px] text-foreground tabular-nums flex-shrink-0 w-9 text-right">{fmt(dispCurrent)}</span>
       <Slider
         value={[dispCurrent]}
         max={dispDuration || 1}
         step={1}
         onValueChange={seek}
-        className="flex-1 cursor-pointer [&>span:first-child]:bg-white/25 [&>span:first-child>span]:bg-[#D6B45E] [&_[role=slider]]:border-[#D6B45E] [&_[role=slider]]:bg-[#D6B45E]"
+        className="flex-1 cursor-pointer [&>span:first-child]:bg-border [&>span:first-child>span]:bg-lodge-gold [&_[role=slider]]:border-lodge-gold [&_[role=slider]]:bg-lodge-gold"
       />
-      <span className="text-[11px] text-white tabular-nums flex-shrink-0 w-9">{fmt(dispDuration)}</span>
-      <button onClick={toggleMute} className="text-slate-300 hover:text-[#D6B45E] flex-shrink-0 transition-colors">
+      <span className="text-[11px] text-foreground tabular-nums flex-shrink-0 w-9">{fmt(dispDuration)}</span>
+      <button onClick={toggleMute} className="text-muted-foreground hover:text-warning flex-shrink-0 transition-colors">
         {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
       </button>
       <Slider
@@ -112,7 +112,7 @@ export default function AudioPlayer({ src }) {
         max={1}
         step={0.05}
         onValueChange={changeVolume}
-        className="w-14 cursor-pointer flex-shrink-0 hidden md:flex [&>span:first-child]:bg-white/25 [&>span:first-child>span]:bg-[#D6B45E] [&_[role=slider]]:border-[#D6B45E] [&_[role=slider]]:bg-[#D6B45E]"
+        className="w-14 cursor-pointer flex-shrink-0 hidden md:flex [&>span:first-child]:bg-border [&>span:first-child>span]:bg-lodge-gold [&_[role=slider]]:border-lodge-gold [&_[role=slider]]:bg-lodge-gold"
       />
     </div>
   );

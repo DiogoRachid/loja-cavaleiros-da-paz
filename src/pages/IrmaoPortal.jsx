@@ -43,12 +43,12 @@ export default function IrmaoPortal() {
   const pendentes = mensalidades.filter(m => m.status === "Pendente" || m.status === "Atrasado");
   const ultimasMensalidades = mensalidades.slice(0, 4);
 
-  const statusMensColors = { Pago: "bg-green-100 text-green-800", Pendente: "bg-yellow-100 text-yellow-800", Atrasado: "bg-red-100 text-red-800", Isento: "bg-slate-100 text-slate-600" };
+  const statusMensColors = { Pago: "bg-lodge-success-soft text-lodge-success", Pendente: "bg-warning-soft text-warning", Atrasado: "bg-danger-soft text-danger", Isento: "bg-muted text-muted-foreground" };
 
   return (
     <div className="space-y-6">
       {/* Saudação */}
-      <div className="rounded-xl bg-lodge-navy p-6 text-primary-foreground">
+      <div className="rounded-xl bg-lodge-navy dark:bg-primary p-6 text-primary-foreground">
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-lodge-gold/20 text-2xl font-semibold text-lodge-gold">
             {irmao.nome_completo?.charAt(0)}
@@ -98,7 +98,7 @@ export default function IrmaoPortal() {
               </div>
               <div>
                 <p className="text-xl font-semibold text-lodge-navy">{freqPct}%</p>
-                <p className="text-xs text-slate-500">Frequência ({presentes}/{totalSessoes})</p>
+                <p className="text-xs text-muted-foreground">Frequência ({presentes}/{totalSessoes})</p>
               </div>
             </div>
           </CardContent>
@@ -111,7 +111,7 @@ export default function IrmaoPortal() {
               </div>
               <div>
                 <p className="text-xl font-semibold text-lodge-navy">{pendentes.length}</p>
-                <p className="text-xs text-slate-500">Mensalidades em aberto</p>
+                <p className="text-xs text-muted-foreground">Mensalidades em aberto</p>
               </div>
             </div>
           </CardContent>
@@ -134,7 +134,7 @@ export default function IrmaoPortal() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-lodge-navy/10">
                     <Icon className="h-5 w-5 text-lodge-navy" />
                   </div>
-                  <p className="text-xs font-medium text-slate-700">{item.label}</p>
+                  <p className="text-xs font-medium text-foreground">{item.label}</p>
                 </CardContent>
               </Card>
             </Link>
@@ -150,8 +150,8 @@ export default function IrmaoPortal() {
             {sessoes.map(s => (
               <div key={s.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3">
                 <div>
-                  <p className="font-medium text-slate-800 text-sm">{s.tipo}</p>
-                  <p className="text-xs text-slate-500">{s.data} às {s.hora}{s.local ? ` • ${s.local}` : ""}</p>
+                  <p className="font-medium text-foreground text-sm">{s.tipo}</p>
+                  <p className="text-xs text-muted-foreground">{s.data} às {s.hora}{s.local ? ` • ${s.local}` : ""}</p>
                 </div>
                 <Badge className="bg-lodge-navy/10 text-lodge-navy">{s.grau}</Badge>
               </div>
@@ -164,12 +164,12 @@ export default function IrmaoPortal() {
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2 text-base text-lodge-navy"><DollarSign className="w-4 h-4" /> Minhas Mensalidades</CardTitle></CardHeader>
         <CardContent className="space-y-2">
-          {ultimasMensalidades.length === 0 && <p className="text-slate-400 text-sm text-center py-3">Nenhum lançamento encontrado.</p>}
+          {ultimasMensalidades.length === 0 && <p className="text-muted-foreground text-sm text-center py-3">Nenhum lançamento encontrado.</p>}
           {ultimasMensalidades.map(m => (
             <div key={m.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3">
               <div>
-                <p className="font-medium text-slate-800 text-sm">{m.competencia}</p>
-                <p className="text-xs text-slate-500">Venc: {m.vencimento}</p>
+                <p className="font-medium text-foreground text-sm">{m.competencia}</p>
+                <p className="text-xs text-muted-foreground">Venc: {m.vencimento}</p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-sm">R$ {(m.valor || 0).toFixed(2)}</span>
@@ -184,12 +184,12 @@ export default function IrmaoPortal() {
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2 text-base text-lodge-navy"><User className="w-4 h-4" /> Dados Cadastrais</CardTitle></CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-3 text-sm">
-          <div><span className="text-slate-500">CIM: </span><span className="font-medium">{irmao.cim}</span></div>
-          <div><span className="text-slate-500">Nº GLP: </span><span className="font-medium">{irmao.numero_glp || "—"}</span></div>
-          <div><span className="text-slate-500">Email: </span><span className="font-medium">{irmao.email || "—"}</span></div>
-          <div><span className="text-slate-500">Telefone: </span><span className="font-medium">{irmao.telefone || "—"}</span></div>
-          <div><span className="text-slate-500">Iniciação: </span><span className="font-medium">{irmao.data_iniciacao || "—"}</span></div>
-          <div><span className="text-slate-500">Grau: </span><span className="font-medium">{irmao.grau}</span></div>
+          <div><span className="text-muted-foreground">CIM: </span><span className="font-medium">{irmao.cim}</span></div>
+          <div><span className="text-muted-foreground">Nº GLP: </span><span className="font-medium">{irmao.numero_glp || "—"}</span></div>
+          <div><span className="text-muted-foreground">Email: </span><span className="font-medium">{irmao.email || "—"}</span></div>
+          <div><span className="text-muted-foreground">Telefone: </span><span className="font-medium">{irmao.telefone || "—"}</span></div>
+          <div><span className="text-muted-foreground">Iniciação: </span><span className="font-medium">{irmao.data_iniciacao || "—"}</span></div>
+          <div><span className="text-muted-foreground">Grau: </span><span className="font-medium">{irmao.grau}</span></div>
         </CardContent>
       </Card>
     </div>

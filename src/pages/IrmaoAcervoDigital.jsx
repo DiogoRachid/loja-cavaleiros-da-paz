@@ -153,15 +153,15 @@ export default function IrmaoAcervoDigital() {
   );
 
   const grauColors = {
-    "Aprendiz": "bg-blue-100 text-blue-700",
-    "Companheiro": "bg-amber-100 text-amber-700",
-    "Mestre": "bg-purple-100 text-purple-700"
+    "Aprendiz": "bg-info-soft text-info",
+    "Companheiro": "bg-warning-soft text-warning",
+    "Mestre": "bg-notice-soft text-notice"
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-[#1B3A5F]" />
+        <Loader2 className="w-8 h-8 animate-spin text-lodge-navy" />
       </div>
     );
   }
@@ -170,13 +170,13 @@ export default function IrmaoAcervoDigital() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Acervo Digital</h1>
-          <p className="text-slate-500">{filteredDocs.length} documento(s) disponível(is)</p>
+          <h1 className="text-2xl font-bold text-foreground">Acervo Digital</h1>
+          <p className="text-muted-foreground">{filteredDocs.length} documento(s) disponível(is)</p>
         </div>
 
         <Button
           onClick={() => window.location.href = createPageUrl("IrmaoBibliotecaChat")}
-          className="bg-[#1B3A5F] hover:bg-[#15304d]"
+          className="bg-lodge-navy dark:bg-primary text-primary-foreground hover:opacity-90"
         >
           <MessageSquare className="w-4 h-4 mr-2" />
           Perguntar ao Acervo
@@ -186,7 +186,7 @@ export default function IrmaoAcervoDigital() {
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por título ou autor..."
             value={search}
@@ -231,17 +231,17 @@ export default function IrmaoAcervoDigital() {
             <Card key={doc.id} className="hover:shadow-lg transition-shadow overflow-hidden flex flex-col">
               <CardContent className="p-4 flex flex-col gap-4 h-full">
                 <div className="flex gap-4">
-                  <div className="w-16 h-20 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-16 h-20 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
                     {doc.capa_url ? (
                       <img src={doc.capa_url} alt="" className="w-full h-full object-cover rounded-lg" />
                     ) : (
-                      <FileText className="w-8 h-8 text-slate-400" />
+                      <FileText className="w-8 h-8 text-muted-foreground" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-slate-800 line-clamp-2">{doc.titulo}</h3>
+                    <h3 className="font-semibold text-foreground line-clamp-2">{doc.titulo}</h3>
                     {doc.autor && (
-                      <p className="text-xs text-slate-500 line-clamp-1 mt-1">{doc.autor}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-1 mt-1">{doc.autor}</p>
                     )}
                     <div className="flex flex-wrap gap-1 mt-2">
                       <Badge variant="outline" className="text-xs">{doc.tipo}</Badge>
@@ -256,7 +256,7 @@ export default function IrmaoAcervoDigital() {
                 <div className="space-y-2">
                   {/* Avaliação */}
                   {mediaAvaliacao > 0 && (
-                    <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <div className="flex gap-0.5">
                         {[...Array(5)].map((_, i) => (
                           <Star
@@ -265,13 +265,13 @@ export default function IrmaoAcervoDigital() {
                           />
                         ))}
                       </div>
-                      <span className="text-slate-500">({totalAvaliacoes})</span>
+                      <span className="text-muted-foreground">({totalAvaliacoes})</span>
                     </div>
                   )}
 
                   {/* Data de publicação */}
                   {doc.data_publicacao && (
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Calendar className="w-3 h-3 flex-shrink-0" />
                       <span>{format(parseISO(doc.data_publicacao), 'dd/MM/yyyy')}</span>
                     </div>
@@ -279,7 +279,7 @@ export default function IrmaoAcervoDigital() {
 
                   {/* Descrição */}
                   {doc.descricao && (
-                    <p className="text-xs text-slate-600 line-clamp-2">{doc.descricao}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{doc.descricao}</p>
                   )}
                 </div>
 
@@ -314,12 +314,12 @@ export default function IrmaoAcervoDigital() {
         <Card>
           <CardContent className="py-12 text-center">
             <FileText className="w-12 h-12 mx-auto text-slate-300 mb-4" />
-            <p className="text-slate-500">Nenhum documento encontrado</p>
+            <p className="text-muted-foreground">Nenhum documento encontrado</p>
           </CardContent>
         </Card>
       )}
 
-      <div className="text-center text-xs text-slate-400 mt-8 pb-4 border-t pt-4">
+      <div className="text-center text-xs text-muted-foreground mt-8 pb-4 border-t pt-4">
         Conteúdo protegido por direitos autorais — uso permitido apenas para fins educacionais e sem autorização para reprodução ou distribuição
       </div>
 
@@ -338,7 +338,7 @@ export default function IrmaoAcervoDigital() {
           <form onSubmit={handleEnviarAvaliacao} className="space-y-4">
             {/* Nota */}
             <div>
-              <label className="text-sm font-medium text-slate-700 block mb-2">
+              <label className="text-sm font-medium text-foreground block mb-2">
                 Avaliação (1-5 estrelas)
               </label>
               <div className="flex gap-2">
@@ -361,7 +361,7 @@ export default function IrmaoAcervoDigital() {
 
             {/* Comentário */}
             <div>
-              <label className="text-sm font-medium text-slate-700 block mb-2">
+              <label className="text-sm font-medium text-foreground block mb-2">
                 Comentário (opcional)
               </label>
               <Textarea
@@ -383,7 +383,7 @@ export default function IrmaoAcervoDigital() {
               </Button>
               <Button
                 type="submit"
-                className="flex-1 bg-[#1B3A5F] hover:bg-[#15304d]"
+                className="flex-1 bg-lodge-navy dark:bg-primary text-primary-foreground hover:opacity-90"
                 disabled={enviandoAvaliacao}
               >
                 {enviandoAvaliacao ? (

@@ -31,14 +31,17 @@ import AdminAcaoSocial from './pages/AdminAcaoSocial';
 import Portais from './pages/Portais';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import PortalThemeProvider from '@/components/theme/PortalThemeProvider';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
-const LayoutWrapper = ({ children, currentPageName }) => Layout ?
-  <Layout currentPageName={currentPageName}>{children}</Layout>
-  : <>{children}</>;
+const LayoutWrapper = ({ children, currentPageName }) => (
+  <PortalThemeProvider currentPageName={currentPageName}>
+    {Layout ? <Layout currentPageName={currentPageName}>{children}</Layout> : children}
+  </PortalThemeProvider>
+);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();

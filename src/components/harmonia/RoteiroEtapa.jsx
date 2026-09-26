@@ -44,18 +44,18 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
   };
 
   return (
-    <div className={`rounded-xl border bg-white transition-colors ${isEtapaPlaying ? "border-[#C9A227]" : "border-slate-200"} ${isEtapaPlaying && playback?.nearEnd ? "ring-2 ring-[#C9A227] animate-pulse" : ""}`}>
+    <div className={`rounded-xl border bg-card transition-colors ${isEtapaPlaying ? "border-lodge-gold" : "border-border"} ${isEtapaPlaying && playback?.nearEnd ? "ring-2 ring-lodge-gold animate-pulse" : ""}`}>
       {/* Cabeçalho compacto */}
       <div className="flex items-center gap-2 px-2 py-2 sm:px-3">
         <button
           onClick={() => setOpen(!open)}
-          className="text-slate-400 hover:text-[#1B3A5F] flex-shrink-0"
+          className="text-muted-foreground hover:text-lodge-navy flex-shrink-0"
           title={open ? "Recolher etapa" : "Expandir etapa"}
         >
           {open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         </button>
 
-        <span className="text-[#1B3A5F] text-sm font-semibold w-6 flex-shrink-0 tabular-nums">{num}</span>
+        <span className="text-lodge-navy text-sm font-semibold w-6 flex-shrink-0 tabular-nums">{num}</span>
 
         {editing ? (
           <input
@@ -64,18 +64,18 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
             onChange={(e) => setName(e.target.value)}
             onBlur={handleSaveName}
             onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
-            className="bg-transparent text-slate-800 font-semibold text-sm border-b border-[#C9A227] outline-none flex-1 min-w-0"
+            className="bg-transparent text-foreground font-semibold text-sm border-b border-lodge-gold outline-none flex-1 min-w-0"
           />
         ) : (
           <button
             onClick={() => { setEditing(true); setName(etapa.nome); }}
-            className="text-slate-800 font-semibold text-sm text-left flex-1 min-w-0 truncate hover:text-[#1B3A5F]"
+            className="text-foreground font-semibold text-sm text-left flex-1 min-w-0 truncate hover:text-lodge-navy"
           >
             {etapa.nome}
           </button>
         )}
 
-        <span className="text-xs text-slate-400 flex-shrink-0">
+        <span className="text-xs text-muted-foreground flex-shrink-0">
           {tracks.length} <Music className="w-3 h-3 inline -mt-0.5" />
         </span>
 
@@ -83,7 +83,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
           size="icon"
           variant="outline"
           title="Adicionar Música"
-          className="border-[#1B3A5F] text-[#1B3A5F] hover:bg-[#1B3A5F] hover:text-white h-7 w-7 flex-shrink-0"
+          className="border-border text-lodge-navy hover:bg-primary hover:text-white h-7 w-7 flex-shrink-0"
           onClick={() => onAddTrack(etapa.id)}
         >
           <Music className="w-3 h-3" />
@@ -92,7 +92,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
         <Button
           size="icon"
           variant="ghost"
-          className="h-7 w-7 text-slate-400 hover:text-red-500 hover:bg-red-50 flex-shrink-0"
+          className="h-7 w-7 text-muted-foreground hover:text-red-500 hover:bg-red-50 flex-shrink-0"
           onClick={() => onRemove(etapa.id)}
         >
           <Trash2 className="w-3 h-3" />
@@ -123,7 +123,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
           />
 
           {tracks.length === 0 ? (
-            <p className="text-xs text-slate-400 py-2">Nenhuma música nesta etapa.</p>
+            <p className="text-xs text-muted-foreground py-2">Nenhuma música nesta etapa.</p>
           ) : (
             <div className="space-y-1.5">
               {tracks.map((track, ti) => {
@@ -151,7 +151,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
 
           {playback?.error && <p className="text-xs text-red-500">{playback.error}</p>}
           {isEtapaPlaying && playback?.analyzing && (
-            <p className="text-xs text-[#C9A227] animate-pulse">Analisando áudio…</p>
+            <p className="text-xs text-warning animate-pulse">Analisando áudio…</p>
           )}
         </div>
       )}

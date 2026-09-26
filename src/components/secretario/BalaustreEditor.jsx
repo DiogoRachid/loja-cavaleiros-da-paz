@@ -11,7 +11,7 @@ export default function BalaustreEditor({ secoes, onChange }) {
       {secoes.map((s, idx) => (
         <Card key={s.id}>
           <CardContent className="p-4 space-y-2">
-            <p className="font-semibold text-sm text-[#1B3A5F]">
+            <p className="font-semibold text-sm text-lodge-navy">
               {idx + 1}. {s.titulo}
             </p>
             <Textarea

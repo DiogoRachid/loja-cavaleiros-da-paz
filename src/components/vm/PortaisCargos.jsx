@@ -29,8 +29,8 @@ export default function PortaisCargos() {
                   <Icon className="h-5 w-5 text-lodge-navy" />
                 </div>
                 <div>
-                  <p className="font-semibold text-slate-800">{item.title}</p>
-                  <p className="text-xs text-slate-500">{item.desc}</p>
+                  <p className="font-semibold text-foreground">{item.title}</p>
+                  <p className="text-xs text-muted-foreground">{item.desc}</p>
                 </div>
               </CardContent>
             </Card>

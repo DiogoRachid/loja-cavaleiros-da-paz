@@ -98,11 +98,11 @@ export default function AdminRelatorioFinanceiro() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-[#1B3A5F] flex items-center justify-center">
-            <BarChart2 className="w-6 h-6 text-[#C9A227]" />
+            <BarChart2 className="w-6 h-6 text-lodge-gold" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[#1B3A5F]">Relatório Financeiro</h1>
-            <p className="text-slate-500">Exercício {ano}</p>
+            <h1 className="text-2xl font-bold text-lodge-navy">Relatório Financeiro</h1>
+            <p className="text-muted-foreground">Exercício {ano}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -110,7 +110,7 @@ export default function AdminRelatorioFinanceiro() {
             <Label>Ano:</Label>
             <Input value={ano} onChange={e => setAno(e.target.value)} className="w-24" />
           </div>
-          <Button variant="outline" onClick={exportarCSV} className="border-[#1B3A5F] text-[#1B3A5F]">
+          <Button variant="outline" onClick={exportarCSV} className="border-border text-lodge-navy">
             <Download className="w-4 h-4 mr-2" /> Exportar CSV
           </Button>
           <Button onClick={imprimir} className="bg-[#1B3A5F] hover:bg-[#152e4d]">
@@ -134,8 +134,8 @@ export default function AdminRelatorioFinanceiro() {
                 <div className={`w-9 h-9 rounded-lg ${c.color} flex items-center justify-center mb-2`}>
                   <Icon className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-xl font-bold text-slate-800">{c.value}</p>
-                <p className="text-xs text-slate-500">{c.label}</p>
+                <p className="text-xl font-bold text-foreground">{c.value}</p>
+                <p className="text-xs text-muted-foreground">{c.label}</p>
               </CardContent>
             </Card>
           );
@@ -144,7 +144,7 @@ export default function AdminRelatorioFinanceiro() {
 
       {/* Gráfico Mensal */}
       <Card>
-        <CardHeader><CardTitle className="text-[#1B3A5F]">Arrecadação Mensal — {ano}</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-lodge-navy">Arrecadação Mensal — {ano}</CardTitle></CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={porMes}>
@@ -152,8 +152,8 @@ export default function AdminRelatorioFinanceiro() {
               <XAxis dataKey="mes" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip formatter={(v) => `R$ ${v.toFixed(2)}`} />
-              <Bar dataKey="recebido" name="Recebido" fill="#1B3A5F" />
-              <Bar dataKey="pendente" name="Pendente" fill="#C9A227" />
+              <Bar dataKey="recebido" name="Recebido" fill="hsl(var(--lodge-navy))" />
+              <Bar dataKey="pendente" name="Pendente" fill="hsl(var(--lodge-gold))" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -167,8 +167,8 @@ export default function AdminRelatorioFinanceiro() {
             {inadimplentes.map(ir => (
               <div key={ir.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
                 <div>
-                  <p className="font-medium text-slate-800 text-sm">{ir.nome_completo}</p>
-                  <p className="text-xs text-slate-500">CIM: {ir.cim}</p>
+                  <p className="font-medium text-foreground text-sm">{ir.nome_completo}</p>
+                  <p className="text-xs text-muted-foreground">CIM: {ir.cim}</p>
                 </div>
                 <span className="text-xs text-red-600 font-medium">Em atraso</span>
               </div>

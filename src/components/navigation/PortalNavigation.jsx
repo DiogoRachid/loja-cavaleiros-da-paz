@@ -22,7 +22,7 @@ export default function PortalNavigation({ links, currentPageName, onNavigate })
             const Icon = link.icon;
             const active = currentPageName === link.page;
             return <Link key={link.page} to={`/${link.page}`} onClick={onNavigate} aria-current={active ? "page" : undefined}
-              className={`flex min-h-10 items-center gap-3 rounded-lg border-l-2 px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lodge-gold ${active ? "border-lodge-gold bg-lodge-navy font-semibold text-primary-foreground" : "border-transparent text-muted-foreground hover:bg-muted hover:text-lodge-navy"}`}>
+              className={`flex min-h-10 items-center gap-3 rounded-lg border-l-2 px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lodge-gold ${active ? "border-lodge-gold bg-lodge-navy dark:bg-primary font-semibold text-primary-foreground" : "border-transparent text-muted-foreground hover:bg-muted hover:text-lodge-navy"}`}>
               <Icon className={`h-4 w-4 shrink-0 ${active ? "text-lodge-gold" : ""}`} />
               <span>{link.name}</span>
             </Link>;

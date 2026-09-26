@@ -123,10 +123,10 @@ export default function AdminVM() {
             {proximasSessoes.map(s => (
               <div key={s.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3">
                 <div>
-                  <p className="font-medium text-slate-800">{s.tipo}</p>
-                  <p className="text-sm text-slate-500">{s.data} às {s.hora}</p>
+                  <p className="font-medium text-foreground">{s.tipo}</p>
+                  <p className="text-sm text-muted-foreground">{s.data} às {s.hora}</p>
                 </div>
-                <Badge className="bg-lodge-navy text-primary-foreground">{s.grau}</Badge>
+                <Badge className="bg-lodge-navy dark:bg-primary text-primary-foreground">{s.grau}</Badge>
               </div>
             ))}
           </CardContent>

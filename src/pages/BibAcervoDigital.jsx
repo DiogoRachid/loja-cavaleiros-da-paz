@@ -160,15 +160,15 @@ export default function BibAcervoDigital() {
   });
 
   const grauColors = {
-    "Aprendiz": "bg-blue-100 text-blue-700",
-    "Companheiro": "bg-amber-100 text-amber-700",
-    "Mestre": "bg-purple-100 text-purple-700"
+    "Aprendiz": "bg-info-soft text-info",
+    "Companheiro": "bg-warning-soft text-warning",
+    "Mestre": "bg-notice-soft text-notice"
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-[#1B3A5F]" />
+        <Loader2 className="w-8 h-8 animate-spin text-lodge-navy" />
       </div>
     );
   }
@@ -177,8 +177,8 @@ export default function BibAcervoDigital() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Acervo Digital</h1>
-          <p className="text-slate-500">{documentos.length} documento(s) cadastrado(s)</p>
+          <h1 className="text-2xl font-bold text-foreground">Acervo Digital</h1>
+          <p className="text-muted-foreground">{documentos.length} documento(s) cadastrado(s)</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button
@@ -198,7 +198,7 @@ export default function BibAcervoDigital() {
             {gerandoCapas ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{progressoCapas || "Gerando..."}</> : <><ImagePlus className="w-4 h-4 mr-2" />Gerar Capas</>}
           </Button>
           <Button 
-            className="bg-[#1B3A5F] hover:bg-[#15304d]"
+            className="bg-lodge-navy dark:bg-primary text-primary-foreground hover:opacity-90"
             onClick={() => { setEditando(null); setFormOpen(true); }}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -213,7 +213,7 @@ export default function BibAcervoDigital() {
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por título ou autor..."
             value={search}
@@ -244,17 +244,17 @@ export default function BibAcervoDigital() {
           <Card key={doc.id} className="hover:shadow-lg transition-shadow overflow-hidden">
             <CardContent className="p-4">
               <div className="flex gap-3 min-w-0">
-                <div className="w-14 h-18 min-w-[56px] bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0" style={{height:'72px'}}>
+                <div className="w-14 h-18 min-w-[56px] bg-muted rounded-lg flex items-center justify-center flex-shrink-0" style={{height:'72px'}}>
                   {doc.capa_url ? (
                     <img src={doc.capa_url} alt="" className="w-full h-full object-cover rounded-lg" />
                   ) : (
-                    <FileText className="w-8 h-8 text-slate-400" />
+                    <FileText className="w-8 h-8 text-muted-foreground" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0 overflow-hidden">
-                  <h3 className="font-semibold text-slate-800 truncate text-sm">{doc.titulo}</h3>
+                  <h3 className="font-semibold text-foreground truncate text-sm">{doc.titulo}</h3>
                   {doc.autor && (
-                    <p className="text-xs text-slate-500 truncate">{doc.autor}</p>
+                    <p className="text-xs text-muted-foreground truncate">{doc.autor}</p>
                   )}
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     <Badge variant="outline" className="text-xs">{doc.tipo}</Badge>
@@ -273,7 +273,7 @@ export default function BibAcervoDigital() {
                   title="Compartilhar"
                   onClick={() => setShareItem(doc)}
                 >
-                  <Share2 className="w-4 h-4 text-[#1B3A5F]" />
+                  <Share2 className="w-4 h-4 text-lodge-navy" />
                 </Button>
                 <Button
                   variant="ghost"
@@ -299,8 +299,8 @@ export default function BibAcervoDigital() {
                 </Button>
               </div>
 
-              <div className="flex items-center justify-between mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <span className="text-sm text-slate-600">Disponível para irmãos</span>
+              <div className="flex items-center justify-between mt-4 p-3 bg-muted rounded-lg border border-border">
+                <span className="text-sm text-muted-foreground">Disponível para irmãos</span>
                 <Switch 
                   checked={doc.disponivel !== false}
                   onCheckedChange={() => handleToggleDisponibilidade(doc)}
@@ -315,12 +315,12 @@ export default function BibAcervoDigital() {
         <Card>
           <CardContent className="py-12 text-center">
             <FileText className="w-12 h-12 mx-auto text-slate-300 mb-4" />
-            <p className="text-slate-500">Nenhum documento encontrado</p>
+            <p className="text-muted-foreground">Nenhum documento encontrado</p>
           </CardContent>
         </Card>
       )}
 
-      <div className="text-center text-xs text-slate-400 mt-8 pb-4 border-t pt-4">
+      <div className="text-center text-xs text-muted-foreground mt-8 pb-4 border-t pt-4">
         Conteúdo protegido por direitos autorais — uso permitido apenas para fins educacionais e sem autorização para reprodução ou distribuição
       </div>
 

@@ -14,6 +14,14 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+            danger: 'hsl(var(--danger))',
+            'danger-soft': 'hsl(var(--danger-soft))',
+            warning: 'hsl(var(--warning))',
+            'warning-soft': 'hsl(var(--warning-soft))',
+            info: 'hsl(var(--info))',
+            'info-soft': 'hsl(var(--info-soft))',
+            notice: 'hsl(var(--notice))',
+            'notice-soft': 'hsl(var(--notice-soft))',
             landing: {
                 deep: 'hsl(var(--landing-deep))',
                 surface: 'hsl(var(--landing-surface))',
