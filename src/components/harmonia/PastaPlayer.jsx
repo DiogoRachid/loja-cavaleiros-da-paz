@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Volume2, VolumeX, Music } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { useSilenceTrim } from "@/lib/useSilenceTrim";
@@ -35,8 +35,16 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
   const audioRef = useRef(null);
   const listRef = useRef(null);
   const rowRefs = useRef([]);
-  const [order, setOrder] = useState(() => musicas.map((_, i) => i));
+
+  // Assinatura estável dos ids da lista para detectar mudanças reais de conteúdo
+  const idsKey = useMemo(() => musicas.map((m) => m.id).join("|"), [musicas]);
+  const prevIdsKeyRef = useRef(idsKey);
+
+  // order guarda IDs (sobrevive a mudanças de índice na lista)
+  const [order, setOrder] = useState(() => musicas.map((m) => m.id));
   const [orderPos, setOrderPos] = useState(0);
+  // Faixa realmente carregada no áudio — pode ter saído da lista filtrada (destacada)
+  const [nowPlaying, setNowPlaying] = useState(() => musicas[0] || null);
   const [playing, setPlaying] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -46,22 +54,44 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
   const [repeat, setRepeat] = useState(false);
   const endedGuardRef = useRef(false);
 
-  const atualIdx = order[orderPos];
+  const atualId = order[orderPos];
+  const atualIdx = useMemo(() => musicas.findIndex((m) => m.id === atualId), [musicas, atualId]);
   const atual = musicas[atualIdx];
+  const detached = nowPlaying ? !musicas.some((m) => m.id === nowPlaying.id) : false;
+  const displayTrack = nowPlaying || atual;
+  const activeId = nowPlaying?.id ?? atual?.id;
 
-  const { start: trimStart, end: trimEnd, analyzing } = useSilenceTrim(atual?.file_url, {
-    savedStart: atual?.silence_start,
-    savedEnd: atual?.silence_end,
-    persistId: atual?.id,
+  const { start: trimStart, end: trimEnd, analyzing } = useSilenceTrim(displayTrack?.file_url, {
+    savedStart: displayTrack?.silence_start,
+    savedEnd: displayTrack?.silence_end,
+    persistId: displayTrack?.id,
   });
 
-  // Reset quando a lista de músicas muda
+  // Reconciliação inteligente: só age quando o conteúdo da lista muda de verdade
   useEffect(() => {
-    setOrder(musicas.map((_, i) => i));
-    setOrderPos(0);
-    setPlaying(false);
-    setCurrent(0);
-  }, [musicas]);
+    if (prevIdsKeyRef.current === idsKey) return;
+    prevIdsKeyRef.current = idsKey;
+
+    const idSet = new Set(musicas.map((m) => m.id));
+    const filtered = order.filter((id) => idSet.has(id));
+
+    if (filtered.length === 0) {
+      // Mudança drástica (ex: troca de filtro/pasta) ou lista vazia — zera o player
+      setOrder(musicas.map((m) => m.id));
+      setOrderPos(0);
+      setNowPlaying(musicas[0] || null);
+      setPlaying(false);
+      return;
+    }
+
+    // Mudança parcial — preserva a sequência e a faixa em reprodução
+    setOrder(filtered);
+    setOrderPos((prev) => {
+      if (nowPlaying && filtered.includes(nowPlaying.id)) return filtered.indexOf(nowPlaying.id);
+      return Math.min(prev, filtered.length - 1);
+    });
+    // Se nowPlaying saiu da lista, mantém como destacada para continuar tocando
+  }, [idsKey]);
 
   // Pausar ao recolher a pasta
   useEffect(() => {
@@ -76,21 +106,19 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
     if (audioRef.current) audioRef.current.volume = muted ? 0 : volume;
   }, [volume, muted]);
 
-  // (Re)iniciar reprodução ao trocar de faixa
+  // (Re)carregar e reproduzir quando o src muda (troca de faixa)
   useEffect(() => {
     const a = audioRef.current;
-    if (!a) return;
+    if (!a || !displayTrack) return;
     endedGuardRef.current = false;
     setCurrent(0);
-    if (playing) {
-      a.play().catch(() => setPlaying(false));
-    }
-  }, [orderPos, order]);
+    if (playing) a.play().catch(() => setPlaying(false));
+  }, [displayTrack?.file_url]);
 
   // Aplicar offset de silêncio quando os limites ficam prontos
   useEffect(() => {
     const a = audioRef.current;
-    if (!a || !atual) return;
+    if (!a || !displayTrack) return;
     if (trimStart > 0 && a.currentTime < trimStart) {
       try { a.currentTime = trimStart; } catch {}
     }
@@ -98,42 +126,53 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
 
   // Rolar a lista para colocar a faixa ativa no topo
   useEffect(() => {
+    if (detached) return;
     const list = listRef.current;
     const el = rowRefs.current[atualIdx];
     if (!list || !el) return;
     list.scrollTo({ top: el.offsetTop, behavior: "smooth" });
-  }, [atualIdx]);
+  }, [atualIdx, detached]);
 
   const toggle = () => {
     const a = audioRef.current;
-    if (!a || !atual) return;
+    if (!a || !displayTrack) return;
     if (playing) a.pause();
     else a.play().catch(() => setPlaying(false));
   };
 
-  const buildShuffleFromScratch = (avoidIdx) => {
-    let ord = shuffleArray(musicas.map((_, i) => i));
-    if (avoidIdx != null && ord.length > 1 && ord[0] === avoidIdx) {
-      [ord[0], ord[1]] = [ord[1], ord[0]];
+  const buildShuffleFromScratch = (avoidId) => {
+    let ids = shuffleArray(musicas.map((m) => m.id));
+    if (avoidId && ids.length > 1 && ids[0] === avoidId) {
+      [ids[0], ids[1]] = [ids[1], ids[0]];
     }
-    return ord;
+    return ids;
   };
 
   const proxima = () => {
+    if (order.length === 0) return;
+    let newPos = orderPos;
+    let newOrder = order;
     if (orderPos < order.length - 1) {
-      setOrderPos((p) => p + 1);
+      newPos = orderPos + 1;
     } else if (shuffle) {
-      const lastIdx = order[order.length - 1];
-      setOrder(buildShuffleFromScratch(lastIdx));
-      setOrderPos(0);
+      const lastId = order[order.length - 1];
+      newOrder = buildShuffleFromScratch(lastId);
+      newPos = 0;
     } else {
-      setOrderPos(0);
+      newPos = 0;
     }
+    const nextTrack = musicas.find((m) => m.id === newOrder[newPos]);
+    if (nextTrack) setNowPlaying(nextTrack);
+    setOrder(newOrder);
+    setOrderPos(newPos);
   };
 
   const anterior = () => {
-    if (orderPos > 0) setOrderPos((p) => p - 1);
-    else setOrderPos(order.length - 1);
+    if (order.length === 0) return;
+    const newPos = orderPos > 0 ? orderPos - 1 : order.length - 1;
+    const prevTrack = musicas.find((m) => m.id === order[newPos]);
+    if (prevTrack) setNowPlaying(prevTrack);
+    setOrderPos(newPos);
   };
 
   const handleEnded = () => {
@@ -146,20 +185,30 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
       }
       return;
     }
+    if (detached) {
+      // Faixa destacada acabou: continua com a próxima faixa restante da sequência
+      if (order.length === 0) { setPlaying(false); return; }
+      const nextId = order[orderPos] ?? order[0];
+      const nextTrack = musicas.find((m) => m.id === nextId);
+      if (nextTrack) { setNowPlaying(nextTrack); setPlaying(true); }
+      else setPlaying(false);
+      return;
+    }
     proxima();
   };
 
   const toggleShuffle = () => {
     if (!shuffle) {
-      const startIdx = atualIdx ?? 0;
-      const rest = musicas.map((_, i) => i).filter((i) => i !== startIdx);
-      setOrder([startIdx, ...shuffleArray(rest)]);
+      const startId = nowPlaying?.id ?? atualId ?? musicas[0]?.id;
+      const rest = musicas.map((m) => m.id).filter((id) => id !== startId);
+      setOrder([startId, ...shuffleArray(rest)].filter(Boolean));
       setOrderPos(0);
       setShuffle(true);
     } else {
-      const startIdx = atualIdx ?? 0;
-      setOrder(musicas.map((_, i) => i));
-      setOrderPos(startIdx);
+      const startId = nowPlaying?.id ?? atualId ?? musicas[0]?.id;
+      const newOrder = musicas.map((m) => m.id);
+      setOrder(newOrder);
+      setOrderPos(Math.max(0, newOrder.indexOf(startId)));
       setShuffle(false);
     }
   };
@@ -167,7 +216,9 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
   const toggleRepeat = () => setRepeat((r) => !r);
 
   const playTrack = (i) => {
-    if (i === atualIdx) {
+    const track = musicas[i];
+    if (!track) return;
+    if (nowPlaying && track.id === nowPlaying.id) {
       const a = audioRef.current;
       if (a) {
         a.currentTime = trimStart || 0;
@@ -178,12 +229,15 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
       return;
     }
     if (shuffle) {
-      const rest = musicas.map((_, x) => x).filter((x) => x !== i);
-      setOrder([i, ...shuffleArray(rest)]);
+      const rest = musicas.map((m) => m.id).filter((id) => id !== track.id);
+      setOrder([track.id, ...shuffleArray(rest)]);
       setOrderPos(0);
     } else {
-      setOrderPos(i);
+      const idx = order.indexOf(track.id);
+      if (idx >= 0) setOrderPos(idx);
+      else { setOrder([...order, track.id]); setOrderPos(order.length); }
     }
+    setNowPlaying(track);
     setPlaying(true);
   };
 
@@ -206,7 +260,7 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
     if (!novo && volume === 0) setVolume(1);
   };
 
-  if (musicas.length === 0) return null;
+  if (musicas.length === 0 && !nowPlaying) return null;
 
   const dispCurrent = Math.max(0, current - (trimStart || 0));
   const dispDuration = Math.max(0, (trimEnd > (trimStart || 0) ? trimEnd : duration) - (trimStart || 0)) || duration;
@@ -219,7 +273,7 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       <audio
         ref={audioRef}
-        src={atual?.file_url}
+        src={displayTrack?.file_url}
         preload="metadata"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
@@ -248,10 +302,10 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
           </div>
           <div className="min-w-0 flex-1 sm:flex-none sm:w-44 lg:w-56">
             <p className="font-display text-[1.25rem] leading-tight text-foreground truncate">
-              {atual?.nome || "—"}
+              {displayTrack?.nome || "—"}
             </p>
             <p className="text-[0.75rem] uppercase tracking-wider text-muted-foreground truncate">
-              {atual?.artista || `Faixa ${(atualIdx ?? 0) + 1} de ${musicas.length}`}
+              {displayTrack?.artista || (detached ? "Tocando fora da lista" : `Faixa ${(atualIdx ?? 0) + 1} de ${musicas.length}`)}
             </p>
             {analyzing && (
               <span className="text-[0.7rem] text-warning animate-pulse">Analisando áudio…</span>
@@ -361,7 +415,7 @@ export default function PastaPlayer({ musicas, expanded, renderRowActions }) {
       {/* Lista de faixas */}
       <div ref={listRef} className="relative divide-y divide-border max-h-72 overflow-y-auto">
         {musicas.map((m, i) => {
-          const isActive = i === atualIdx;
+          const isActive = m.id === activeId;
           const progress = isActive && dispDuration ? (dispCurrent / dispDuration) * 100 : 0;
           return (
             <div

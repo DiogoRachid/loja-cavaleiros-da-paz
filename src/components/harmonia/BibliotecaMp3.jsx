@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Upload, Trash2, Loader2, ChevronDown, ChevronUp, Library, Search, FolderPlus, Check, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,19 +35,22 @@ export default function BibliotecaMp3({ mp3s, pastas = [], vinculos = [], onUplo
   const pastasDaMusica = (mp3Id) =>
     new Set(vinculos.filter((v) => v.mp3_id === mp3Id).map((v) => v.pasta_id));
 
-  const dasPastasSelecionadas = pastasFiltro.length > 0
-    ? mp3s.filter((m) => {
-        const nas = pastasDaMusica(m.id);
-        if (pastasFiltro.includes(SEM_PASTA_ID) && nas.size === 0) return true;
-        return pastasFiltro.some((pid) => pid !== SEM_PASTA_ID && nas.has(pid));
-      })
-    : mp3s;
-
-  const filtradas = termo
-    ? dasPastasSelecionadas.filter((m) =>
-        m.nome.toLowerCase().includes(termo) || (m.artista || "").toLowerCase().includes(termo)
-      )
-    : dasPastasSelecionadas;
+  const filtradas = useMemo(() => {
+    // Sem filtro e sem busca: retorna o próprio array (referência estável)
+    if (pastasFiltro.length === 0 && !termo) return mp3s;
+    const dasPastasSelecionadas = pastasFiltro.length > 0
+      ? mp3s.filter((m) => {
+          const nas = pastasDaMusica(m.id);
+          if (pastasFiltro.includes(SEM_PASTA_ID) && nas.size === 0) return true;
+          return pastasFiltro.some((pid) => pid !== SEM_PASTA_ID && nas.has(pid));
+        })
+      : mp3s;
+    return termo
+      ? dasPastasSelecionadas.filter((m) =>
+          m.nome.toLowerCase().includes(termo) || (m.artista || "").toLowerCase().includes(termo)
+        )
+      : dasPastasSelecionadas;
+  }, [mp3s, vinculos, pastasFiltro, termo]);
 
   return (
     <Card className="border-border shadow-sm">
