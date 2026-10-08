@@ -15,6 +15,9 @@
 //   ARQUITETUS_API_TOKEN      - seu token
 //   ARQUITETUS_MODEL          - openrouter/free (ajustar se der erro de modelo)
 
+import { secrets } from "base44:runtime";
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.52";
+
 interface PedidoChat {
   pergunta: string;
   grau_usuario: string; // ex: "Aprendiz", "Companheiro", "Mestre"
@@ -35,13 +38,7 @@ interface DocumentoAcervo {
   grau_minimo: string;
 }
 
-const SUPABASE_URL = Deno.env.get("SUPABASE2_URL")!;
-const SUPABASE_KEY = Deno.env.get("SUPABASE2_SERVICE_ROLE_KEY")!;
-const EMBED_API_URL = Deno.env.get("EMBED_API_URL")!;
-const EMBED_API_SECRET = Deno.env.get("EMBED_API_SECRET")!;
-const ARQUITETUS_API_URL = Deno.env.get("ARQUITETUS_API_URL")!;
-const ARQUITETUS_API_TOKEN = Deno.env.get("ARQUITETUS_API_TOKEN")!;
-const ARQUITETUS_MODEL = Deno.env.get("ARQUITETUS_MODEL") ?? "openrouter/free";
+const ARQUITETUS_MODEL = "openrouter/free";
 
 const MATCH_COUNT = 12; // mais trechos = mais material para uma resposta completa com múltiplas fontes
 // Com a busca híbrida (RRF), "similarity" deixa de ser o único critério de relevância —
@@ -65,8 +62,10 @@ const PALAVRAS_IGNORADAS = new Set([
   "Maçônico", "Segundo", "Conforme", "Grande",
 ]);
 
-function gerarEmbedding(texto: string): Promise<number[]> {
+function gerarEmbedding(texto: string, config): Promise<number[]> {
+  const { EMBED_API_URL, EMBED_API_SECRET } = config;
   return fetch(EMBED_API_URL, {
+    signal: AbortSignal.timeout(30000),
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -87,13 +86,16 @@ async function buscarTrechosSemanticos(
   pergunta: string,
   embedding: number[],
   grauUsuario: string,
+  config,
 ): Promise<TrechoEncontrado[]> {
+  const { SUPABASE_URL, SUPABASE_KEY } = config;
   // Trocado de match_chunks (só vetorial) para match_chunks_hybrid (vetorial +
   // full-text, combinados por RRF) — resolve casos em que a pergunta usa
   // vocabulário abstrato (ex: "passagem bíblica do grau de companheiro") mas
   // o texto-fonte é dominado por uma citação concreta (ex: "Amós", "prumo"),
   // que a busca puramente vetorial não relacionava bem.
   const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/match_chunks_hybrid`, {
+    signal: AbortSignal.timeout(30000),
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -167,7 +169,9 @@ function extrairNomesProprios(pergunta: string): string[] {
 async function buscarPorAutorOuTitulo(
   termos: string[],
   grauUsuario: string,
+  config,
 ): Promise<TrechoEncontrado[]> {
+  const { SUPABASE_URL, SUPABASE_KEY } = config;
   if (termos.length === 0) return [];
 
   const grauMax = GRAU_ORDEM[grauUsuario] ?? 1;
@@ -189,6 +193,7 @@ async function buscarPorAutorOuTitulo(
     `&or=(${filtroOu})`;
 
   const resp = await fetch(url, {
+    signal: AbortSignal.timeout(30000),
     headers: {
       apikey: SUPABASE_KEY,
       Authorization: `Bearer ${SUPABASE_KEY}`,
@@ -215,6 +220,7 @@ async function buscarPorAutorOuTitulo(
         `&order=ordem.asc` +
         `&limit=${CHUNKS_POR_DOC_AUTOR}`,
       {
+        signal: AbortSignal.timeout(30000),
         headers: {
           apikey: SUPABASE_KEY,
           Authorization: `Bearer ${SUPABASE_KEY}`,
@@ -304,8 +310,10 @@ function montarPrompt(pergunta: string, trechos: TrechoEncontrado[]): string {
   );
 }
 
-async function chamarLLM(prompt: string): Promise<string> {
-  const resp = await fetch(`${ARQUITETUS_API_URL}/chat/completions`, {
+async function chamarLLM(prompt: string, config): Promise<string> {
+  const { ARQUITETUS_API_URL, ARQUITETUS_API_TOKEN } = config;
+  const resp = await fetch(`${ARQUITETUS_API_URL.replace(/\/$/, "")}/chat/completions`, {
+    signal: AbortSignal.timeout(120000),
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -337,8 +345,19 @@ async function chamarLLM(prompt: string): Promise<string> {
   return data.choices?.[0]?.message?.content ?? "Não foi possível gerar uma resposta.";
 }
 
-export default async function handler(req: Request): Promise<Response> {
+export default async function(req: Request): Promise<Response> {
   try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ erro: "Acesso não autorizado" }, { status: 401 });
+    const config = {
+      SUPABASE_URL: secrets.get("SUPABASE2_URL"),
+      SUPABASE_KEY: secrets.get("SUPABASE2_SERVICE_ROLE_KEY"),
+      EMBED_API_URL: secrets.get("EMBED_API_URL"),
+      EMBED_API_SECRET: secrets.get("EMBED_API_SECRET"),
+      ARQUITETUS_API_URL: secrets.get("ARQUITETUS_API_URL"),
+      ARQUITETUS_API_TOKEN: secrets.get("ARQUITETUS_API_TOKEN"),
+    };
     if (req.method !== "POST") {
       return new Response(JSON.stringify({ erro: "Método não permitido" }), {
         status: 405,
@@ -358,19 +377,19 @@ export default async function handler(req: Request): Promise<Response> {
     const grauUsuario = body.grau_usuario || "Aprendiz";
 
     // 1. Embedding da pergunta + busca híbrida (vetorial + full-text via RRF)
-    const embedding = await gerarEmbedding(body.pergunta);
-    const trechosSemanticos = await buscarTrechosSemanticos(body.pergunta, embedding, grauUsuario);
+    const embedding = await gerarEmbedding(body.pergunta, config);
+    const trechosSemanticos = await buscarTrechosSemanticos(body.pergunta, embedding, grauUsuario, config);
 
     // 2. Busca complementar: nomes próprios na pergunta podem ser autor/título
     const nomesProprios = extrairNomesProprios(body.pergunta);
-    const trechosPorAutor = await buscarPorAutorOuTitulo(nomesProprios, grauUsuario);
+    const trechosPorAutor = await buscarPorAutorOuTitulo(nomesProprios, grauUsuario, config);
 
     // 3. Mescla os dois conjuntos (autor/título tem prioridade)
     const trechos = mesclarTrechos(trechosSemanticos, trechosPorAutor);
 
     // 4. Monta prompt e chama o LLM
     const prompt = montarPrompt(body.pergunta, trechos);
-    const resposta = await chamarLLM(prompt);
+    const resposta = await chamarLLM(prompt, config);
 
     // 5. Monta lista de fontes únicas citadas
     const fontesUnicas = Array.from(

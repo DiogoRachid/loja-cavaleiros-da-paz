@@ -158,11 +158,8 @@ export default function IrmaoBibliotecaChat() {
     setCarregando(true);
 
     try {
-      if (RODANDO_NO_BASE44) {
-        await enviarPerguntaViaProxy(texto, indiceMensagemAgente);
-      } else {
-        await enviarPerguntaViaStream(texto, indiceMensagemAgente);
-      }
+      // O token e o modelo são configurados somente no servidor.
+      await enviarPerguntaViaProxy(texto, indiceMensagemAgente);
     } catch (err) {
       setMensagens((prev) => {
         const copia = [...prev];
