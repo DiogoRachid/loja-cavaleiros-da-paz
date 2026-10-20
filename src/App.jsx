@@ -29,6 +29,7 @@ import AdminPareceres from './pages/AdminPareceres';
 import AdminPortais from './pages/AdminPortais';
 import AdminAcaoSocial from './pages/AdminAcaoSocial';
 import Portais from './pages/Portais';
+import AdminLogAtividades from './pages/AdminLogAtividades';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import PortalThemeProvider from '@/components/theme/PortalThemeProvider';
@@ -106,6 +107,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminPareceres" element={<LayoutWrapper currentPageName="AdminPareceres"><AdminPareceres /></LayoutWrapper>} />
       <Route path="/AdminPortais" element={<LayoutWrapper currentPageName="AdminPortais"><AdminPortais /></LayoutWrapper>} />
       <Route path="/AdminAcaoSocial" element={<LayoutWrapper currentPageName="AdminAcaoSocial"><AdminAcaoSocial /></LayoutWrapper>} />
+      <Route path="/AdminLogAtividades" element={<LayoutWrapper currentPageName="AdminLogAtividades"><AdminLogAtividades /></LayoutWrapper>} />
       <Route path="/Portais" element={<LayoutWrapper currentPageName="Portais"><Portais /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

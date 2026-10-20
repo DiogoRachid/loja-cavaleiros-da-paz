@@ -43,6 +43,7 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Comunicados", page: "AdminComunicados", icon: ClipboardList },
     { name: "Dados da Loja", page: "AdminDadosLoja", icon: Star },
     { name: "Relatórios", page: "AdminRelatorios", icon: BarChart },
+    { name: "Log de Acessos", page: "AdminLogAtividades", icon: History },
   ],
   "Primeiro Vigilante": [
     { name: "Painel do Vigilante", page: "AdminVigilantes", icon: Users },

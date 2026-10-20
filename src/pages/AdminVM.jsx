@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { autoRealizarSessoes } from "@/utils/autoRealizarSessoes";
 import PortaisCargos from "@/components/vm/PortaisCargos";
-import LogAtividades from "@/components/vm/LogAtividades";
 
 export default function AdminVM() {
   const [stats, setStats] = useState({ total: 0, regulares: 0, inadimplentes: 0, sessoes: 0 });
@@ -76,8 +75,6 @@ export default function AdminVM() {
           );
         })}
       </div>
-
-      <LogAtividades />
 
       {/* Atalhos de Módulos */}
       <div className="grid md:grid-cols-3 gap-4">
