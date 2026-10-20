@@ -1,4 +1,5 @@
 import { listar, obter, criar, atualizar, excluir, excluirMuitos } from "../../shared/supabase.ts";
+import { mascararLinks, origemApp } from "../../shared/storage.ts";
 
 Deno.serve(async (req) => {
   try {
@@ -29,7 +30,8 @@ Deno.serve(async (req) => {
         return Response.json({ error: "Operação inválida: " + operacao }, { status: 400 });
     }
 
-    return Response.json({ data: resultado });
+    const supabaseUrl = Deno.env.get("SUPABASE2_URL") || "";
+    return Response.json({ data: mascararLinks(resultado, supabaseUrl, origemApp(req)) });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

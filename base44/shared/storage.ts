@@ -75,6 +75,32 @@ export async function migrarArquivo(origemUrl: string, caminho: string) {
   };
 }
 
+export const APP_URL_PADRAO = "https://loja-cavaleiros-da-paz.base44.app";
+const ROTA_ARQUIVO = "/functions/arquivo?f=";
+
+// Origem do app usada nos links mascarados.
+export function origemApp(req: Request) {
+  return (req.headers.get("X-Base44-App-Url") || APP_URL_PADRAO).replace(/\/$/, "");
+}
+
+// Link mascarado: o endereço do Supabase nunca aparece para o usuário.
+export function linkArquivo(appUrl: string, caminho: string) {
+  return appUrl + ROTA_ARQUIVO + encodeURIComponent(caminho);
+}
+
+export function ehLinkMascarado(valor: string) {
+  return valor.includes(ROTA_ARQUIVO);
+}
+
+// Troca qualquer URL pública do bucket (inclusive dentro de JSON salvo em texto) pelo link mascarado.
+export function mascararLinks(dados: unknown, supabaseUrl: string, appUrl: string) {
+  if (dados == null) return dados;
+  const prefixo = supabaseUrl.replace(/\/$/, "") + "/storage/v1/object/public/" + BUCKET + "/";
+  const texto = JSON.stringify(dados);
+  if (!texto.includes(prefixo)) return dados;
+  return JSON.parse(texto.split(prefixo).join(appUrl + ROTA_ARQUIVO));
+}
+
 // Nome de arquivo seguro para o Storage.
 export function nomeSeguro(origemUrl: string, id: string) {
   const base = origemUrl.split("?")[0].split("/").pop() || "arquivo";

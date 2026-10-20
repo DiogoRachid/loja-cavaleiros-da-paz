@@ -1,4 +1,4 @@
-import { BUCKET } from "../../shared/storage.ts";
+import { BUCKET, linkArquivo, origemApp } from "../../shared/storage.ts";
 
 // Gera uma URL assinada para o navegador enviar o arquivo direto ao Storage do Supabase 2.
 Deno.serve(async (req) => {
@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
 
     return Response.json({
       upload_url: base + "/storage/v1" + url.replace(/^\/storage\/v1/, ""),
-      file_url: `${base}/storage/v1/object/public/${BUCKET}/${caminho}`,
+      file_url: linkArquivo(origemApp(req), caminho),
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

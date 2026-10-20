@@ -1,5 +1,7 @@
 import { listar, atualizar } from "../../shared/supabase.ts";
-import { garantirBucket, migrarArquivo, nomeSeguro, BUCKET } from "../../shared/storage.ts";
+import { garantirBucket, migrarArquivo, nomeSeguro, BUCKET, ehLinkMascarado, linkArquivo, origemApp } from "../../shared/storage.ts";
+
+const pendente = (v: unknown) => typeof v === "string" && v.includes("base44") && !ehLinkMascarado(v);
 
 // Grupos de arquivos: tabela + campos que guardam URLs.
 const GRUPOS: Record<string, { tabela: string; campos: string[] }> = {
@@ -21,7 +23,7 @@ Deno.serve(async (req) => {
 
     // Pendentes = ainda apontam para o storage do Base44
     const pendentes = linhas.filter((l: any) =>
-      cfg.campos.some((c) => typeof l[c] === "string" && l[c].includes("base44"))
+      cfg.campos.some((c) => pendente(l[c]))
     );
 
     if (apenasContar) {
@@ -39,11 +41,11 @@ Deno.serve(async (req) => {
       const patch: Record<string, string> = {};
       for (const campo of cfg.campos) {
         const origem = linha[campo];
-        if (typeof origem !== "string" || !origem.includes("base44")) continue;
+        if (!pendente(origem)) continue;
         try {
           const caminho = grupo + "/" + nomeSeguro(origem, linha.id);
-          const { publicUrl, bytes } = await migrarArquivo(origem, caminho);
-          patch[campo] = publicUrl;
+          const { bytes } = await migrarArquivo(origem, caminho);
+          patch[campo] = linkArquivo(origemApp(req), caminho);
           bytesTotal += bytes;
         } catch (e) {
           erros.push(linha.id + " (" + campo + "): " + e.message);
