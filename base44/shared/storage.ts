@@ -75,12 +75,14 @@ export async function migrarArquivo(origemUrl: string, caminho: string) {
   };
 }
 
-export const APP_URL_PADRAO = "https://loja-cavaleiros-da-paz.base44.app";
+// Domínio público (Vercel) usado nos links mascarados; o Vercel repassa /functions/arquivo ao app.
+export const APP_URL_PADRAO = "https://loja-cavaleiros-da-paz.vercel.app";
+const ORIGEM_ANTIGA = "https://loja-cavaleiros-da-paz.base44.app";
 const ROTA_ARQUIVO = "/functions/arquivo?f=";
 
 // Origem do app usada nos links mascarados.
-export function origemApp(req: Request) {
-  return (req.headers.get("X-Base44-App-Url") || APP_URL_PADRAO).replace(/\/$/, "");
+export function origemApp(_req: Request) {
+  return APP_URL_PADRAO;
 }
 
 // Link mascarado: o endereço do Supabase nunca aparece para o usuário.
@@ -96,9 +98,10 @@ export function ehLinkMascarado(valor: string) {
 export function mascararLinks(dados: unknown, supabaseUrl: string, appUrl: string) {
   if (dados == null) return dados;
   const prefixo = supabaseUrl.replace(/\/$/, "") + "/storage/v1/object/public/" + BUCKET + "/";
+  const antigo = ORIGEM_ANTIGA + ROTA_ARQUIVO;
   const texto = JSON.stringify(dados);
-  if (!texto.includes(prefixo)) return dados;
-  return JSON.parse(texto.split(prefixo).join(appUrl + ROTA_ARQUIVO));
+  if (!texto.includes(prefixo) && !texto.includes(antigo)) return dados;
+  return JSON.parse(texto.split(prefixo).join(appUrl + ROTA_ARQUIVO).split(antigo).join(appUrl + ROTA_ARQUIVO));
 }
 
 // Nome de arquivo seguro para o Storage.

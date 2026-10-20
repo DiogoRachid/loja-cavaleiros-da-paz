@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/functions/arquivo", "destination": "https://loja-cavaleiros-da-paz.base44.app/functions/arquivo" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
