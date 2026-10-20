@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
 import { BarChart2, Users, Calendar, DollarSign, TrendingUp, FileText, Download } from "lucide-react";
 import { imprimirRelatorio } from "@/lib/relatorio";
+import LogAtividades from "@/components/vm/LogAtividades";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -303,6 +304,8 @@ export default function AdminRelatorios() {
           </CardContent>
         </Card>
       )}
+
+      <LogAtividades />
     </div>
   );
 }

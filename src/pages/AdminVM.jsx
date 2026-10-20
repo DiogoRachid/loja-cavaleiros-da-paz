@@ -77,6 +77,8 @@ export default function AdminVM() {
         })}
       </div>
 
+      <LogAtividades />
+
       {/* Atalhos de Módulos */}
       <div className="grid md:grid-cols-3 gap-4">
         {[
@@ -111,8 +113,6 @@ export default function AdminVM() {
         <h2 className="text-lg font-semibold text-lodge-navy">Portais dos Cargos</h2>
         <PortaisCargos />
       </div>
-
-      <LogAtividades />
 
       {/* Próximas Sessões */}
       {proximasSessoes.length > 0 && (
