@@ -35,8 +35,8 @@ export default function ShareModal({ open, onClose, titulo, capa, tipo, autor, g
     if (autor) msg += `Autor: ${autor}\n`;
     msg += `Grau mínimo: ${grauStr}\n`;
     const link = itemId
-      ? `https://biblioteca-cavaleiros.base44.app/acervo-publico?id=${itemId}&tipo=${tipoAcervo}`
-      : `https://biblioteca-cavaleiros.base44.app/`;
+      ? `https://loja-cavaleiros-da-paz.vercel.app/AcervoPublico?id=${itemId}&tipo=${tipoAcervo}`
+      : `https://loja-cavaleiros-da-paz.vercel.app/`;
     msg += `\nLoja Cavaleiros da Paz nº25\n${link}`;
     return msg;
   };

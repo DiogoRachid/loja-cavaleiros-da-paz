@@ -4,7 +4,10 @@ import { mascararLinks, origemApp } from "../../shared/storage.ts";
 Deno.serve(async (req) => {
   try {
     const body = await req.json();
-    const { operacao, tabela, id, dados, filtro, sort, limit } = body || {};
+    const { operacao, tabela, id, filtro, sort, limit } = body || {};
+    const supabaseUrl = Deno.env.get("SUPABASE2_URL") || "";
+    // Nunca grava o endereço direto do Supabase: salva sempre o link mascarado.
+    const dados = mascararLinks(body?.dados, supabaseUrl, origemApp(req));
 
     let resultado;
     switch (operacao) {
@@ -30,7 +33,6 @@ Deno.serve(async (req) => {
         return Response.json({ error: "Operação inválida: " + operacao }, { status: 400 });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE2_URL") || "";
     return Response.json({ data: mascararLinks(resultado, supabaseUrl, origemApp(req)) });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
