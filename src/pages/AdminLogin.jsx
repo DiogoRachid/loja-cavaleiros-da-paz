@@ -77,6 +77,7 @@ export default function AdminLogin() {
         sessionStorage.removeItem("admin_substituindo");
         sessionStorage.removeItem("irmao_auth");
         sessionStorage.removeItem("irmao_data");
+        db.LogAcesso.create({ irmao_id: irmao.id, irmao_nome: irmao.nome_completo, irmao_numero_glp: irmao.numero_glp, data_acesso: new Date().toISOString(), tipo_acesso: "Login" }).catch(console.error);
         sessionStorage.setItem("bib_auth", "true");
         sessionStorage.setItem("bib_data", JSON.stringify({ nome: irmao.nome_completo, ...irmao }));
         navigate(createPageUrl("BibDashboard"));
@@ -110,6 +111,7 @@ export default function AdminLogin() {
         sessionStorage.removeItem("bib_auth_time");
         sessionStorage.removeItem("irmao_auth");
         sessionStorage.removeItem("irmao_data");
+        db.LogAcesso.create({ irmao_id: irmao.id, irmao_nome: irmao.nome_completo, irmao_numero_glp: irmao.numero_glp, data_acesso: new Date().toISOString(), tipo_acesso: "Login" }).catch(console.error);
         sessionStorage.setItem("admin_auth", "true");
         sessionStorage.setItem("admin_data", JSON.stringify(irmao));
         sessionStorage.setItem("admin_cargo", cargo);

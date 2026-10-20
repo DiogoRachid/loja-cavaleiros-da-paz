@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { autoRealizarSessoes } from "@/utils/autoRealizarSessoes";
 import PortaisCargos from "@/components/vm/PortaisCargos";
+import LogAtividades from "@/components/vm/LogAtividades";
 
 export default function AdminVM() {
   const [stats, setStats] = useState({ total: 0, regulares: 0, inadimplentes: 0, sessoes: 0 });
@@ -110,6 +111,8 @@ export default function AdminVM() {
         <h2 className="text-lg font-semibold text-lodge-navy">Portais dos Cargos</h2>
         <PortaisCargos />
       </div>
+
+      <LogAtividades />
 
       {/* Próximas Sessões */}
       {proximasSessoes.length > 0 && (
