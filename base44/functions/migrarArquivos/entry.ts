@@ -7,7 +7,9 @@ const pendente = (v: unknown) => typeof v === "string" && v.includes("base44") &
 const GRUPOS: Record<string, { tabela: string; campos: string[] }> = {
   fotos: { tabela: "irmao", campos: ["foto_url"] },
   acervo: { tabela: "acervo_digital", campos: ["arquivo_url", "capa_url"] },
-  logo: { tabela: "dados_loja", campos: ["logo_url"] },
+  logo: { tabela: "dados_loja", campos: ["logo_url", "logo_potencia_url"] },
+  capas: { tabela: "item", campos: ["imagem_capa"] },
+  sugestoes: { tabela: "sugestao_acervo", campos: ["arquivo_url", "capa_url"] },
   musicas: { tabela: "minha_mp3", campos: ["file_url"] },
 };
 
