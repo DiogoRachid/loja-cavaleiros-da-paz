@@ -34,7 +34,7 @@ export function gerarHtmlBalaustre({ sessao, secoes, dadosLoja, assinaturas = {}
     <h2>Balaústre da Sessão ${escapeHtml(sessao.tipo || "")} de ${escapeHtml(dataFmt)}${sessao.numero ? ` — nº ${escapeHtml(sessao.numero)}` : ""}</h2>
     ${corpo}
     <div class="assinaturas${assinaturas.novaPagina === true ? " nova-pagina" : ""}">
-      ${CARGOS_ASSINATURA.map(({ chave, cargo }) => `<div class="assinatura"><div class="assinatura-dados"><strong>${escapeHtml(assinaturas[chave] || "")}</strong><span>${escapeHtml(cargo)}</span></div></div>`).join("")}
+      ${CARGOS_ASSINATURA.map(({ cargo }) => `<div class="assinatura"><div class="assinatura-dados"><span>${escapeHtml(cargo)}</span></div></div>`).join("")}
     </div>
     </body></html>`;
 }

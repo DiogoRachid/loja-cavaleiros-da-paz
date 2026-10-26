@@ -278,7 +278,7 @@ export default function AdminBalaustre() {
           <TroncoBolsaForm dados={tronco} onChange={atualizarTronco} />
 
           <BalaustreEditor key={`editor-${sessaoId}`} secoes={secoes} onChange={(s) => { setSecoes(s); registrarEdicao(); }} />
-          <AssinaturasBalaustre assinaturas={assinaturas} padrao={dados.assinaturas} participantes={dados.presencas.filter((item) => item.presente)} onChange={(novas) => { setAssinaturas(novas); registrarEdicao(); }} />
+          <AssinaturasBalaustre assinaturas={assinaturas} onChange={(novas) => { setAssinaturas(novas); registrarEdicao(); }} />
           {previaAberta && <PreviaBalaustre documento={documento} onClose={() => setPreviaAberta(false)} onImprimir={imprimir} />}
         </>
       )}
