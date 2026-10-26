@@ -3,6 +3,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "@/components/secretario/editor-secretaria.css";
 import { htmlSeguro } from "@/components/secretario/textoRico";
+import MencoesEditor from "@/components/secretario/MencoesEditor";
 
 const modules = { toolbar: [
   [{ header: [1, 2, 3, false] }, { size: ["small", false, "large", "huge"] }],
@@ -12,8 +13,9 @@ const modules = { toolbar: [
 const formats = ["header", "size", "bold", "italic", "underline", "strike", "color", "background", "align", "list", "bullet", "indent", "blockquote"];
 const labels = { header: "Estilo do parágrafo", size: "Tamanho do texto", bold: "Negrito", italic: "Itálico", underline: "Sublinhado", strike: "Tachado", color: "Cor do texto", background: "Cor de destaque", align: "Alinhamento", list: "Lista", indent: "Recuo", blockquote: "Citação", clean: "Limpar formatação" };
 
-export default function EditorTextoRico({ value, onChange, label = "Conteúdo", placeholder = "Escreva aqui..." }) {
+export default function EditorTextoRico({ value, onChange, label = "Conteúdo", placeholder = "Escreva aqui...", mencoes = false }) {
   const root = useRef(null);
+  const quill = useRef(null);
   const html = useMemo(() => htmlSeguro(value), [value]);
   useEffect(() => {
     const editor = root.current.querySelector(".ql-editor");
@@ -28,7 +30,8 @@ export default function EditorTextoRico({ value, onChange, label = "Conteúdo", 
       });
     });
   }, [label]);
-  return <div ref={root} className="secretaria-editor min-w-0">
-    <ReactQuill theme="snow" value={html} onChange={onChange} modules={modules} formats={formats} placeholder={placeholder} />
+  return <div ref={root} className="secretaria-editor relative min-w-0">
+    <ReactQuill ref={quill} theme="snow" value={html} onChange={onChange} modules={modules} formats={formats} placeholder={placeholder} />
+    {mencoes && <MencoesEditor editorRef={quill} alvoRef={root} />}
   </div>;
 }

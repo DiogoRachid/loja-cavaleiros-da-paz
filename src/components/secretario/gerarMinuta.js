@@ -1,6 +1,7 @@
 // Monta as seções do balaústre a partir do andamento real da reunião
 import { cargosOcupados } from "@/components/secretario/CargosOcupados";
 import { anoVerdadeiraLuz } from "@/components/secretario/calendarioJudaico";
+import { textoLeituras } from "@/components/secretario/leiturasBalaustre";
 export { anoVerdadeiraLuz } from "@/components/secretario/calendarioJudaico";
 
 const fmtHora = (iso) => {
@@ -40,6 +41,7 @@ export function gerarSecoes({
   aposPorDoSol = false,
   visitantes = [],
   expedientes = [],
+  leituras = expedientes.filter((documento) => documento.status === "Lido"),
   acaoSocial = [],
 }) {
   const presentes = presencas.filter((p) => p.presente);
@@ -88,21 +90,7 @@ export function gerarSecoes({
         .join("\n")
     : "Os cargos foram ocupados conforme o quadro de oficiais em vigor.";
 
-  const recebidos = expedientes.filter((e) => e.tipo === "Recebido");
-  const expedidos = expedientes.filter((e) => e.tipo === "Expedido");
-  const linhaExpediente = (e) =>
-    `${e.classe}${e.numero ? ` nº ${e.numero}` : ""} — ${e.assunto}${
-      e.tipo === "Recebido" ? (e.remetente ? ` (de ${e.remetente})` : "") : e.destinatario ? ` (para ${e.destinatario})` : ""
-    }`;
-
-  const expedienteTexto = [
-    "Foi procedida a leitura do balaústre da sessão anterior, que foi aprovado sem ressalvas.",
-    recebidos.length ? `Expedientes recebidos:\n${recebidos.map(linhaExpediente).join("\n")}` : null,
-    expedidos.length ? `Expedientes expedidos:\n${expedidos.map(linhaExpediente).join("\n")}` : null,
-    !recebidos.length && !expedidos.length ? "Não houve expediente a ser lido nesta sessão." : null,
-  ]
-    .filter(Boolean)
-    .join("\n\n");
+  const expedienteTexto = textoLeituras(leituras);
 
   // Somente pareceres de ação social do mesmo grau da sessão e que devem constar
   const fmtValor = (v) =>

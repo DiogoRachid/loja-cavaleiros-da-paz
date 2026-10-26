@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 
-export const CLASSES = ["Prancha", "Ofício", "Convite", "Circular", "Balaústre", "Edital", "Outro", "Documento avulso"];
+export const CLASSES = ["Prancha", "Ofício", "Convite", "Circular", "Balaústre", "Edital", "Lei", "Decreto", "Ato", "Outro", "Documento avulso"];
 
 export default function ExpedienteForm({ open, onClose, onSalvar, sessoes = [], inicial, avulso = false }) {
   const [form, setForm] = useState(() => ({

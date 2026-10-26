@@ -16,6 +16,8 @@ export default function BalaustreEditor({ secoes, onChange }) {
             </p>
             <EditorTextoRico
               value={s.texto || ""}
+              mencoes
+              placeholder="Escreva aqui... Digite @ para inserir o nome de um irmão cadastrado."
               onChange={(texto) => atualizar(s.id, texto)}
               label={`${idx + 1}. ${s.titulo}`}
             />

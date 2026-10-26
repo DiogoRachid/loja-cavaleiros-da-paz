@@ -6,6 +6,8 @@ import { htmlSeguro, textoSimples } from "@/components/secretario/textoRico";
 import { imprimirBalaustre } from "@/components/secretario/imprimirBalaustre";
 import BalaustreEditor from "@/components/secretario/BalaustreEditor";
 import PalavraSelector from "@/components/secretario/PalavraSelector";
+import LeiturasBalaustre from "@/components/secretario/LeiturasBalaustre";
+import { resumirLeitura, aplicarLeituras, textoOradores } from "@/components/secretario/leiturasBalaustre";
 import TroncoBolsaForm from "@/components/secretario/TroncoBolsaForm";
 import { FileText, Loader2, Wand2, Save, Printer, Users, Timer, Shield, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +25,7 @@ export default function AdminBalaustre() {
   const [salvando, setSalvando] = useState(false);
   const [salvo, setSalvo] = useState(false);
   const [oradores, setOradores] = useState([]);
+  const [leituras, setLeituras] = useState([]);
   const [tronco, setTronco] = useState({});
   const [aposPorDoSol, setAposPorDoSol] = useState(false);
   const [erro, setErro] = useState("");
@@ -73,6 +76,7 @@ export default function AdminBalaustre() {
       // Ata já salva? Carrega. Senão, gera minuta pelo andamento.
       let carregadas = null;
       let oradoresSalvos = [];
+      let leiturasSalvas = contexto.expedientes.filter((documento) => documento.status === "Lido").map(resumirLeitura);
       let troncoSalvo = {};
       let periodoSalvo = false;
       if (sessao.ata) {
@@ -80,6 +84,7 @@ export default function AdminBalaustre() {
           const parsed = JSON.parse(sessao.ata);
           if (Array.isArray(parsed?.secoes)) carregadas = parsed.secoes;
           if (Array.isArray(parsed?.oradores)) oradoresSalvos = parsed.oradores;
+          if (Array.isArray(parsed?.leituras)) leiturasSalvas = parsed.leituras.map(resumirLeitura);
           if (parsed?.tronco) troncoSalvo = parsed.tronco;
           periodoSalvo = parsed?.calendario?.apos_por_do_sol === true;
         } catch {
@@ -87,8 +92,9 @@ export default function AdminBalaustre() {
         }
       }
       setAposPorDoSol(periodoSalvo);
-      setSecoes(atualizarAnoAbertura(carregadas || gerarSecoes({ ...contexto, aposPorDoSol: periodoSalvo }), sessao.data, periodoSalvo));
+      setSecoes(atualizarAnoAbertura(carregadas || gerarSecoes({ ...contexto, aposPorDoSol: periodoSalvo, leituras: leiturasSalvas }), sessao.data, periodoSalvo));
       setOradores(oradoresSalvos);
+      setLeituras(leiturasSalvas);
       setTronco(troncoSalvo);
       setLoadingSessao(false);
     };
@@ -98,7 +104,7 @@ export default function AdminBalaustre() {
   const gerarPeloAndamento = () => {
     if (!dados) return;
     if (secoes.some((s) => textoSimples(s.texto)) && !confirm("Substituir o texto atual pela minuta gerada a partir do andamento da reunião?")) return;
-    setSecoes(gerarSecoes({ ...dados, aposPorDoSol }));
+    setSecoes(gerarSecoes({ ...dados, aposPorDoSol, leituras }).map((secao) => secao.id === "palavra" ? { ...secao, texto: textoOradores(oradores) } : secao));
     setSalvo(false);
   };
 
@@ -109,7 +115,7 @@ export default function AdminBalaustre() {
       await db.Sessao.update(sessaoId, {
         ata: JSON.stringify({
           secoes: secoes.map((secao) => ({ ...secao, texto: htmlSeguro(secao.texto) })),
-          oradores, tronco, calendario: { apos_por_do_sol: aposPorDoSol },
+          oradores, leituras: leituras.map(resumirLeitura), tronco, calendario: { apos_por_do_sol: aposPorDoSol },
         }),
       });
       setSalvo(true);
@@ -134,35 +140,20 @@ export default function AdminBalaustre() {
     );
   }
 
-  const opcoesPalavra = dados
-    ? [
-        ...dados.presencas
-          .filter((p) => p.presente)
-          .map((p) => ({ valor: `ir-${p.irmao_id}`, label: `Ir∴ ${p.irmao_nome}`, tipo: "Irmão" })),
-        ...dados.visitantes.map((v) => ({
-          valor: `vis-${v.id}`,
-          label: `Ir∴ ${v.nome}${v.loja ? ` (${v.loja})` : ""}`,
-          tipo: "Visitante",
-        })),
-        ...dados.ordemEntrada
-          .filter((o) => o.tipo_participante === "Autoridade" && (o.presente || o.confirmado))
-          .map((o) => ({
-            valor: `aut-${o.id}`,
-            label: `${o.autoridade_titulo ? o.autoridade_titulo + " " : ""}${o.autoridade_nome}`,
-            tipo: "Autoridade",
-          })),
-      ]
-    : [];
+  const atualizarLeituras = (novas) => {
+    const atualizadas = aplicarLeituras(secoes, leituras, novas);
+    if (!atualizadas) return;
+    setLeituras(novas);
+    setSecoes(atualizadas);
+    setSalvo(false);
+  };
 
   const atualizarOradores = (lista) => {
     setOradores(lista);
-    const texto = lista.length
-      ? "Fizeram uso da palavra:\n" +
-        lista
-          .map((o) => `${o.nome}${o.tipo !== "Irmão" ? ` (${o.tipo})` : ""}${o.assunto ? ` — ${o.assunto}` : ""}`)
-          .join("\n")
-      : "";
-    setSecoes((prev) => prev.map((s) => (s.id === "palavra" ? { ...s, texto } : s)));
+    const texto = textoOradores(lista);
+    setSecoes((prev) => prev.some((s) => s.id === "palavra")
+      ? prev.map((s) => s.id === "palavra" ? { ...s, texto } : s)
+      : [...prev, { id: "palavra", titulo: "Palavra a Bem da Ordem", texto }]);
     setSalvo(false);
   };
 
@@ -248,7 +239,8 @@ export default function AdminBalaustre() {
 
           {erro && <p role="alert" className="text-sm text-destructive">{erro}</p>}
           <DataVerdadeiraLuz data={dados.sessao.data} aposPorDoSol={aposPorDoSol} onChange={atualizarPeriodo} />
-          <PalavraSelector opcoes={opcoesPalavra} oradores={oradores} onChange={atualizarOradores} />
+          <PalavraSelector key={`palavra-${sessaoId}`} oradores={oradores} onChange={atualizarOradores} />
+          <LeiturasBalaustre key={`leituras-${sessaoId}`} sessaoId={sessaoId} leituras={leituras} onChange={atualizarLeituras} />
 
           <TroncoBolsaForm dados={tronco} onChange={atualizarTronco} />
 
