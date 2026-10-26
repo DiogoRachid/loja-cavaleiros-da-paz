@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import EditorTextoRico from "@/components/secretario/EditorTextoRico";
 
 export default function BalaustreEditor({ secoes, onChange }) {
   const atualizar = (id, texto) => {
@@ -14,12 +14,10 @@ export default function BalaustreEditor({ secoes, onChange }) {
             <p className="font-semibold text-sm text-lodge-navy">
               {idx + 1}. {s.titulo}
             </p>
-            <Textarea
-              value={s.texto}
-              onChange={(e) => atualizar(s.id, e.target.value)}
-              rows={s.texto.split("\n").length > 3 ? 6 : 3}
-              placeholder="Escreva aqui..."
-              className="text-sm"
+            <EditorTextoRico
+              value={s.texto || ""}
+              onChange={(texto) => atualizar(s.id, texto)}
+              label={`${idx + 1}. ${s.titulo}`}
             />
           </CardContent>
         </Card>

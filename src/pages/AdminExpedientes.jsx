@@ -1,38 +1,34 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { db } from "@/api/db";
-import { Mail, Loader2, Plus } from "lucide-react";
+import { Mail, Loader2, Plus, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ExpedienteForm from "@/components/secretario/ExpedienteForm";
-import ExpedienteRow from "@/components/secretario/ExpedienteRow";
+import ExpedientesLista from "@/components/secretario/ExpedientesLista";
 import { imprimirExpediente } from "@/components/secretario/imprimirExpediente";
 
 export default function AdminExpedientes() {
-  const [expedientes, setExpedientes] = useState([]);
-  const [sessoes, setSessoes] = useState([]);
-  const [dadosLoja, setDadosLoja] = useState(null);
-  const [quadro, setQuadro] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const urlParams = new URLSearchParams(window.location.search);
+  const [aba, setAba] = useState(urlParams.get("aba") === "avulsos" ? "avulsos" : "recebidos");
+  const [avulso, setAvulso] = useState(false);
   const [formAberto, setFormAberto] = useState(false);
   const [editando, setEditando] = useState(null);
   const admin = JSON.parse(sessionStorage.getItem("admin_data") || "{}");
-
-  const carregar = async () => {
-    const [lista, sess, lojas, q] = await Promise.all([
-      db.Expediente.list("-data", 500),
-      db.Sessao.filter({ status: { $ne: "Cancelada" } }, "-data", 50),
-      db.DadosLoja.list(),
-      db.QuadroOficiais.filter({ exercicio: new Date().getFullYear().toString() }),
-    ]);
-    setExpedientes(lista || []);
-    setSessoes(sess || []);
-    setDadosLoja(lojas?.[0] || null);
-    setQuadro(q || []);
-    setLoading(false);
-  };
-
-  useEffect(() => { carregar(); }, []);
+  const { data: contexto, isPending: loading, error, refetch } = useQuery({
+    queryKey: ["contexto-documentos-secretaria"],
+    queryFn: async () => {
+      const [sess, lojas, q] = await Promise.all([
+        db.Sessao.filter({ status: { $ne: "Cancelada" } }, "-data", 50),
+        db.DadosLoja.list(),
+        db.QuadroOficiais.filter({ exercicio: new Date().getFullYear().toString() }),
+      ]);
+      return { sessoes: sess || [], dadosLoja: lojas?.[0] || null, quadro: q || [] };
+    },
+  });
+  const { sessoes = [], dadosLoja = null, quadro = [] } = contexto || {};
 
   const salvar = async (form) => {
     const sessao = sessoes.find((s) => s.id === form.sessao_id);
@@ -44,13 +40,14 @@ export default function AdminExpedientes() {
     };
     if (editando) await db.Expediente.update(editando.id, payload);
     else await db.Expediente.create(payload);
+    await queryClient.invalidateQueries({ queryKey: ["expedientes-secretaria"] });
+    setAba(form.classe === "Documento avulso" ? "avulsos" : form.tipo === "Recebido" ? "recebidos" : "expedidos");
     setEditando(null);
-    await carregar();
   };
 
   const marcarLido = async (e) => {
     await db.Expediente.update(e.id, { status: "Lido" });
-    setExpedientes((atual) => atual.map((x) => (x.id === e.id ? { ...x, status: "Lido" } : x)));
+    await queryClient.invalidateQueries({ queryKey: ["expedientes-secretaria"] });
   };
 
   const imprimir = (e) =>
@@ -65,23 +62,7 @@ export default function AdminExpedientes() {
     return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="w-8 h-8 animate-spin text-slate-400" /></div>;
   }
 
-  const recebidos = expedientes.filter((e) => e.tipo === "Recebido");
-  const expedidos = expedientes.filter((e) => e.tipo === "Expedido");
-
-  const lista = (itens) => (
-    <Card><CardContent className="p-3 sm:p-4 space-y-2">
-      {itens.length === 0 && <p className="text-center text-slate-400 py-8">Nenhum expediente registrado.</p>}
-      {itens.map((e) => (
-        <ExpedienteRow
-          key={e.id}
-          expediente={e}
-          onEditar={(x) => { setEditando(x); setFormAberto(true); }}
-          onImprimir={imprimir}
-          onMarcarLido={marcarLido}
-        />
-      ))}
-    </CardContent></Card>
-  );
+  if (error) return <div role="alert" className="space-y-3"><p className="text-destructive">Não foi possível carregar os dados da Secretaria: {error.message}</p><Button variant="outline" onClick={() => refetch()}>Tentar novamente</Button></div>;
 
   return (
     <div className="space-y-6">
@@ -95,23 +76,31 @@ export default function AdminExpedientes() {
             <p className="text-slate-500 text-sm">Recebimento, registro e emissão de documentos da Secretaria</p>
           </div>
         </div>
-        <Button onClick={() => { setEditando(null); setFormAberto(true); }} className="bg-[#1B3A5F] hover:bg-[#152e4d] gap-2">
-          <Plus className="w-4 h-4" /> Novo expediente
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => { setEditando(null); setAvulso(true); setFormAberto(true); }} className="gap-2">
+            <FileText className="h-4 w-4" /> Documento avulso
+          </Button>
+          <Button onClick={() => { setEditando(null); setAvulso(false); setFormAberto(true); }} className="gap-2">
+            <Plus className="h-4 w-4" /> Novo expediente
+          </Button>
+        </div>
       </div>
 
-      <Tabs defaultValue="recebidos">
-        <TabsList>
-          <TabsTrigger value="recebidos">Recebidos ({recebidos.length})</TabsTrigger>
-          <TabsTrigger value="expedidos">Expedidos ({expedidos.length})</TabsTrigger>
+      <Tabs value={aba} onValueChange={setAba}>
+        <TabsList className="h-auto flex-wrap">
+          <TabsTrigger value="recebidos">Recebidos</TabsTrigger>
+          <TabsTrigger value="expedidos">Expedidos</TabsTrigger>
+          <TabsTrigger value="avulsos">Documentos avulsos</TabsTrigger>
         </TabsList>
-        <TabsContent value="recebidos">{lista(recebidos)}</TabsContent>
-        <TabsContent value="expedidos">{lista(expedidos)}</TabsContent>
+        <TabsContent value={aba}>
+          <ExpedientesLista key={aba} aba={aba} onEditar={(x) => { setEditando(x); setAvulso(x.classe === "Documento avulso"); setFormAberto(true); }} onImprimir={imprimir} onMarcarLido={marcarLido} />
+        </TabsContent>
       </Tabs>
 
       {formAberto && (
         <ExpedienteForm
-          key={editando?.id || "novo"}
+          key={editando?.id || (avulso ? "novo-avulso" : "novo")}
+          avulso={avulso}
           open={formAberto}
           inicial={editando}
           sessoes={sessoes}

@@ -1,9 +1,10 @@
-import { anoVerdadeiraLuz } from "@/components/secretario/gerarMinuta";
+import { anoVerdadeiraLuz } from "@/components/secretario/calendarioJudaico";
+import { htmlSeguro, textoSimples, escapeHtml, ESTILOS_TEXTO_RICO } from "@/components/secretario/textoRico";
 
 import { logoLoja, logoPotencia } from "@/lib/relatorio";
 
 // Abre uma janela de impressão com o balaústre formatado
-export function imprimirBalaustre({ sessao, secoes, dadosLoja, assinaturas = {} }) {
+export function imprimirBalaustre({ sessao, secoes, dadosLoja, assinaturas = {}, aposPorDoSol = false }) {
   const nomeLoja = dadosLoja ? `ARLS ${dadosLoja.nome} nº ${dadosLoja.numero}` : "Loja";
   const oriente = dadosLoja?.oriente ? `Oriente de ${dadosLoja.oriente}` : "";
   const dataFmt = sessao.data
@@ -11,11 +12,8 @@ export function imprimirBalaustre({ sessao, secoes, dadosLoja, assinaturas = {} 
     : "";
 
   const corpo = secoes
-    .filter((s) => s.texto && s.texto.trim())
-    .map(
-      (s, i) =>
-        `<h3>${i + 1}. ${s.titulo}</h3><p>${s.texto.replace(/\n/g, "<br/>")}</p>`
-    )
+    .filter((s) => textoSimples(s.texto))
+    .map((s, i) => `<h3>${i + 1}. ${escapeHtml(s.titulo)}</h3><div class="texto-rico">${htmlSeguro(s.texto)}</div>`)
     .join("");
 
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/>
@@ -34,13 +32,14 @@ export function imprimirBalaustre({ sessao, secoes, dadosLoja, assinaturas = {} 
       .assinaturas div { flex: 1; border-top: 1px solid #333; text-align: center; font-size: 12px; padding-top: 6px; }
       .assinaturas strong { display: block; font-size: 12px; }
       .assinaturas span { font-size: 11px; color: #555; }
+      ${ESTILOS_TEXTO_RICO}
     </style></head><body>
     <header>
       <img class="logo" src="${logoLoja(dadosLoja)}" alt="" onerror="this.style.visibility='hidden'"/>
       <div class="titulo">
         <h1>${nomeLoja}</h1>
         <p>${dadosLoja?.potencia || "Grande Loja do Paraná"}${oriente ? ` — ${oriente}` : ""}</p>
-        <p>Ano da Verdadeira Luz ${anoVerdadeiraLuz(sessao.data)}</p>
+        <p>Ano da Verdadeira Luz ${anoVerdadeiraLuz(sessao.data, aposPorDoSol)}</p>
       </div>
       <img class="logo" src="${logoPotencia(dadosLoja)}" alt="" onerror="this.style.visibility='hidden'"/>
     </header>

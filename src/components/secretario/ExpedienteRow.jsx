@@ -25,13 +25,13 @@ export default function ExpedienteRow({ expediente: e, onEditar, onImprimir, onM
       </div>
       <div className="flex items-center gap-2">
         <Badge className={`${CORES_STATUS[e.status] || "bg-slate-200 text-slate-700"} text-xs`}>{e.status}</Badge>
-        {e.status === "Pendente" && (
+        {e.status === "Pendente" && e.classe !== "Documento avulso" && (
           <Button size="sm" variant="outline" className="gap-1 text-blue-700 border-blue-300 hover:bg-blue-50" onClick={() => onMarcarLido(e)}>
             <Check className="w-4 h-4" /> Lido
           </Button>
         )}
-        <Button size="sm" variant="outline" onClick={() => onEditar(e)}><Pencil className="w-4 h-4" /></Button>
-        <Button size="sm" variant="outline" onClick={() => onImprimir(e)}><Printer className="w-4 h-4" /></Button>
+        <Button size="sm" variant="outline" aria-label={`Editar ${e.assunto}`} onClick={() => onEditar(e)}><Pencil className="w-4 h-4" /></Button>
+        <Button size="sm" variant="outline" aria-label={`Imprimir ${e.assunto}`} onClick={() => onImprimir(e)}><Printer className="w-4 h-4" /></Button>
       </div>
     </div>
   );

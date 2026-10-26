@@ -30,6 +30,7 @@ export default function AdminSecretario() {
   const modulos = [
     { title: "Balaústre (Ata)", desc: "Montar a ata conforme a reunião", icon: FileText, page: "AdminBalaustre" },
     { title: "Expedientes e Pranchas", desc: "Recebidos, expedidos e emissão", icon: Mail, page: "AdminExpedientes" },
+    { title: "Documentos avulsos", desc: "Editor de texto, arquivo e impressão", icon: FileText, page: "AdminExpedientes", href: "/AdminExpedientes?aba=avulsos" },
     { title: "Visitantes e Ordem do Dia", desc: "Visitantes, autoridades e cargos", icon: Users, page: "AdminVisitantes" },
     { title: "Cadastro de Irmãos", desc: "Adicionar e editar membros", icon: UserPlus, page: "AdminCadastroIrmaos" },
     { title: "Controle de Presenças", desc: "Marcar frequência nas sessões", icon: ClipboardList, page: "AdminPresencas" },
@@ -74,7 +75,7 @@ export default function AdminSecretario() {
         {modulos.map((item) => {
           const Icon = item.icon;
           return (
-            <Link key={item.page} to={createPageUrl(item.page)}>
+            <Link key={item.title} to={item.href || `/${item.page}`}>
               <Card className="hover:shadow-md hover:border-[#C9A227] transition-all cursor-pointer">
                 <CardContent className="p-5 flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[#1B3A5F]/10 flex items-center justify-center flex-shrink-0">

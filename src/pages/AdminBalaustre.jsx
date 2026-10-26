@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { db } from "@/api/db";
-import { gerarSecoes } from "@/components/secretario/gerarMinuta";
+import { gerarSecoes, atualizarAnoAbertura } from "@/components/secretario/gerarMinuta";
+import DataVerdadeiraLuz from "@/components/secretario/DataVerdadeiraLuz";
+import { htmlSeguro, textoSimples } from "@/components/secretario/textoRico";
 import { imprimirBalaustre } from "@/components/secretario/imprimirBalaustre";
 import BalaustreEditor from "@/components/secretario/BalaustreEditor";
 import PalavraSelector from "@/components/secretario/PalavraSelector";
@@ -22,6 +24,8 @@ export default function AdminBalaustre() {
   const [salvo, setSalvo] = useState(false);
   const [oradores, setOradores] = useState([]);
   const [tronco, setTronco] = useState({});
+  const [aposPorDoSol, setAposPorDoSol] = useState(false);
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
     const init = async () => {
@@ -70,17 +74,20 @@ export default function AdminBalaustre() {
       let carregadas = null;
       let oradoresSalvos = [];
       let troncoSalvo = {};
+      let periodoSalvo = false;
       if (sessao.ata) {
         try {
           const parsed = JSON.parse(sessao.ata);
           if (Array.isArray(parsed?.secoes)) carregadas = parsed.secoes;
           if (Array.isArray(parsed?.oradores)) oradoresSalvos = parsed.oradores;
           if (parsed?.tronco) troncoSalvo = parsed.tronco;
+          periodoSalvo = parsed?.calendario?.apos_por_do_sol === true;
         } catch {
           carregadas = [{ id: "texto", titulo: "Ata", texto: sessao.ata }];
         }
       }
-      setSecoes(carregadas || gerarSecoes(contexto));
+      setAposPorDoSol(periodoSalvo);
+      setSecoes(atualizarAnoAbertura(carregadas || gerarSecoes({ ...contexto, aposPorDoSol: periodoSalvo }), sessao.data, periodoSalvo));
       setOradores(oradoresSalvos);
       setTronco(troncoSalvo);
       setLoadingSessao(false);
@@ -90,18 +97,33 @@ export default function AdminBalaustre() {
 
   const gerarPeloAndamento = () => {
     if (!dados) return;
-    if (secoes.some((s) => s.texto?.trim()) && !confirm("Substituir o texto atual pela minuta gerada a partir do andamento da reunião?")) return;
-    setSecoes(gerarSecoes(dados));
+    if (secoes.some((s) => textoSimples(s.texto)) && !confirm("Substituir o texto atual pela minuta gerada a partir do andamento da reunião?")) return;
+    setSecoes(gerarSecoes({ ...dados, aposPorDoSol }));
     setSalvo(false);
   };
 
   const salvar = async () => {
     setSalvando(true);
-    await db.Sessao.update(sessaoId, {
-      ata: JSON.stringify({ secoes, oradores, tronco }),
-    });
-    setSalvando(false);
-    setSalvo(true);
+    setErro("");
+    try {
+      await db.Sessao.update(sessaoId, {
+        ata: JSON.stringify({
+          secoes: secoes.map((secao) => ({ ...secao, texto: htmlSeguro(secao.texto) })),
+          oradores, tronco, calendario: { apos_por_do_sol: aposPorDoSol },
+        }),
+      });
+      setSalvo(true);
+    } catch (error) {
+      setErro(`Não foi possível salvar o balaústre: ${error.message}`);
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const atualizarPeriodo = (apos) => {
+    setAposPorDoSol(apos);
+    setSecoes((atuais) => atualizarAnoAbertura(atuais, dados.sessao.data, apos));
+    setSalvo(false);
   };
 
   if (loading) {
@@ -219,11 +241,13 @@ export default function AdminBalaustre() {
               {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : salvo ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
               {salvando ? "Salvando..." : salvo ? "Salvo" : "Salvar"}
             </Button>
-            <Button variant="outline" onClick={() => imprimirBalaustre({ sessao: dados.sessao, secoes, dadosLoja: dados.dadosLoja, assinaturas: dados.assinaturas })} className="gap-2">
+            <Button variant="outline" onClick={() => imprimirBalaustre({ sessao: dados.sessao, secoes, dadosLoja: dados.dadosLoja, assinaturas: dados.assinaturas, aposPorDoSol })} className="gap-2">
               <Printer className="w-4 h-4" /> Imprimir
             </Button>
           </div>
 
+          {erro && <p role="alert" className="text-sm text-destructive">{erro}</p>}
+          <DataVerdadeiraLuz data={dados.sessao.data} aposPorDoSol={aposPorDoSol} onChange={atualizarPeriodo} />
           <PalavraSelector opcoes={opcoesPalavra} oradores={oradores} onChange={atualizarOradores} />
 
           <TroncoBolsaForm dados={tronco} onChange={atualizarTronco} />

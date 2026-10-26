@@ -2,52 +2,58 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import EditorTextoRico from "@/components/secretario/EditorTextoRico";
+import DataVerdadeiraLuz from "@/components/secretario/DataVerdadeiraLuz";
+import { lerDocumento, salvarDocumento } from "@/components/secretario/textoRico";
+import { hojeCivil, dataJudaica } from "@/components/secretario/calendarioJudaico";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 
-export const CLASSES = ["Prancha", "Ofício", "Convite", "Circular", "Balaústre", "Edital", "Outro"];
+export const CLASSES = ["Prancha", "Ofício", "Convite", "Circular", "Balaústre", "Edital", "Outro", "Documento avulso"];
 
-export default function ExpedienteForm({ open, onClose, onSalvar, sessoes, inicial }) {
-  const [form, setForm] = useState(
-    inicial || {
-      tipo: "Recebido",
-      classe: "Prancha",
-      numero: "",
-      data: new Date().toISOString().slice(0, 10),
-      remetente: "",
-      destinatario: "",
-      assunto: "",
-      conteudo: "",
-      sessao_id: "",
-      status: "Pendente",
-    }
-  );
+export default function ExpedienteForm({ open, onClose, onSalvar, sessoes = [], inicial, avulso = false }) {
+  const [form, setForm] = useState(() => ({
+    tipo: avulso ? "Expedido" : "Recebido", classe: avulso ? "Documento avulso" : "Prancha",
+    numero: "", data: hojeCivil(), remetente: "", destinatario: "", assunto: "", sessao_id: "", status: "Pendente",
+    ...(inicial || {}), conteudo: lerDocumento(inicial?.conteudo).texto,
+  }));
+  const [aposPorDoSol, setAposPorDoSol] = useState(() => lerDocumento(inicial?.conteudo).aposPorDoSol);
   const [salvando, setSalvando] = useState(false);
-  const set = (c, v) => setForm((f) => ({ ...f, [c]: v }));
+  const [erro, setErro] = useState("");
+  const documentoAvulso = form.classe === "Documento avulso";
+  const set = (c, v) => setForm((f) => ({ ...f, [c]: v, ...(c === "classe" && v === "Documento avulso" ? { tipo: "Expedido", sessao_id: "" } : {}) }));
 
   const salvar = async () => {
-    if (!form.assunto) return;
+    if (!form.assunto?.trim() || !dataJudaica(form.data, aposPorDoSol)) {
+      setErro("Informe o assunto ou título e uma data válida.");
+      return;
+    }
     setSalvando(true);
-    await onSalvar(form);
-    setSalvando(false);
-    onClose();
+    setErro("");
+    try {
+      await onSalvar({ ...form, assunto: form.assunto.trim(), conteudo: salvarDocumento(form.conteudo, aposPorDoSol) });
+      onClose();
+    } catch (error) {
+      setErro(`Não foi possível salvar o documento: ${error.message}`);
+    } finally {
+      setSalvando(false);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[#1B3A5F]">
-            {inicial ? "Editar expediente" : "Novo expediente"}
+            {documentoAvulso ? (inicial ? "Editar documento avulso" : "Novo documento avulso") : (inicial ? "Editar expediente" : "Novo expediente")}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Tipo</Label>
-              <Select value={form.tipo} onValueChange={(v) => set("tipo", v)}>
+              <Select value={form.tipo} disabled={documentoAvulso} onValueChange={(v) => set("tipo", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Recebido">Recebido</SelectItem>
@@ -76,6 +82,7 @@ export default function ExpedienteForm({ open, onClose, onSalvar, sessoes, inici
               <Input type="date" value={form.data || ""} onChange={(e) => set("data", e.target.value)} />
             </div>
           </div>
+          <DataVerdadeiraLuz data={form.data} aposPorDoSol={aposPorDoSol} onChange={setAposPorDoSol} />
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -89,20 +96,21 @@ export default function ExpedienteForm({ open, onClose, onSalvar, sessoes, inici
           </div>
 
           <div className="space-y-1.5">
-            <Label>Assunto</Label>
+            <Label>{documentoAvulso ? "Título" : "Assunto"}</Label>
             <Input value={form.assunto} onChange={(e) => set("assunto", e.target.value)} />
           </div>
 
           <div className="space-y-1.5">
             <Label>Conteúdo</Label>
-            <Textarea rows={6} value={form.conteudo} onChange={(e) => set("conteudo", e.target.value)} />
+            <EditorTextoRico value={form.conteudo} onChange={(texto) => set("conteudo", texto)} label="Conteúdo do documento" />
           </div>
 
-          <div className="space-y-1.5">
+          {!documentoAvulso && <div className="space-y-1.5">
             <Label>Sessão de leitura (opcional)</Label>
-            <Select value={form.sessao_id || ""} onValueChange={(v) => set("sessao_id", v)}>
+            <Select value={form.sessao_id || "sem-sessao"} onValueChange={(v) => set("sessao_id", v === "sem-sessao" ? "" : v)}>
               <SelectTrigger><SelectValue placeholder="Vincular a uma sessão" /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="sem-sessao">Sem vínculo com uma sessão</SelectItem>
                 {sessoes.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {new Date(s.data + "T12:00:00").toLocaleDateString("pt-BR")} — {s.tipo}
@@ -110,8 +118,9 @@ export default function ExpedienteForm({ open, onClose, onSalvar, sessoes, inici
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </div>}
 
+          {erro && <p role="alert" className="text-sm text-destructive">{erro}</p>}
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>Cancelar</Button>
             <Button onClick={salvar} disabled={salvando || !form.assunto} className="bg-[#1B3A5F] hover:bg-[#152e4d] gap-2">
