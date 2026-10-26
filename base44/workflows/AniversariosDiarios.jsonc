@@ -1,0 +1,45 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "aniversarios_diarios",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "enviar_aniversarios": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "enviarAniversarios",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Enviar anivers\u00e1rios do dia",
+            "description": "Evolution API \u00b7 9h Bras\u00edlia \u00b7 sem duplicidade"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Anivers\u00e1rios di\u00e1rios dos Irm\u00e3os",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * *",
+      "one_time_date": null,
+      "timezone": "America/Sao_Paulo",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "\u00c0s 9h de Bras\u00edlia, envia pela Evolution uma mensagem com os aniversariantes de nascimento do dia, com reserva exclusiva para impedir duplicidade."
+}

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 
 export default function useConfigEvolution(permitido) {
-  const [config, setConfig] = useState({ destino: "", chave_api: "", chave_configurada: false });
+  const [config, setConfig] = useState({ destino: "", chave_api: "", chave_configurada: false, url_api: "", instancia: "", aniversarios_ativos: true });
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
@@ -26,7 +26,7 @@ export default function useConfigEvolution(permitido) {
   const salvar = async () => {
     setSalvando(true); setErro(""); setSalvo(false);
     try {
-      const { data } = await base44.functions.invoke("configEvolution", { operacao: "salvar", destino: config.destino, chave_api: config.chave_api });
+      const { data } = await base44.functions.invoke("configEvolution", { operacao: "salvar", destino: config.destino, chave_api: config.chave_api, url_api: config.url_api, instancia: config.instancia, aniversarios_ativos: config.aniversarios_ativos });
       if (data.error) throw new Error(data.error);
       setConfig({ ...data, chave_api: "" }); setSalvo(true);
     } catch (error) { tratarErro(error); }
