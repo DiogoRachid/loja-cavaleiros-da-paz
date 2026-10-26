@@ -1,10 +1,10 @@
 import { listar, obter, criar, atualizar, excluir, excluirMuitos } from "../../shared/supabase.ts";
 import { mascararLinks, origemApp } from "../../shared/storage.ts";
 
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
     const body = await req.json();
-    const { operacao, tabela, id, filtro, sort, limit } = body || {};
+    const { operacao, tabela, id, filtro, sort, limit, offset } = body || {};
     const supabaseUrl = Deno.env.get("SUPABASE2_URL") || "";
     // Nunca grava o endereço direto do Supabase: salva sempre o link mascarado.
     const dados = mascararLinks(body?.dados, supabaseUrl, origemApp(req));
@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
     let resultado;
     switch (operacao) {
       case "listar":
-        resultado = await listar(tabela, { filtro, sort, limit });
+        resultado = await listar(tabela, { filtro, sort, limit, offset });
         break;
       case "obter":
         resultado = await obter(tabela, id);
@@ -37,4 +37,4 @@ Deno.serve(async (req) => {
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
-});
+}

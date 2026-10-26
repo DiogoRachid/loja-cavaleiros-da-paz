@@ -24,8 +24,8 @@ async function chamar(payload) {
 // Cria um "repositório" com a mesma interface usada nas telas hoje.
 function tabela(nome) {
   return {
-    list: (sort, limit) => chamar({ operacao: "listar", tabela: nome, sort, limit }),
-    filter: (filtro, sort, limit) => chamar({ operacao: "listar", tabela: nome, filtro, sort, limit }),
+    list: (sort, limit, offset) => chamar({ operacao: "listar", tabela: nome, sort, limit, offset }),
+    filter: (filtro, sort, limit, offset) => chamar({ operacao: "listar", tabela: nome, filtro, sort, limit, offset }),
     get: (id) => chamar({ operacao: "obter", tabela: nome, id }),
     create: (dados) => chamar({ operacao: "criar", tabela: nome, dados }),
     bulkCreate: (dados) => chamar({ operacao: "criar", tabela: nome, dados }),
@@ -70,6 +70,10 @@ export const db = {
   PedidoAcaoSocial: tabela("pedido_acao_social"),
   CargoExercido: tabela("cargo_exercido"),
   BeneficiarioMutua: tabela("beneficiario_mutua"),
+  Familiar: tabela("familiar"),
+  FamiliarCadastro: tabela("familiar_cadastro"),
+  FamiliaIrmao: tabela("familia_irmao"),
+  Aniversariante: tabela("aniversariante"),
 };
 
 export default db;

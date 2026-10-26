@@ -7,7 +7,7 @@ function groupFor(page) {
   if (/Mensalidades|Financeiro/.test(page)) return "Financeiro";
   if (/^Bib|Acervo|Emprestimos|Sugestoes|IrmaoScan/.test(page)) return "Biblioteca";
   if (/Sessoes|AgendaRitual|Trabalhos|Balaustre|Expedientes|Visitantes|Pareceres|Presenc|Frequencias|Autoridades|QuadroOficiais|OrdemEntrada/.test(page)) return "Sessões e trabalhos";
-  if (/Membros|CadastroIrmaos|Hospitaleiro|Contatos|AcaoSocial|Atestados/.test(page)) return "Irmãos e assistência";
+  if (/Membros|CadastroIrmaos|Familiares|Hospitaleiro|Contatos|AcaoSocial|Atestados/.test(page)) return "Irmãos e assistência";
   return "Gestão da Loja";
 }
 

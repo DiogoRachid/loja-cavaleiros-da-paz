@@ -10,7 +10,8 @@ export const TABELAS = [
   "minha_mp3", "pasta_mp3", "pasta_musica", "config_etapa_harmonia", "roteiro_harmonia",
   "playlist_sessao", "tempo_etapa",
   "trabalho_irmao", "expediente", "visitante_sessao",
-  "parecer", "pedido_acao_social", "cargo_exercido", "beneficiario_mutua"
+  "parecer", "pedido_acao_social", "cargo_exercido", "beneficiario_mutua",
+  "familiar", "familiar_cadastro", "familia_irmao", "aniversariante"
 ];
 
 function config() {
@@ -50,7 +51,7 @@ function filtroParaQuery(filtro) {
     else if (Array.isArray(valor)) partes.push(campo + "=in.(" + valor.map((v) => `"${v}"`).join(",") + ")");
     else if (typeof valor === "object") {
       // Suporte a operadores estilo Mongo: { $ne, $gt, $gte, $lt, $lte, $in }
-      const mapa = { $ne: "neq", $gt: "gt", $gte: "gte", $lt: "lt", $lte: "lte" };
+      const mapa = { $ne: "neq", $gt: "gt", $gte: "gte", $lt: "lt", $lte: "lte", $ilike: "ilike" };
       for (const [op, v] of Object.entries(valor)) {
         if (op === "$in" && Array.isArray(v)) {
           partes.push(campo + "=in.(" + v.map((x) => `"${x}"`).join(",") + ")");
@@ -67,15 +68,20 @@ function filtroParaQuery(filtro) {
 
 function ordenacaoParaQuery(sort) {
   if (!sort) return [];
-  const desc = sort.startsWith("-");
-  const campo = desc ? sort.slice(1) : sort;
-  return ["order=" + campo + "." + (desc ? "desc" : "asc")];
+  const campos = sort.split(",").map((item) => {
+    const desc = item.startsWith("-");
+    const campo = desc ? item.slice(1) : item;
+    if (!/^[a-z_][a-z0-9_]*$/i.test(campo)) throw new Error("Ordenação inválida");
+    return campo + "." + (desc ? "desc" : "asc");
+  });
+  return ["order=" + campos.join(",")];
 }
 
-export async function listar(tabela, { filtro, sort, limit } = {}) {
+export async function listar(tabela, { filtro, sort, limit, offset } = {}) {
   assertTabela(tabela);
   const q = ["select=*", ...filtroParaQuery(filtro), ...ordenacaoParaQuery(sort)];
   if (limit) q.push("limit=" + limit);
+  if (Number.isInteger(offset) && offset > 0) q.push("offset=" + offset);
   return await request("GET", tabela + "?" + q.join("&"));
 }
 

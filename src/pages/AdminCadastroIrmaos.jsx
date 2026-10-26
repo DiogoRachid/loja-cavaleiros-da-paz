@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import MovimentacaoMaconica from "@/components/irmaos/MovimentacaoMaconica";
 import TestamentoIrmao from "@/components/irmaos/TestamentoIrmao";
+import FamiliaresCadastro from "@/components/familiares/FamiliaresCadastro";
 
 const CARGOS_SUGERIDOS = ["Nenhum","Venerável Mestre","Primeiro Vigilante","Segundo Vigilante","Orador","Secretário","Tesoureiro","Chanceler","Bibliotecário","Mestre de Cerimônias","Primeiro Diácono","Segundo Diácono","Porta Bandeira","Porta Espada","Arquiteto","Hospitaleiro","Músico","Mestre de Harmonia","Cobrador","Guarda Interno","Guarda Externo","Primeiro Experto","Segundo Experto","Mestre de Banquetes"];
 
@@ -230,11 +231,12 @@ export default function AdminCadastroIrmaos() {
               <div className="space-y-4 pt-2">
                 <MovimentacaoMaconica irmao={{ ...form, id: editando }} cargosSugeridos={CARGOS_SUGERIDOS} />
                 <TestamentoIrmao irmao={{ ...form, id: editando }} />
+                <FamiliaresCadastro irmao={{ id: editando, nome_completo: form.nome_completo, numero_glp: form.numero_glp }} />
               </div>
             )}
             {!editando && (
               <p className="text-xs text-slate-400 pt-2">
-                Salve o cadastro para registrar a movimentação maçônica e o testamento do irmão.
+                Salve o cadastro para registrar familiares, a movimentação maçônica e o testamento do irmão.
               </p>
             )}
 

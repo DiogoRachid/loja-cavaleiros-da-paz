@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
-import { FileText, BarChart, ClipboardList, TrendingUp, AlertCircle, CheckCircle } from "lucide-react";
+import { FileText, BarChart, ClipboardList, TrendingUp, AlertCircle, CheckCircle, Users } from "lucide-react";
+import AniversariosPainel from "@/components/familiares/AniversariosPainel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
@@ -24,6 +25,7 @@ export default function AdminChanceler() {
   };
 
   const modulos = [
+    { title: "Familiares e Aniversários", desc: "Cadastro de cunhadas, sobrinhos e aniversariantes", icon: Users, page: "AdminFamiliares" },
     { title: "Relatório de Frequências", desc: "Assiduidade por irmão e sessão", icon: BarChart, page: "AdminFrequencias" },
     { title: "Comunicados", desc: "Envio de comunicados oficiais", icon: ClipboardList, page: "AdminComunicados" },
   ];
@@ -82,6 +84,7 @@ export default function AdminChanceler() {
           );
         })}
       </div>
+      <AniversariosPainel />
     </div>
   );
 }

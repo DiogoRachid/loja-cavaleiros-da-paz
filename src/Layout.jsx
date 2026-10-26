@@ -30,6 +30,7 @@ const ADMIN_LINKS_BY_CARGO = {
     { name: "Comissões", page: "AdminComissoes", icon: Users },
     { name: "Membros", page: "AdminMembros", icon: Users },
     { name: "Cadastro de Irmãos", page: "AdminCadastroIrmaos", icon: Users },
+    { name: "Familiares e Aniversários", page: "AdminFamiliares", icon: Calendar },
     { name: "Autoridades", page: "AdminAutoridades", icon: Shield },
     { name: "Agenda Ritual", page: "AdminAgendaRitual", icon: Calendar },
     { name: "Mensalidades", page: "AdminMensalidades", icon: DollarSign },
@@ -78,6 +79,7 @@ const ADMIN_LINKS_BY_CARGO = {
   ],
   "Secretário": [
     { name: "Painel Secretaria", page: "AdminSecretario", icon: FileText },
+    { name: "Familiares e Aniversários", page: "AdminFamiliares", icon: Calendar },
     { name: "Balaústre (Ata)", page: "AdminBalaustre", icon: FileText },
     { name: "QR de Presença", page: "AdminListaPresencaQR", icon: QrCode },
     { name: "Expedientes e Pranchas", page: "AdminExpedientes", icon: Mail },
@@ -94,6 +96,7 @@ const ADMIN_LINKS_BY_CARGO = {
   ],
   "Chanceler": [
     { name: "Painel Chancelaria", page: "AdminChanceler", icon: FileText },
+    { name: "Familiares e Aniversários", page: "AdminFamiliares", icon: Calendar },
     { name: "QR de Presença", page: "AdminListaPresencaQR", icon: QrCode },
     { name: "Presenças", page: "AdminPresencas", icon: ClipboardList },
     { name: "Visitantes e Autoridades", page: "AdminVisitantes", icon: Users },
