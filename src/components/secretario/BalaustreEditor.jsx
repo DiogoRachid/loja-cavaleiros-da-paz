@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import EditorTextoRico from "@/components/secretario/EditorTextoRico";
 import SecaoBalaustreControles from "@/components/secretario/SecaoBalaustreControles";
+import QuebraPaginaBalaustre from "@/components/secretario/QuebraPaginaBalaustre";
 import { Button } from "@/components/ui/button";
 import { textoSimples } from "@/components/secretario/textoRico";
 
@@ -23,7 +24,7 @@ export default function BalaustreEditor({ secoes, onChange }) {
       {secoes.map((s, idx) => (
         <Card key={s.id}>
           <CardContent className="p-4 space-y-2">
-            <SecaoBalaustreControles secao={s} indice={idx} total={secoes.length} onTitulo={(titulo) => onChange(secoes.map((item) => item.id === s.id ? { ...item, titulo } : item))} onMover={(deslocamento) => mover(idx, deslocamento)} onRemover={() => remover(s)} />
+            <SecaoBalaustreControles secao={s} indice={idx} total={secoes.length} onTitulo={(titulo) => onChange(secoes.map((item) => item.id === s.id ? { ...item, titulo } : item))} onMover={(deslocamento) => mover(idx, deslocamento)} onRemover={() => remover(s)} onDuplicar={() => { const copia = [...secoes]; copia.splice(idx + 1, 0, { ...s, id: `secao-${crypto.randomUUID()}`, titulo: `${s.titulo} (cópia)` }); onChange(copia); }} />
             <EditorTextoRico
               value={s.texto || ""}
               mencoes
@@ -31,6 +32,7 @@ export default function BalaustreEditor({ secoes, onChange }) {
               onChange={(texto) => atualizar(s.id, texto)}
               label={`${idx + 1}. ${s.titulo}`}
             />
+            <QuebraPaginaBalaustre ativa={s.novaPagina} onChange={(novaPagina) => onChange(secoes.map((item) => item.id === s.id ? { ...item, novaPagina } : item))} />
           </CardContent>
         </Card>
       ))}

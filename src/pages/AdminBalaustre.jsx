@@ -11,6 +11,7 @@ import { resumirLeitura, aplicarLeituras, textoOradores } from "@/components/sec
 import TroncoBolsaForm from "@/components/secretario/TroncoBolsaForm";
 import AssinaturasBalaustre from "@/components/secretario/AssinaturasBalaustre";
 import PreviaBalaustre from "@/components/secretario/PreviaBalaustre";
+import useProtecaoBalaustre from "@/components/secretario/useProtecaoBalaustre";
 import RegistroBalaustre from "@/components/secretario/RegistroBalaustre";
 import { assinaturasSessao, lerAssinaturas } from "@/components/secretario/assinaturasBalaustre";
 import { FileText, Loader2, Wand2, Save, Printer, Users, Timer, Shield, Check } from "lucide-react";
@@ -35,21 +36,34 @@ export default function AdminBalaustre() {
   const [erro, setErro] = useState("");
   const [assinaturas, setAssinaturas] = useState({});
   const [previaAberta, setPreviaAberta] = useState(false);
+  const protecao = useProtecaoBalaustre();
+  const registrarEdicao = () => { protecao.marcar(); setSalvo(false); };
+  const selecionarSessao = (id) => {
+    if (id === sessaoId) return;
+    if (protecao.alterado && !window.confirm("Há alterações não salvas no Balaústre. Deseja descartá-las e trocar de sessão?")) return;
+    setSessaoId(id);
+  };
 
   useEffect(() => {
     const init = async () => {
-      const lista = await db.Sessao.filter({ status: { $ne: "Cancelada" } }, "-data", 100);
-      setSessoes(lista || []);
-      setLoading(false);
+      try {
+        const lista = await db.Sessao.filter({ status: { $ne: "Cancelada" } }, "-data", 100);
+        setSessoes(lista || []);
+      } catch (error) { setErro(`Não foi possível carregar as sessões: ${error.message}`); }
+      finally { setLoading(false); }
     };
     init();
   }, []);
 
   useEffect(() => {
     if (!sessaoId) return;
+    let ativo = true;
     const load = async () => {
       setLoadingSessao(true);
+      setDados(null);
+      setErro("");
       setSalvo(false);
+      try {
       const [sessao, presencas, tempos, ordemEntrada, lojas, quadro, visitantes, expedientes, acaoSocial] = await Promise.all([
         db.Sessao.get(sessaoId),
         db.Presenca.filter({ sessao_id: sessaoId }),
@@ -61,6 +75,8 @@ export default function AdminBalaustre() {
         db.Expediente.filter({ sessao_id: sessaoId }, "data", 200),
         db.PedidoAcaoSocial.filter({ status: "Parecer Emitido" }, "-parecer_data", 200),
       ]);
+      if (!ativo) return;
+      if (!sessao) throw new Error("Sessão não encontrada.");
       const assinaturasPadrao = assinaturasSessao(sessao, quadro || []);
       const contexto = {
         sessao,
@@ -103,19 +119,23 @@ export default function AdminBalaustre() {
       setTronco(troncoSalvo);
       setAssinaturas(assinaturasSalvas);
       setPreviaAberta(false);
-      setLoadingSessao(false);
+      protecao.limpar();
+      } catch (error) { if (ativo) setErro(`Não foi possível carregar o Balaústre: ${error.message}`); }
+      finally { if (ativo) setLoadingSessao(false); }
     };
     load();
+    return () => { ativo = false; };
   }, [sessaoId]);
 
   const gerarPeloAndamento = () => {
     if (!dados) return;
     if (secoes.some((s) => textoSimples(s.texto)) && !confirm("Substituir o texto atual pela minuta gerada a partir do andamento da reunião?")) return;
     setSecoes(gerarSecoes({ ...dados, aposPorDoSol, leituras }).map((secao) => secao.id === "palavra" ? { ...secao, texto: textoOradores(oradores) } : secao));
-    setSalvo(false);
+    registrarEdicao();
   };
 
   const salvar = async () => {
+    const revisaoEnviada = protecao.revisao.current;
     setSalvando(true);
     setErro("");
     try {
@@ -125,7 +145,7 @@ export default function AdminBalaustre() {
           oradores, leituras: leituras.map(resumirLeitura), tronco, assinaturas: lerAssinaturas(assinaturas, {}), calendario: { apos_por_do_sol: aposPorDoSol },
         }),
       });
-      setSalvo(true);
+      if (protecao.revisao.current === revisaoEnviada) { setSalvo(true); protecao.limpar(); }
     } catch (error) {
       setErro(`Não foi possível salvar o balaústre: ${error.message}`);
     } finally {
@@ -136,7 +156,7 @@ export default function AdminBalaustre() {
   const atualizarPeriodo = (apos) => {
     setAposPorDoSol(apos);
     setSecoes((atuais) => atualizarAnoAbertura(atuais, dados.sessao.data, apos));
-    setSalvo(false);
+    registrarEdicao();
   };
 
   if (loading) {
@@ -152,7 +172,7 @@ export default function AdminBalaustre() {
     if (!atualizadas) return;
     setLeituras(novas);
     setSecoes(atualizadas);
-    setSalvo(false);
+    registrarEdicao();
   };
 
   const atualizarOradores = (lista) => {
@@ -160,7 +180,7 @@ export default function AdminBalaustre() {
     if (!atualizadas) return false;
     setOradores(lista);
     setSecoes(atualizadas);
-    setSalvo(false);
+    registrarEdicao();
     return true;
   };
 
@@ -178,7 +198,7 @@ export default function AdminBalaustre() {
         s.id === "tronco" ? { ...s, texto: textoTronco } : s.id === "bolsa" ? { ...s, texto: textoBolsa } : s
       )
     );
-    setSalvo(false);
+    registrarEdicao();
   };
 
   const documento = dados ? { sessao: dados.sessao, secoes, dadosLoja: dados.dadosLoja, assinaturas, aposPorDoSol } : null;
@@ -202,7 +222,7 @@ export default function AdminBalaustre() {
 
       <Card>
         <CardContent className="p-4 space-y-4">
-          <Select value={sessaoId} onValueChange={setSessaoId}>
+          <Select value={sessaoId} onValueChange={selecionarSessao} disabled={salvando}>
             <SelectTrigger>
               <SelectValue placeholder="Selecione a sessão" />
             </SelectTrigger>
@@ -227,6 +247,7 @@ export default function AdminBalaustre() {
         </CardContent>
       </Card>
 
+      {erro && <p role="alert" className="text-sm text-destructive">{erro}</p>}
       {loadingSessao && (
         <div className="flex justify-center py-10">
           <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
@@ -249,15 +270,15 @@ export default function AdminBalaustre() {
             </Button>
           </div>
 
-          {erro && <p role="alert" className="text-sm text-destructive">{erro}</p>}
+          {protecao.alterado && <p role="status" className="text-sm text-muted-foreground">Há alterações não salvas. Salve para mantê-las nesta sessão.</p>}
           <DataVerdadeiraLuz data={dados.sessao.data} aposPorDoSol={aposPorDoSol} onChange={atualizarPeriodo} />
           <PalavraSelector key={`palavra-${sessaoId}`} oradores={oradores} onChange={atualizarOradores} />
           <LeiturasBalaustre key={`leituras-${sessaoId}`} sessaoId={sessaoId} leituras={leituras} onChange={atualizarLeituras} />
 
           <TroncoBolsaForm dados={tronco} onChange={atualizarTronco} />
 
-          <BalaustreEditor secoes={secoes} onChange={(s) => { setSecoes(s); setSalvo(false); }} />
-          <AssinaturasBalaustre assinaturas={assinaturas} onChange={(novas) => { setAssinaturas(novas); setSalvo(false); }} />
+          <BalaustreEditor key={`editor-${sessaoId}`} secoes={secoes} onChange={(s) => { setSecoes(s); registrarEdicao(); }} />
+          <AssinaturasBalaustre assinaturas={assinaturas} padrao={dados.assinaturas} participantes={dados.presencas.filter((item) => item.presente)} onChange={(novas) => { setAssinaturas(novas); registrarEdicao(); }} />
           {previaAberta && <PreviaBalaustre documento={documento} onClose={() => setPreviaAberta(false)} onImprimir={imprimir} />}
         </>
       )}

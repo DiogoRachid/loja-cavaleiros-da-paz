@@ -1,6 +1,7 @@
 import { anoVerdadeiraLuz } from "@/components/secretario/calendarioJudaico";
 import { htmlSeguro, textoSimples, escapeHtml } from "@/components/secretario/textoRico";
 import { estilosBalaustre } from "@/components/secretario/balaustreImpressaoEstilos";
+import { CARGOS_ASSINATURA } from "@/components/secretario/assinaturasBalaustre";
 
 import { logoLoja, logoPotencia } from "@/lib/relatorio";
 
@@ -15,7 +16,7 @@ export function gerarHtmlBalaustre({ sessao, secoes, dadosLoja, assinaturas = {}
 
   const corpo = secoes
     .filter((s) => textoSimples(s.texto))
-    .map((s, i) => `<h3>${i + 1}. ${escapeHtml(s.titulo)}</h3><div class="texto-rico">${htmlSeguro(s.texto)}</div>`)
+    .map((s, i) => `<section${s.novaPagina === true ? ' class="nova-pagina"' : ""}><h3>${i + 1}. ${escapeHtml(s.titulo)}</h3><div class="texto-rico">${htmlSeguro(s.texto)}</div></section>`)
     .join("");
 
   return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"/>
@@ -32,10 +33,8 @@ export function gerarHtmlBalaustre({ sessao, secoes, dadosLoja, assinaturas = {}
     </header>
     <h2>Balaústre da Sessão ${escapeHtml(sessao.tipo || "")} de ${escapeHtml(dataFmt)}${sessao.numero ? ` — nº ${escapeHtml(sessao.numero)}` : ""}</h2>
     ${corpo}
-    <div class="assinaturas">
-      <div><strong>${escapeHtml(assinaturas.vm || "")}</strong><span>Venerável Mestre</span></div>
-      <div><strong>${escapeHtml(assinaturas.secretario || "")}</strong><span>Secretário</span></div>
-      <div><strong>${escapeHtml(assinaturas.orador || "")}</strong><span>Orador</span></div>
+    <div class="assinaturas${assinaturas.novaPagina === true ? " nova-pagina" : ""}">
+      ${CARGOS_ASSINATURA.map(({ chave, cargo }) => `<div class="assinatura"><div class="assinatura-dados"><strong>${escapeHtml(assinaturas[chave] || "")}</strong><span>${escapeHtml(cargo)}</span></div></div>`).join("")}
     </div>
     </body></html>`;
 }
@@ -44,7 +43,11 @@ export function imprimirBalaustre(documento) {
   const win = window.open("", "_blank");
   if (!win) return false;
   win.opener = null;
-  win.addEventListener("load", () => win.print(), { once: true });
+  win.addEventListener("load", async () => {
+    await Promise.all(Array.from(win.document.images).map((img) => img.decode ? img.decode().catch(() => {}) : Promise.resolve()));
+    await win.document.fonts?.ready;
+    if (!win.closed) { win.focus(); win.print(); }
+  }, { once: true });
   win.document.write(gerarHtmlBalaustre(documento));
   win.document.close();
   return true;
