@@ -9,6 +9,10 @@ import PalavraSelector from "@/components/secretario/PalavraSelector";
 import LeiturasBalaustre from "@/components/secretario/LeiturasBalaustre";
 import { resumirLeitura, aplicarLeituras, textoOradores } from "@/components/secretario/leiturasBalaustre";
 import TroncoBolsaForm from "@/components/secretario/TroncoBolsaForm";
+import AssinaturasBalaustre from "@/components/secretario/AssinaturasBalaustre";
+import PreviaBalaustre from "@/components/secretario/PreviaBalaustre";
+import RegistroBalaustre from "@/components/secretario/RegistroBalaustre";
+import { assinaturasSessao, lerAssinaturas } from "@/components/secretario/assinaturasBalaustre";
 import { FileText, Loader2, Wand2, Save, Printer, Users, Timer, Shield, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,6 +33,8 @@ export default function AdminBalaustre() {
   const [tronco, setTronco] = useState({});
   const [aposPorDoSol, setAposPorDoSol] = useState(false);
   const [erro, setErro] = useState("");
+  const [assinaturas, setAssinaturas] = useState({});
+  const [previaAberta, setPreviaAberta] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -50,23 +56,20 @@ export default function AdminBalaustre() {
         db.TempoEtapa.filter({ sessao_id: sessaoId }),
         db.OrdemEntrada.filter({ sessao_id: sessaoId }),
         db.DadosLoja.list(),
-        db.QuadroOficiais.filter({ exercicio: new Date().getFullYear().toString() }),
+        db.QuadroOficiais.filter({ exercicio: sessoes.find((item) => item.id === sessaoId)?.data?.slice(0, 4) || new Date().getFullYear().toString() }),
         db.VisitanteSessao.filter({ sessao_id: sessaoId }, "nome", 200),
         db.Expediente.filter({ sessao_id: sessaoId }, "data", 200),
         db.PedidoAcaoSocial.filter({ status: "Parecer Emitido" }, "-parecer_data", 200),
       ]);
+      const assinaturasPadrao = assinaturasSessao(sessao, quadro || []);
       const contexto = {
         sessao,
         presencas: presencas || [],
         tempos: tempos || [],
         ordemEntrada: ordemEntrada || [],
         dadosLoja: lojas?.[0] || null,
-        vmNome: quadro?.find((q) => q.cargo === "Venerável Mestre")?.titular_nome || "",
-        assinaturas: {
-          vm: quadro?.find((q) => q.cargo === "Venerável Mestre")?.titular_nome || "",
-          secretario: quadro?.find((q) => q.cargo === "Secretário")?.titular_nome || "",
-          orador: quadro?.find((q) => q.cargo === "Orador")?.titular_nome || "",
-        },
+        vmNome: assinaturasPadrao.vm,
+        assinaturas: assinaturasPadrao,
         visitantes: visitantes || [],
         expedientes: expedientes || [],
         acaoSocial: acaoSocial || [],
@@ -79,6 +82,7 @@ export default function AdminBalaustre() {
       let leiturasSalvas = contexto.expedientes.filter((documento) => documento.status === "Lido").map(resumirLeitura);
       let troncoSalvo = {};
       let periodoSalvo = false;
+      let assinaturasSalvas = assinaturasPadrao;
       if (sessao.ata) {
         try {
           const parsed = JSON.parse(sessao.ata);
@@ -87,6 +91,7 @@ export default function AdminBalaustre() {
           if (Array.isArray(parsed?.leituras)) leiturasSalvas = parsed.leituras.map(resumirLeitura);
           if (parsed?.tronco) troncoSalvo = parsed.tronco;
           periodoSalvo = parsed?.calendario?.apos_por_do_sol === true;
+          assinaturasSalvas = lerAssinaturas(parsed?.assinaturas, assinaturasPadrao);
         } catch {
           carregadas = [{ id: "texto", titulo: "Ata", texto: sessao.ata }];
         }
@@ -96,6 +101,8 @@ export default function AdminBalaustre() {
       setOradores(oradoresSalvos);
       setLeituras(leiturasSalvas);
       setTronco(troncoSalvo);
+      setAssinaturas(assinaturasSalvas);
+      setPreviaAberta(false);
       setLoadingSessao(false);
     };
     load();
@@ -115,7 +122,7 @@ export default function AdminBalaustre() {
       await db.Sessao.update(sessaoId, {
         ata: JSON.stringify({
           secoes: secoes.map((secao) => ({ ...secao, texto: htmlSeguro(secao.texto) })),
-          oradores, leituras: leituras.map(resumirLeitura), tronco, calendario: { apos_por_do_sol: aposPorDoSol },
+          oradores, leituras: leituras.map(resumirLeitura), tronco, assinaturas: lerAssinaturas(assinaturas, {}), calendario: { apos_por_do_sol: aposPorDoSol },
         }),
       });
       setSalvo(true);
@@ -149,12 +156,12 @@ export default function AdminBalaustre() {
   };
 
   const atualizarOradores = (lista) => {
+    const atualizadas = RegistroBalaustre(secoes, { id: "palavra", titulo: "Palavra a Bem da Ordem", anterior: textoOradores(oradores), novo: textoOradores(lista) });
+    if (!atualizadas) return false;
     setOradores(lista);
-    const texto = textoOradores(lista);
-    setSecoes((prev) => prev.some((s) => s.id === "palavra")
-      ? prev.map((s) => s.id === "palavra" ? { ...s, texto } : s)
-      : [...prev, { id: "palavra", titulo: "Palavra a Bem da Ordem", texto }]);
+    setSecoes(atualizadas);
     setSalvo(false);
+    return true;
   };
 
   const atualizarTronco = (novo) => {
@@ -174,6 +181,10 @@ export default function AdminBalaustre() {
     setSalvo(false);
   };
 
+  const documento = dados ? { sessao: dados.sessao, secoes, dadosLoja: dados.dadosLoja, assinaturas, aposPorDoSol } : null;
+  const imprimir = () => {
+    if (!imprimirBalaustre(documento)) setErro("Permita a abertura de janelas neste navegador para imprimir ou salvar como PDF.");
+  };
   const presentes = dados?.presencas.filter((p) => p.presente).length || 0;
   const autoridades = dados?.ordemEntrada.filter((o) => o.tipo_participante === "Autoridade" && (o.presente || o.confirmado)).length || 0;
 
@@ -232,8 +243,9 @@ export default function AdminBalaustre() {
               {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : salvo ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
               {salvando ? "Salvando..." : salvo ? "Salvo" : "Salvar"}
             </Button>
-            <Button variant="outline" onClick={() => imprimirBalaustre({ sessao: dados.sessao, secoes, dadosLoja: dados.dadosLoja, assinaturas: dados.assinaturas, aposPorDoSol })} className="gap-2">
-              <Printer className="w-4 h-4" /> Imprimir
+            <Button variant="outline" onClick={() => setPreviaAberta(true)}>Pré-visualizar</Button>
+            <Button variant="outline" onClick={imprimir} className="gap-2">
+              <Printer className="w-4 h-4" /> Imprimir / PDF
             </Button>
           </div>
 
@@ -245,6 +257,8 @@ export default function AdminBalaustre() {
           <TroncoBolsaForm dados={tronco} onChange={atualizarTronco} />
 
           <BalaustreEditor secoes={secoes} onChange={(s) => { setSecoes(s); setSalvo(false); }} />
+          <AssinaturasBalaustre assinaturas={assinaturas} onChange={(novas) => { setAssinaturas(novas); setSalvo(false); }} />
+          {previaAberta && <PreviaBalaustre documento={documento} onClose={() => setPreviaAberta(false)} onImprimir={imprimir} />}
         </>
       )}
     </div>

@@ -1,10 +1,12 @@
 import { anoVerdadeiraLuz } from "@/components/secretario/calendarioJudaico";
-import { htmlSeguro, textoSimples, escapeHtml, ESTILOS_TEXTO_RICO } from "@/components/secretario/textoRico";
+import { htmlSeguro, textoSimples, escapeHtml } from "@/components/secretario/textoRico";
+import { estilosBalaustre } from "@/components/secretario/balaustreImpressaoEstilos";
 
 import { logoLoja, logoPotencia } from "@/lib/relatorio";
 
 // Abre uma janela de impressão com o balaústre formatado
-export function imprimirBalaustre({ sessao, secoes, dadosLoja, assinaturas = {}, aposPorDoSol = false }) {
+export function gerarHtmlBalaustre({ sessao, secoes, dadosLoja, assinaturas = {}, aposPorDoSol = false }) {
+  const imagem = (url) => /^https:\/\//i.test(url || "") ? escapeHtml(url) : "";
   const nomeLoja = dadosLoja ? `ARLS ${dadosLoja.nome} nº ${dadosLoja.numero}` : "Loja";
   const oriente = dadosLoja?.oriente ? `Oriente de ${dadosLoja.oriente}` : "";
   const dataFmt = sessao.data
@@ -16,44 +18,34 @@ export function imprimirBalaustre({ sessao, secoes, dadosLoja, assinaturas = {},
     .map((s, i) => `<h3>${i + 1}. ${escapeHtml(s.titulo)}</h3><div class="texto-rico">${htmlSeguro(s.texto)}</div>`)
     .join("");
 
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/>
-    <title>Balaústre — Sessão ${sessao.numero || dataFmt}</title>
-    <style>
-      body { font-family: Georgia, serif; color: #1a1a1a; max-width: 720px; margin: 40px auto; line-height: 1.7; }
-      header { display: flex; align-items: center; gap: 20px; border-bottom: 2px solid #1B3A5F; padding-bottom: 16px; margin-bottom: 24px; }
-      header .logo { width: 78px; height: 78px; object-fit: contain; flex-shrink: 0; }
-      header .titulo { flex: 1; text-align: center; }
-      header h1 { font-size: 18px; color: #1B3A5F; margin: 0; }
-      header p { margin: 4px 0 0; font-size: 13px; color: #555; }
-      h2 { text-align: center; font-size: 16px; margin: 24px 0; }
-      h3 { font-size: 13px; color: #1B3A5F; text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 4px; }
-      p { font-size: 13px; text-align: justify; margin: 0; }
-      .assinaturas { display: flex; justify-content: space-between; gap: 16px; margin-top: 90px; }
-      .assinaturas div { flex: 1; border-top: 1px solid #333; text-align: center; font-size: 12px; padding-top: 6px; }
-      .assinaturas strong { display: block; font-size: 12px; }
-      .assinaturas span { font-size: 11px; color: #555; }
-      ${ESTILOS_TEXTO_RICO}
-    </style></head><body>
+  return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"/>
+    <title>Balaústre — Sessão ${escapeHtml(sessao.numero || dataFmt)}</title>
+    <style>${estilosBalaustre}</style></head><body>
     <header>
-      <img class="logo" src="${logoLoja(dadosLoja)}" alt="" onerror="this.style.visibility='hidden'"/>
+      <img class="logo" src="${imagem(logoLoja(dadosLoja))}" alt="Logo da Loja"/>
       <div class="titulo">
-        <h1>${nomeLoja}</h1>
-        <p>${dadosLoja?.potencia || "Grande Loja do Paraná"}${oriente ? ` — ${oriente}` : ""}</p>
+        <h1>${escapeHtml(nomeLoja)}</h1>
+        <p>${escapeHtml(dadosLoja?.potencia || "Grande Loja do Paraná")}${oriente ? ` — ${escapeHtml(oriente)}` : ""}</p>
         <p>Ano da Verdadeira Luz ${anoVerdadeiraLuz(sessao.data, aposPorDoSol)}</p>
       </div>
-      <img class="logo" src="${logoPotencia(dadosLoja)}" alt="" onerror="this.style.visibility='hidden'"/>
+      <img class="logo" src="${imagem(logoPotencia(dadosLoja))}" alt="Logo da Potência"/>
     </header>
-    <h2>Balaústre da Sessão ${sessao.tipo || ""} de ${dataFmt}${sessao.numero ? ` — nº ${sessao.numero}` : ""}</h2>
+    <h2>Balaústre da Sessão ${escapeHtml(sessao.tipo || "")} de ${escapeHtml(dataFmt)}${sessao.numero ? ` — nº ${escapeHtml(sessao.numero)}` : ""}</h2>
     ${corpo}
     <div class="assinaturas">
-      <div><strong>${assinaturas.vm || ""}</strong><span>Venerável Mestre</span></div>
-      <div><strong>${assinaturas.secretario || ""}</strong><span>Secretário</span></div>
-      <div><strong>${assinaturas.orador || ""}</strong><span>Orador</span></div>
+      <div><strong>${escapeHtml(assinaturas.vm || "")}</strong><span>Venerável Mestre</span></div>
+      <div><strong>${escapeHtml(assinaturas.secretario || "")}</strong><span>Secretário</span></div>
+      <div><strong>${escapeHtml(assinaturas.orador || "")}</strong><span>Orador</span></div>
     </div>
-    <script>window.onload = () => window.print();</script>
     </body></html>`;
+}
 
+export function imprimirBalaustre(documento) {
   const win = window.open("", "_blank");
-  win.document.write(html);
+  if (!win) return false;
+  win.opener = null;
+  win.addEventListener("load", () => win.print(), { once: true });
+  win.document.write(gerarHtmlBalaustre(documento));
   win.document.close();
+  return true;
 }

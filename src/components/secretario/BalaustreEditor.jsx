@@ -1,19 +1,29 @@
 import { Card, CardContent } from "@/components/ui/card";
 import EditorTextoRico from "@/components/secretario/EditorTextoRico";
+import SecaoBalaustreControles from "@/components/secretario/SecaoBalaustreControles";
+import { Button } from "@/components/ui/button";
+import { textoSimples } from "@/components/secretario/textoRico";
 
 export default function BalaustreEditor({ secoes, onChange }) {
   const atualizar = (id, texto) => {
     onChange(secoes.map((s) => (s.id === id ? { ...s, texto } : s)));
   };
 
+  const mover = (indice, deslocamento) => {
+    const copia = [...secoes];
+    [copia[indice], copia[indice + deslocamento]] = [copia[indice + deslocamento], copia[indice]];
+    onChange(copia);
+  };
+  const remover = (secao) => {
+    if (textoSimples(secao.texto) && !window.confirm(`Excluir a seção “${secao.titulo}” e seu texto?`)) return;
+    onChange(secoes.filter((item) => item.id !== secao.id));
+  };
   return (
     <div className="space-y-3">
       {secoes.map((s, idx) => (
         <Card key={s.id}>
           <CardContent className="p-4 space-y-2">
-            <p className="font-semibold text-sm text-lodge-navy">
-              {idx + 1}. {s.titulo}
-            </p>
+            <SecaoBalaustreControles secao={s} indice={idx} total={secoes.length} onTitulo={(titulo) => onChange(secoes.map((item) => item.id === s.id ? { ...item, titulo } : item))} onMover={(deslocamento) => mover(idx, deslocamento)} onRemover={() => remover(s)} />
             <EditorTextoRico
               value={s.texto || ""}
               mencoes
@@ -24,6 +34,7 @@ export default function BalaustreEditor({ secoes, onChange }) {
           </CardContent>
         </Card>
       ))}
+      <Button type="button" variant="outline" onClick={() => onChange([...secoes, { id: `secao-${crypto.randomUUID()}`, titulo: "Nova seção", texto: "" }])}>Adicionar seção</Button>
     </div>
   );
 }
