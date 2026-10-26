@@ -8,7 +8,7 @@ export function imprimirListaPresenca({ sessao, irmaos, dadosLoja, codigo }) {
   const linhas = irmaos
     .map(
       (i, idx) =>
-        `<tr><td class="num">${idx + 1}</td><td>${i.nome_completo}</td><td>${i.grau || ""}</td><td class="assina"></td></tr>`
+        `<tr><td class="num">${idx + 1}</td><td>${i.nome_completo}</td><td>${i.grau || ""}</td><td class="assina"></td><td class="marca"></td></tr>`
     )
     .join("");
 
@@ -22,7 +22,7 @@ export function imprimirListaPresenca({ sessao, irmaos, dadosLoja, codigo }) {
       extraDireita: qr,
     })}
     <table class="rel">
-      <thead><tr><th>#</th><th>Irmão</th><th>Grau</th><th>Assinatura</th></tr></thead>
+      <thead><tr><th>#</th><th>Irmão</th><th>Grau</th><th>Assinatura</th><th>Presença (X)</th></tr></thead>
       <tbody>${linhas}</tbody>
     </table>
     <div class="conf"><div>Ir∴ Chanceler — conferência das presenças</div></div>
@@ -37,7 +37,9 @@ export function imprimirListaPresenca({ sessao, irmaos, dadosLoja, codigo }) {
       .qr img { width: 110px; height: 110px; }
       .qr span { display: block; font-size: 9px; color: #666; }
       table.rel td.num { width: 34px; text-align: center; }
-      table.rel td.assina { width: 240px; }
+      table.rel td.assina { width: 200px; }
+      table.rel td.marca { width: 65px; text-align: center; }
+      table.rel td { height: 30px; }
       .conf { margin-top: 50px; text-align: center; }
       .conf div { display: inline-block; width: 300px; border-top: 1px solid #333; font-size: 11px; padding-top: 5px; }
     `,

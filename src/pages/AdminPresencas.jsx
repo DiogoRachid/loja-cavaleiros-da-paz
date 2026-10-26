@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import LeituraFotoPresenca from "@/components/presenca/LeituraFotoPresenca";
 
 const GRAU_NIVEL = { "Aprendiz": 1, "Companheiro": 2, "Mestre": 3 };
 const GRAU_CORES = {
@@ -17,13 +18,13 @@ const GRAU_CORES = {
 
 export default function AdminPresencas() {
   const [sessoes, setSessoes] = useState([]);
-  const [sessaoId, setSessaoId] = useState("");
+  const [sessaoId, setSessaoId] = useState(() => new URLSearchParams(window.location.search).get("sessao") || "");
   const [irmaos, setIrmaos] = useState([]);
   const [presencas, setPresencas] = useState([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { loadDados(); }, []);
-  useEffect(() => { if (sessaoId) loadPresencas(); }, [sessaoId]);
+  useEffect(() => { if (sessaoId && irmaos.length && sessoes.length) loadPresencas(); }, [sessaoId, irmaos, sessoes]);
 
   const loadDados = async () => {
     const [s, ir] = await Promise.all([
@@ -147,6 +148,8 @@ export default function AdminPresencas() {
           </Select>
         </CardContent>
       </Card>
+
+      {sessaoId && sessaoAtual && <LeituraFotoPresenca key={sessaoId} sessaoId={sessaoId} irmaos={irmaos} onAprovada={(registros) => setPresencas((atuais) => atuais.map((p) => { const salva = registros.find((item) => item.irmao_id === p.irmao_id); return salva ? { ...p, ...salva, _novo: false } : p; }))} />}
 
       {sessaoId && sessaoAtual && (
         <div className="flex items-center gap-2">

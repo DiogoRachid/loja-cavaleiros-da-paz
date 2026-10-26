@@ -25,6 +25,7 @@ export default function AdminChanceler() {
   };
 
   const modulos = [
+    { title: "Presenças e leitura por foto", desc: "Ler listas assinadas e aprovar os presentes", icon: ClipboardList, page: "AdminPresencas" },
     { title: "Familiares e Aniversários", desc: "Cadastro de cunhadas, sobrinhos e aniversariantes", icon: Users, page: "AdminFamiliares" },
     { title: "Relatório de Frequências", desc: "Assiduidade por irmão e sessão", icon: BarChart, page: "AdminFrequencias" },
     { title: "Comunicados", desc: "Envio de comunicados oficiais", icon: ClipboardList, page: "AdminComunicados" },

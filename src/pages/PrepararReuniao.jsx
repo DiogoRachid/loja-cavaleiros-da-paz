@@ -158,7 +158,10 @@ export default function PrepararReuniao() {
     if (!sessaoId) return;
     setSaving(true);
     const agora = new Date().toISOString();
+    const atual = await db.Sessao.get(sessaoId);
+    const anteriores = typeof atual.preparacao_json === "string" ? JSON.parse(atual.preparacao_json || "{}") : (atual.preparacao_json || {});
     const dados = {
+      ...anteriores,
       quadroOficiais: quadroOficiais.map(o => ({ cargo: o.cargo, confirmado: o.confirmado, substituto_id: o.substituto_id, substituto_nome: o.substituto_nome })),
       autoridadesLista: ordenarAutoridades(autoridadesLista, autoridades),
       roteiro,
