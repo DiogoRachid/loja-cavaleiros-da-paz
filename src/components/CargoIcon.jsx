@@ -74,7 +74,7 @@ export default function CargoIcon({ cargo, className = "w-5 h-5" }) {
       <img
         src={img}
         alt={CARGO_JOIA[cargo]?.joia || cargo}
-        className={`${className} object-contain mix-blend-multiply`}
+        className={`${className} object-contain mix-blend-multiply dark:mix-blend-normal dark:bg-lodge-jewel-surface dark:rounded-sm`}
       />
     );
   }

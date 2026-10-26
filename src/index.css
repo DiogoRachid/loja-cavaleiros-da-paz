@@ -112,6 +112,8 @@ button:focus-visible {
     --lodge-surface: 215 38% 13%;
     --lodge-gold: 46 67% 47%;
     --lodge-canvas: 210 25% 97%;
+    /* Preserve the original raster jewels on a neutral plate in dark mode. */
+    --lodge-jewel-surface: 0 0% 100%;
     --lodge-success: 153 48% 28%;
     --lodge-success-soft: 150 30% 96%;
     --danger: 0 70% 36%;
@@ -143,6 +145,7 @@ button:focus-visible {
     --lodge-surface: var(--landing-surface);
     --lodge-gold: 46 60% 60%;
     --lodge-canvas: var(--landing-deep);
+    --lodge-jewel-surface: 0 0% 100%;
     --lodge-success: 153 45% 72%;
     --lodge-success-soft: 153 35% 17%;
     --danger: 0 85% 80%;

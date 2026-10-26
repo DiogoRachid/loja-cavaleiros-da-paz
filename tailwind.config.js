@@ -33,6 +33,7 @@ module.exports = {
                 surface: 'hsl(var(--lodge-surface))',
                 gold: 'hsl(var(--lodge-gold))',
                 canvas: 'hsl(var(--lodge-canvas))',
+                'jewel-surface': 'hsl(var(--lodge-jewel-surface))',
                 success: 'hsl(var(--lodge-success))',
                 'success-soft': 'hsl(var(--lodge-success-soft))'
             },
