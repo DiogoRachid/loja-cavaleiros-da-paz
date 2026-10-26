@@ -13,6 +13,7 @@ import AssinaturasBalaustre from "@/components/secretario/AssinaturasBalaustre";
 import PreviaBalaustre from "@/components/secretario/PreviaBalaustre";
 import useProtecaoBalaustre from "@/components/secretario/useProtecaoBalaustre";
 import RegistroBalaustre from "@/components/secretario/RegistroBalaustre";
+import AprovacaoBalaustre from "@/components/secretario/AprovacaoBalaustre";
 import { assinaturasSessao, lerAssinaturas } from "@/components/secretario/assinaturasBalaustre";
 import { FileText, Loader2, Wand2, Save, Printer, Users, Timer, Shield, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ export default function AdminBalaustre() {
   const [erro, setErro] = useState("");
   const [assinaturas, setAssinaturas] = useState({});
   const [previaAberta, setPreviaAberta] = useState(false);
+  const [fluxo, setFluxo] = useState({ status: "Rascunho", revisao: "" });
   const protecao = useProtecaoBalaustre();
   const registrarEdicao = () => { protecao.marcar(); setSalvo(false); };
   const selecionarSessao = (id) => {
@@ -99,6 +101,7 @@ export default function AdminBalaustre() {
       let troncoSalvo = {};
       let periodoSalvo = false;
       let assinaturasSalvas = assinaturasPadrao;
+      let fluxoSalvo = { status: "Rascunho", revisao: "" };
       if (sessao.ata) {
         try {
           const parsed = JSON.parse(sessao.ata);
@@ -108,6 +111,7 @@ export default function AdminBalaustre() {
           if (parsed?.tronco) troncoSalvo = parsed.tronco;
           periodoSalvo = parsed?.calendario?.apos_por_do_sol === true;
           assinaturasSalvas = lerAssinaturas(parsed?.assinaturas, assinaturasPadrao);
+          if (["Rascunho", "Emitido para leitura", "Aprovado em Loja"].includes(parsed?.aprovacao?.status)) fluxoSalvo = parsed.aprovacao;
         } catch {
           carregadas = [{ id: "texto", titulo: "Ata", texto: sessao.ata }];
         }
@@ -118,6 +122,7 @@ export default function AdminBalaustre() {
       setLeituras(leiturasSalvas);
       setTronco(troncoSalvo);
       setAssinaturas(assinaturasSalvas);
+      setFluxo(fluxoSalvo);
       setPreviaAberta(false);
       protecao.limpar();
       } catch (error) { if (ativo) setErro(`Não foi possível carregar o Balaústre: ${error.message}`); }
@@ -134,7 +139,8 @@ export default function AdminBalaustre() {
     registrarEdicao();
   };
 
-  const salvar = async () => {
+  const salvar = async (novoFluxo = fluxo) => {
+    if (salvando) return;
     const revisaoEnviada = protecao.revisao.current;
     setSalvando(true);
     setErro("");
@@ -143,14 +149,23 @@ export default function AdminBalaustre() {
         ata: JSON.stringify({
           secoes: secoes.map((secao) => ({ ...secao, texto: htmlSeguro(secao.texto) })),
           oradores, leituras: leituras.map(resumirLeitura), tronco, assinaturas: lerAssinaturas(assinaturas, {}), calendario: { apos_por_do_sol: aposPorDoSol },
+          aprovacao: novoFluxo,
         }),
       });
+      setFluxo(novoFluxo);
       if (protecao.revisao.current === revisaoEnviada) { setSalvo(true); protecao.limpar(); }
     } catch (error) {
       setErro(`Não foi possível salvar o balaústre: ${error.message}`);
     } finally {
       setSalvando(false);
     }
+  };
+
+  const mudarEtapa = (status) => {
+    if (status === "Aprovado em Loja" && !window.confirm("Confirma que o Balaústre, com as correções atuais, foi aprovado em Loja?")) return;
+    if (status === "Rascunho" && !window.confirm("Reabrir para revisão? A aprovação será retirada e será necessário emitir e aprovar novamente.")) return;
+    const agora = new Date().toISOString();
+    salvar({ ...fluxo, status, emitido_em: status === "Rascunho" ? null : status === "Emitido para leitura" ? agora : fluxo.emitido_em, aprovado_em: status === "Aprovado em Loja" ? agora : null });
   };
 
   const atualizarPeriodo = (apos) => {
@@ -257,10 +272,10 @@ export default function AdminBalaustre() {
       {dados && !loadingSessao && (
         <>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={gerarPeloAndamento} className="gap-2">
+            <Button variant="outline" onClick={gerarPeloAndamento} disabled={salvando || fluxo.status === "Aprovado em Loja"} className="gap-2">
               <Wand2 className="w-4 h-4" /> Gerar minuta pelo andamento
             </Button>
-            <Button onClick={salvar} disabled={salvando} className="gap-2 bg-[#1B3A5F] hover:bg-[#152e4d]">
+            <Button onClick={() => salvar()} disabled={salvando || fluxo.status === "Aprovado em Loja"} className="gap-2 bg-[#1B3A5F] hover:bg-[#152e4d]">
               {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : salvo ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
               {salvando ? "Salvando..." : salvo ? "Salvo" : "Salvar"}
             </Button>
@@ -271,6 +286,8 @@ export default function AdminBalaustre() {
           </div>
 
           {protecao.alterado && <p role="status" className="text-sm text-muted-foreground">Há alterações não salvas. Salve para mantê-las nesta sessão.</p>}
+          <AprovacaoBalaustre fluxo={fluxo} salvando={salvando} onEtapa={mudarEtapa} onRevisao={(revisao) => { setFluxo((atual) => ({ ...atual, revisao })); registrarEdicao(); }} />
+          <fieldset disabled={salvando || fluxo.status === "Aprovado em Loja"} inert={salvando || fluxo.status === "Aprovado em Loja" ? "" : undefined} className="min-w-0 space-y-6">
           <DataVerdadeiraLuz data={dados.sessao.data} aposPorDoSol={aposPorDoSol} onChange={atualizarPeriodo} />
           <PalavraSelector key={`palavra-${sessaoId}`} oradores={oradores} onChange={atualizarOradores} />
           <LeiturasBalaustre key={`leituras-${sessaoId}`} sessaoId={sessaoId} leituras={leituras} onChange={atualizarLeituras} />
@@ -279,6 +296,7 @@ export default function AdminBalaustre() {
 
           <BalaustreEditor key={`editor-${sessaoId}`} secoes={secoes} onChange={(s) => { setSecoes(s); registrarEdicao(); }} />
           <AssinaturasBalaustre assinaturas={assinaturas} onChange={(novas) => { setAssinaturas(novas); registrarEdicao(); }} />
+          </fieldset>
           {previaAberta && <PreviaBalaustre documento={documento} onClose={() => setPreviaAberta(false)} onImprimir={imprimir} />}
         </>
       )}
