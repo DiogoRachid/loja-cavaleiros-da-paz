@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import ConfigEvolution from "@/components/configuracoes/ConfigEvolution";
 
 const FORM_VAZIO = {
   nome: "", numero: "", potencia: "", oriente: "", endereco: "",
@@ -135,6 +136,8 @@ export default function AdminDadosLoja() {
           </div>
         </CardContent>
       </Card>
+
+      <ConfigEvolution />
 
       {/* Financeiro */}
       <Card>
