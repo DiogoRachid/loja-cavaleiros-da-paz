@@ -1,4 +1,5 @@
 import { base44 } from "@/api/base44Client";
+import mascararLinksArquivos from "@/lib/linksArquivos";
 
 // Endpoint externo (deploy no Vercel, sem dependência do Base44).
 // Defina VITE_DB_API_URL no ambiente para apontar para a sua própria API
@@ -6,6 +7,8 @@ import { base44 } from "@/api/base44Client";
 const DB_API_URL = import.meta.env.VITE_DB_API_URL;
 
 async function chamar(payload) {
+  const biblioteca = ["acervo_digital", "sugestao_acervo"].includes(payload.tabela);
+  if (biblioteca && payload.dados) payload = { ...payload, dados: mascararLinksArquivos(payload.dados) };
   if (DB_API_URL) {
     const res = await fetch(DB_API_URL, {
       method: "POST",
@@ -14,11 +17,11 @@ async function chamar(payload) {
     });
     const json = await res.json();
     if (json?.error) throw new Error(json.error);
-    return json?.data;
+    return biblioteca ? mascararLinksArquivos(json?.data) : json?.data;
   }
   const res = await base44.functions.invoke("db", payload);
   if (res.data?.error) throw new Error(res.data.error);
-  return res.data?.data;
+  return biblioteca ? mascararLinksArquivos(res.data?.data) : res.data?.data;
 }
 
 // Cria um "repositório" com a mesma interface usada nas telas hoje.
