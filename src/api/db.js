@@ -19,7 +19,11 @@ async function chamar(payload) {
     if (json?.error) throw new Error(json.error);
     return biblioteca ? mascararLinksArquivos(json?.data) : json?.data;
   }
-  const res = await base44.functions.invoke("db", payload);
+  const res = await base44.functions.invoke("db", payload).catch(error => {
+    const detalhe = error.response?.data?.error;
+    if (typeof detalhe === "string" && detalhe) throw new Error(detalhe);
+    throw error;
+  });
   if (res.data?.error) throw new Error(res.data.error);
   return biblioteca ? mascararLinksArquivos(res.data?.data) : res.data?.data;
 }

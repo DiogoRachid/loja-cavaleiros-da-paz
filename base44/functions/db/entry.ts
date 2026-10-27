@@ -1,5 +1,6 @@
 import { listar, obter, criar, atualizar, excluir, excluirMuitos } from "../../shared/supabase.ts";
 import { mascararLinks, origemApp } from "../../shared/storage.ts";
+import listarAvaliacoes from "../../shared/listarAvaliacoes.ts";
 
 export default async function(req) {
   try {
@@ -12,7 +13,9 @@ export default async function(req) {
     let resultado;
     switch (operacao) {
       case "listar":
-        resultado = await listar(tabela, { filtro, sort, limit, offset });
+        resultado = tabela === "avaliacao"
+          ? await listarAvaliacoes({ filtro, sort, limit, offset })
+          : await listar(tabela, { filtro, sort, limit, offset });
         break;
       case "obter":
         resultado = await obter(tabela, id);
