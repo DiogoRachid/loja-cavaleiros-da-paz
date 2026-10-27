@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
+import carregarAvaliacoesBiblioteca from "@/lib/avaliacoesBiblioteca";
 import { atualizarIrmaoBiblioteca, consultarObrasPermitidas, confirmarObraPermitida, podeLerObra } from "@/lib/acessoBiblioteca";
 import BibliotecaAcessoAviso from "@/components/biblioteca/BibliotecaAcessoAviso";
 import { createPageUrl } from "@/utils";
@@ -68,7 +69,7 @@ export default function IrmaoAcervo() {
       setIrmao(atual);
       if (!atual) throw new Error("Não foi possível confirmar seu grau. Entre novamente ou consulte o bibliotecário.");
       const itemsData = await consultarObrasPermitidas("fisico", atual, {}, "nome");
-      const avs = itemsData.length ? await db.Avaliacao.filter({ item_id: { $in: itemsData.map(item => item.id) } }, "-data_avaliacao") : [];
+      const avs = await carregarAvaliacoesBiblioteca("item_id", itemsData);
       setItems(itemsData);
       setAvaliacoes(avs);
       setItemSelecionado(anterior => podeLerObra(atual, anterior) ? anterior : null);
