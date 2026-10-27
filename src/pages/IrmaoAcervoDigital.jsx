@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
+import { atualizarIrmaoBiblioteca, consultarObrasPermitidas, confirmarObraPermitida, podeLerObra } from "@/lib/acessoBiblioteca";
+import abrirDocumentoBiblioteca from "@/lib/abrirDocumentoBiblioteca";
+import BibliotecaAcessoAviso from "@/components/biblioteca/BibliotecaAcessoAviso";
 import { createPageUrl } from "@/utils";
 import {
   FileText, Search, Loader2, BookOpen, GraduationCap,
@@ -37,6 +40,8 @@ export default function IrmaoAcervoDigital() {
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [filtroOrdem, setFiltroOrdem] = useState("titulo");
   const [docSelecionado, setDocSelecionado] = useState(null);
+  const [erroAcesso, setErroAcesso] = useState("");
+  const [documentoAbrindo, setDocumentoAbrindo] = useState(null);
   
 
 
@@ -45,7 +50,7 @@ export default function IrmaoAcervoDigital() {
   const [comentario, setComentario] = useState("");
   const [enviandoAvaliacao, setEnviandoAvaliacao] = useState(false);
 
-  const grauOrdem = { "Aprendiz": 1, "Companheiro": 2, "Mestre": 3 };
+
 
 
 
@@ -58,18 +63,29 @@ export default function IrmaoAcervoDigital() {
       return;
     }
     
-    setIrmao(JSON.parse(irmaoData));
     loadData();
   }, []);
 
   const loadData = async () => {
-    const [docs, avs] = await Promise.all([
-      db.AcervoDigital.filter({ ativo: true, disponivel: true }, "-created_date"),
-      db.Avaliacao.filter({ documento_id: { "$ne": null } }, "-data_avaliacao")
-    ]);
-    setDocumentos(docs);
-    setAvaliacoes(avs);
-    setLoading(false);
+    setLoading(true);
+    setErroAcesso("");
+    setDocumentos([]);
+    setAvaliacoes([]);
+    try {
+      const atual = await atualizarIrmaoBiblioteca();
+      setIrmao(atual);
+      if (!atual) throw new Error("Não foi possível confirmar seu grau. Entre novamente ou consulte o bibliotecário.");
+      const docs = await consultarObrasPermitidas("digital", atual, {}, "-created_date");
+      const avs = docs.length ? await db.Avaliacao.filter({ documento_id: { $in: docs.map(doc => doc.id) } }, "-data_avaliacao") : [];
+      setDocumentos(docs);
+      setAvaliacoes(avs);
+      setDocSelecionado(anterior => podeLerObra(atual, anterior) ? anterior : null);
+    } catch (error) {
+      setDocSelecionado(null);
+      setErroAcesso(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getMediaAvaliacao = (docId) => {
@@ -79,22 +95,20 @@ export default function IrmaoAcervoDigital() {
     return soma / docAvaliacoes.length;
   };
 
-  const podeAcessar = (doc) => {
-    if (!irmao?.grau) return false;
-    return grauOrdem[irmao.grau] >= grauOrdem[doc.grau_minimo];
-  };
+  const podeAcessar = (doc) => podeLerObra(irmao, doc);
 
-  const registrarDownload = (doc) => {
-    window.open(doc.arquivo_url, '_blank');
-
-    db.LogDownload.create({
-      documento_id: doc.id,
-      documento_titulo: doc.titulo,
-      irmao_id: irmao.id,
-      irmao_nome: irmao.nome_completo,
-      irmao_numero_glp: irmao.numero_glp,
-      data_download: new Date().toISOString()
-    }).catch(console.error);
+  const registrarDownload = async (doc) => {
+    if (!podeAcessar(doc) || documentoAbrindo) return;
+    setDocumentoAbrindo(doc.id);
+    try {
+      const { irmao: atual } = await abrirDocumentoBiblioteca(doc.id);
+      setIrmao(atual);
+    } catch (error) {
+      toast.error(error.message);
+      await loadData();
+    } finally {
+      setDocumentoAbrindo(null);
+    }
   };
 
   const handleEnviarAvaliacao = async (e) => {
@@ -103,6 +117,7 @@ export default function IrmaoAcervoDigital() {
 
     setEnviandoAvaliacao(true);
     try {
+      await confirmarObraPermitida("digital", docSelecionado.id);
       await db.Avaliacao.create({
         documento_id: docSelecionado.id,
         irmao_id: irmao.id,
@@ -165,6 +180,8 @@ export default function IrmaoAcervoDigital() {
       </div>
     );
   }
+
+  if (erroAcesso) return <BibliotecaAcessoAviso mensagem={erroAcesso} onRetry={loadData} />;
 
   return (
     <div className="space-y-6">
@@ -289,9 +306,10 @@ export default function IrmaoAcervoDigital() {
                     size="sm"
                     className="flex-1 text-xs"
                     onClick={() => registrarDownload(doc)}
+                    disabled={Boolean(documentoAbrindo)}
                   >
-                    <Eye className="w-3 h-3 mr-1" />
-                    Ver PDF
+                    {documentoAbrindo === doc.id ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Eye className="w-3 h-3 mr-1" />}
+                    {documentoAbrindo === doc.id ? "Conferindo acesso..." : "Ver PDF"}
                   </Button>
                   <Button
                     variant="ghost"

@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
+import { atualizarIrmaoBiblioteca, consultarObrasPermitidas, podeLerObra } from "@/lib/acessoBiblioteca";
+import BibliotecaAcessoAviso from "@/components/biblioteca/BibliotecaAcessoAviso";
+import abrirDocumentoBiblioteca from "@/lib/abrirDocumentoBiblioteca";
 import { createPageUrl } from "@/utils";
 import { PDFDocument } from "pdf-lib";
 import {
@@ -27,7 +30,8 @@ export default function AcervoPublico() {
   const [preview, setPreview] = useState(null); // dados públicos (capa+título)
   const [avaliacoes, setAvaliacoes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadingItem, setLoadingItem] = useState(false);
+  const [loadingItem, setLoadingItem] = useState(true);
+  const [erroAcesso, setErroAcesso] = useState("");
   const [pdfUrl, setPdfUrl] = useState(null);
   const [pdfLoading, setPdfLoading] = useState(false);
 
@@ -50,34 +54,9 @@ export default function AcervoPublico() {
     if (irmaoAuth === "true" && irmaoData) {
       setIrmao(JSON.parse(irmaoData));
     }
-    // Carregar prévia pública (capa + título) independente de auth
-    if (itemId) loadPreview();
+    // Nenhuma capa, título ou arquivo é consultado antes do login e da conferência do grau.
     setLoading(false);
   }, []);
-
-  const loadPreview = async () => {
-    try {
-      if (tipo === "digital") {
-        const docs = await db.AcervoDigital.filter({ id: itemId });
-        const doc = docs[0];
-        if (doc) {
-          const titulo = doc.titulo;
-          const capa = doc.capa_url;
-          setPreview({ titulo, capa });
-          setMetaTags(titulo, capa);
-        }
-      } else {
-        const its = await db.Item.filter({ id: itemId });
-        const it = its[0];
-        if (it) {
-          const titulo = it.nome;
-          const capa = it.imagem_capa;
-          setPreview({ titulo, capa });
-          setMetaTags(titulo, capa);
-        }
-      }
-    } catch (e) {}
-  };
 
   const setMetaTags = (titulo, capaUrl) => {
     document.title = `${titulo} — Biblioteca Cavaleiros da Paz nº25`;
@@ -93,29 +72,29 @@ export default function AcervoPublico() {
   };
 
   useEffect(() => {
-    if (irmao && itemId) {
-      loadItem();
-    }
-  }, [irmao, itemId]);
+    if (irmao) loadItem();
+  }, [irmao, itemId, tipo]);
 
   const loadItem = async () => {
     setLoadingItem(true);
-    if (tipo === "digital") {
-      const [doc, avs] = await Promise.all([
-        db.AcervoDigital.filter({ id: itemId }),
-        db.Avaliacao.filter({ documento_id: itemId }, "-data_avaliacao")
-      ]);
-      setItem(doc[0] || null);
+    setErroAcesso("");
+    setItem(null);
+    setPreview(null);
+    setAvaliacoes([]);
+    try {
+      if (!itemId || !["digital", "fisico"].includes(tipo)) throw new Error("Link de obra inválido.");
+      const atual = await atualizarIrmaoBiblioteca();
+      const [obra] = await consultarObrasPermitidas(tipo, atual, { id: itemId });
+      if (!podeLerObra(atual, obra)) throw new Error("Obra indisponível para o seu grau ou não encontrada.");
+      const avs = await db.Avaliacao.filter({ [tipo === "digital" ? "documento_id" : "item_id"]: itemId }, "-data_avaliacao");
+      setItem(obra);
       setAvaliacoes(avs);
-    } else {
-      const [it, avs] = await Promise.all([
-        db.Item.filter({ id: itemId }),
-        db.Avaliacao.filter({ item_id: itemId }, "-data_avaliacao")
-      ]);
-      setItem(it[0] || null);
-      setAvaliacoes(avs);
+      setMetaTags(tipo === "digital" ? obra.titulo : obra.nome, tipo === "digital" ? obra.capa_url : obra.imagem_capa);
+    } catch (error) {
+      setErroAcesso(error.message);
+    } finally {
+      setLoadingItem(false);
     }
-    setLoadingItem(false);
   };
 
   const handleLogin = async (e) => {
@@ -149,6 +128,7 @@ export default function AcervoPublico() {
       }
     }).catch(console.error);
 
+    ["admin_auth", "admin_data", "admin_cargo", "admin_substituindo", "bib_auth", "bib_data", "bib_auth_time"].forEach(chave => sessionStorage.removeItem(chave));
     sessionStorage.setItem("irmao_auth", "true");
     sessionStorage.setItem("irmao_data", JSON.stringify(ir));
     setIrmao(ir);
@@ -172,20 +152,17 @@ export default function AcervoPublico() {
     setRecuperarLoading(false);
   };
 
-  const abrirPDF = (url) => {
-    // Registrar log de download via backend (sem auth Base44)
-    if (irmao && item) {
-      base44.functions.invoke('registrarLog', {
-        tipo: 'download',
-        dados: {
-          documento_id: item.id,
-          documento_titulo: item.titulo,
-          irmao_id: irmao.id,
-          irmao_nome: irmao.nome_completo,
-          irmao_numero_glp: irmao.numero_glp,
-          data_download: new Date().toISOString()
-        }
-      }).catch(console.error);
+  const abrirPDF = async () => {
+    if (!item || pdfLoading) return;
+    setPdfLoading(true);
+    try {
+      await abrirDocumentoBiblioteca(item.id);
+    } catch (error) {
+      setItem(null);
+      setAvaliacoes([]);
+      setErroAcesso(error.message);
+    } finally {
+      setPdfLoading(false);
     }
   };
 
@@ -348,6 +325,8 @@ export default function AcervoPublico() {
     );
   }
 
+  if (erroAcesso) return <div className="mx-auto max-w-xl p-6"><BibliotecaAcessoAviso mensagem={erroAcesso} onRetry={loadItem} /><Link to="/IrmaoEmprestimos" className="mt-4 block text-center text-primary">Voltar ao portal</Link></div>;
+
   // Item não encontrado
   if (!item) {
     return (
@@ -436,15 +415,15 @@ export default function AcervoPublico() {
                 )}
 
                 {tipo === "digital" && item.arquivo_url && (
-                  <a
-                    href={item.arquivo_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => abrirPDF(item.arquivo_url)}
-                    className="inline-flex items-center justify-center bg-[#1B3A5F] hover:bg-[#15304d] text-white rounded-md px-4 py-2 text-sm font-medium w-full sm:w-auto"
+                  <Button
+                    type="button"
+                    onClick={abrirPDF}
+                    disabled={pdfLoading}
+                    className="w-full sm:w-auto"
                   >
-                    <Eye className="w-4 h-4 mr-2" />Ver PDF
-                  </a>
+                    {pdfLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Eye className="w-4 h-4 mr-2" />}
+                    {pdfLoading ? "Conferindo acesso..." : "Ver PDF"}
+                  </Button>
                 )}
               </div>
             </div>

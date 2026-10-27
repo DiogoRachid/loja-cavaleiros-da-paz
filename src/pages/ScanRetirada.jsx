@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
+import { consultarObrasPermitidas, podeLerObra } from "@/lib/acessoBiblioteca";
 import { useLocation } from "react-router-dom";
 import { 
   QrCode, Loader2, CheckCircle, AlertTriangle, BookOpen, ArrowLeft
@@ -29,30 +30,25 @@ export default function ScanRetirada() {
   }, [codigo]);
 
   const loadData = async () => {
+    setLoading(true);
+    setItem(null);
     try {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
-
-      const irmaos = await db.Irmao.filter({ email: currentUser.email });
-      if (irmaos.length > 0) {
-        setIrmao(irmaos[0]);
-      }
-
-      if (codigo) {
-        const itens = await db.Item.filter({ codigo_qr: codigo });
-        if (itens.length > 0) {
-          setItem(itens[0]);
-        } else {
-          setResultado({
-            tipo: "erro",
-            mensagem: "Item não encontrado com este código."
-          });
-        }
+      const irmaos = currentUser.email ? await db.Irmao.filter({ email: currentUser.email, ativo: true }) : [];
+      const atual = irmaos.length === 1 ? irmaos[0] : null;
+      setIrmao(atual);
+      if (codigo && atual) {
+        const [obra] = await consultarObrasPermitidas("fisico", atual, { codigo_qr: codigo });
+        if (podeLerObra(atual, obra)) setItem(obra);
+        else setResultado({ tipo: "erro", mensagem: "Obra indisponível para o seu grau ou código não encontrado." });
       }
     } catch (error) {
-      console.error("Erro:", error);
+      if (error.status === 401 || error.response?.status === 401) base44.auth.redirectToLogin(window.location.href);
+      else setResultado({ tipo: "erro", mensagem: "Não foi possível conferir seu acesso. Tente novamente." });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const confirmarRetirada = async () => {
@@ -60,7 +56,12 @@ export default function ScanRetirada() {
     setProcessing(true);
 
     try {
-      if ((item.quantidade_disponivel || 0) <= 0) {
+      const currentUser = await base44.auth.me();
+      const irmaos = currentUser.email ? await db.Irmao.filter({ email: currentUser.email, ativo: true }) : [];
+      const atual = irmaos.length === 1 ? irmaos[0] : null;
+      const [obra] = await consultarObrasPermitidas("fisico", atual, { id: item.id });
+      if (!podeLerObra(atual, obra)) throw new Error("Obra indisponível para o seu grau.");
+      if ((obra.quantidade_disponivel || 0) <= 0) {
         setResultado({
           tipo: "erro",
           mensagem: "Este item não está disponível no momento."
@@ -70,20 +71,20 @@ export default function ScanRetirada() {
       }
 
       await db.Emprestimo.create({
-        item_id: item.id,
-        item_nome: item.nome,
-        irmao_id: irmao.id,
-        irmao_nome: irmao.nome_completo,
-        irmao_email: irmao.email,
+        item_id: obra.id,
+        item_nome: obra.nome,
+        irmao_id: atual.id,
+        irmao_nome: atual.nome_completo,
+        irmao_email: atual.email,
         data_retirada: format(new Date(), "yyyy-MM-dd"),
         data_prevista_devolucao: format(addDays(new Date(), 30), "yyyy-MM-dd"),
         status: "Ativo",
         tipo_operacao: "QR Code"
       });
 
-      await db.Item.update(item.id, {
-        quantidade_disponivel: (item.quantidade_disponivel || 1) - 1,
-        quantidade_emprestada: (item.quantidade_emprestada || 0) + 1
+      await db.Item.update(obra.id, {
+        quantidade_disponivel: obra.quantidade_disponivel - 1,
+        quantidade_emprestada: (obra.quantidade_emprestada || 0) + 1
       });
 
       setResultado({
@@ -94,7 +95,7 @@ export default function ScanRetirada() {
       console.error("Erro:", error);
       setResultado({
         tipo: "erro",
-        mensagem: "Erro ao processar. Tente novamente."
+        mensagem: error.message || "Erro ao processar. Tente novamente."
       });
     }
     

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
+import { atualizarIrmaoBiblioteca, consultarObrasPermitidas, confirmarObraPermitida, podeLerObra } from "@/lib/acessoBiblioteca";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
@@ -21,8 +22,6 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format, addDays } from "date-fns";
-
-const grauOrdem = { "Aprendiz": 1, "Companheiro": 2, "Mestre": 3 };
 
 export default function IrmaoScan() {
   const [user, setUser] = useState(null);
@@ -171,7 +170,8 @@ export default function IrmaoScan() {
         return;
       }
 
-      const irmaoSessao = JSON.parse(irmaoData);
+      const irmaoSessao = await atualizarIrmaoBiblioteca();
+      if (!irmaoSessao) { setIrmao(null); setLoading(false); return; }
       setUser({ email: irmaoSessao.email });
       setIrmao(irmaoSessao);
         
@@ -213,24 +213,24 @@ export default function IrmaoScan() {
         return;
       }
 
-      // Buscar item pelo código QR
-      const itens = await db.Item.filter({ codigo_qr: codigo });
+      // Consulta somente obras compatíveis com o grau atual, inclusive no acesso por QR.
+      const atual = await atualizarIrmaoBiblioteca();
+      setIrmao(atual);
+      setItemEncontrado(null);
+      setRetiradaDialogOpen(false);
+      const itens = await consultarObrasPermitidas("fisico", atual, { codigo_qr: codigo });
       
       if (itens.length === 0) {
         setResultado({
           tipo: "erro",
-          mensagem: "Item não encontrado. Verifique o código."
+          mensagem: "Obra indisponível para o seu grau ou código não encontrado."
         });
       } else {
         const item = itens[0];
-        // Verificar grau mínimo
-        const grauItem = item.grau_minimo || "Aprendiz";
-        const grauIrmao = irmao?.grau || "Aprendiz";
-        
-        if (grauOrdem[grauIrmao] < grauOrdem[grauItem]) {
+        if (!podeLerObra(atual, item)) {
           setResultado({
             tipo: "erro",
-            mensagem: `"${item.nome}" é restrito para ${grauItem}s. Seu grau atual é ${grauIrmao}.`
+            mensagem: "Obra indisponível para o seu grau."
           });
         } else if ((item.quantidade_disponivel || 0) <= 0) {
           setResultado({
@@ -293,13 +293,15 @@ export default function IrmaoScan() {
     setProcessing(true);
 
     try {
-      // Criar empréstimo
+      const { irmao: atual, obra } = await confirmarObraPermitida("fisico", itemEncontrado.id);
+      if (!(obra.quantidade_disponivel > 0)) throw new Error("Este item não está disponível no momento.");
+      // Confere novamente o grau antes de efetivar a retirada.
       await db.Emprestimo.create({
-        item_id: itemEncontrado.id,
-        item_nome: itemEncontrado.nome,
-        irmao_id: irmao.id,
-        irmao_nome: irmao.nome_completo,
-        irmao_email: irmao.email,
+        item_id: obra.id,
+        item_nome: obra.nome,
+        irmao_id: atual.id,
+        irmao_nome: atual.nome_completo,
+        irmao_email: atual.email,
         data_retirada: format(new Date(), "yyyy-MM-dd"),
         data_prevista_devolucao: format(addDays(new Date(), 30), "yyyy-MM-dd"),
         status: "Ativo",
@@ -307,9 +309,9 @@ export default function IrmaoScan() {
       });
 
       // Atualizar quantidades
-      await db.Item.update(itemEncontrado.id, {
-        quantidade_disponivel: (itemEncontrado.quantidade_disponivel || 1) - 1,
-        quantidade_emprestada: (itemEncontrado.quantidade_emprestada || 0) + 1
+      await db.Item.update(obra.id, {
+        quantidade_disponivel: obra.quantidade_disponivel - 1,
+        quantidade_emprestada: (obra.quantidade_emprestada || 0) + 1
       });
 
       setResultado({
@@ -324,7 +326,7 @@ export default function IrmaoScan() {
       console.error("Erro na retirada:", error);
       setResultado({
         tipo: "erro",
-        mensagem: "Erro ao processar retirada. Tente novamente."
+        mensagem: error.message || "Erro ao processar retirada. Tente novamente."
       });
     }
     

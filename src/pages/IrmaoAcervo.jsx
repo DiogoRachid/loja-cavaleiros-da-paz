@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { db } from "@/api/db";
+import { atualizarIrmaoBiblioteca, consultarObrasPermitidas, confirmarObraPermitida, podeLerObra } from "@/lib/acessoBiblioteca";
+import BibliotecaAcessoAviso from "@/components/biblioteca/BibliotecaAcessoAviso";
 import { createPageUrl } from "@/utils";
 import {
   Book, Search, Loader2, Star, Calendar, MessageSquare, 
@@ -36,6 +38,7 @@ export default function IrmaoAcervo() {
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [filtroOrdem, setFiltroOrdem] = useState("nome");
   const [itemSelecionado, setItemSelecionado] = useState(null);
+  const [erroAcesso, setErroAcesso] = useState("");
 
   
   // Estado para avaliação
@@ -52,18 +55,29 @@ export default function IrmaoAcervo() {
       return;
     }
     
-    setIrmao(JSON.parse(irmaoData));
     loadData();
   }, []);
 
   const loadData = async () => {
-    const [itemsData, avs] = await Promise.all([
-      db.Item.filter({ ativo: true }, "nome"),
-      db.Avaliacao.filter({ item_id: { "$ne": null } }, "-data_avaliacao")
-    ]);
-    setItems(itemsData);
-    setAvaliacoes(avs);
-    setLoading(false);
+    setLoading(true);
+    setErroAcesso("");
+    setItems([]);
+    setAvaliacoes([]);
+    try {
+      const atual = await atualizarIrmaoBiblioteca();
+      setIrmao(atual);
+      if (!atual) throw new Error("Não foi possível confirmar seu grau. Entre novamente ou consulte o bibliotecário.");
+      const itemsData = await consultarObrasPermitidas("fisico", atual, {}, "nome");
+      const avs = itemsData.length ? await db.Avaliacao.filter({ item_id: { $in: itemsData.map(item => item.id) } }, "-data_avaliacao") : [];
+      setItems(itemsData);
+      setAvaliacoes(avs);
+      setItemSelecionado(anterior => podeLerObra(atual, anterior) ? anterior : null);
+    } catch (error) {
+      setItemSelecionado(null);
+      setErroAcesso(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getMediaAvaliacao = (itemId) => {
@@ -79,6 +93,7 @@ export default function IrmaoAcervo() {
 
     setEnviandoAvaliacao(true);
     try {
+      await confirmarObraPermitida("fisico", itemSelecionado.id);
       await db.Avaliacao.create({
         item_id: itemSelecionado.id,
         irmao_id: irmao.id,
@@ -104,7 +119,7 @@ export default function IrmaoAcervo() {
       const matchSearch = item.nome?.toLowerCase().includes(search.toLowerCase()) ||
                          item.autor?.toLowerCase().includes(search.toLowerCase());
       const matchTipo = filtroTipo === "todos" || item.tipo === filtroTipo;
-      return matchSearch && matchTipo;
+      return matchSearch && matchTipo && podeLerObra(irmao, item);
     });
 
     return filtered.sort((a, b) => {
@@ -143,6 +158,8 @@ export default function IrmaoAcervo() {
       </div>
     );
   }
+
+  if (erroAcesso) return <BibliotecaAcessoAviso mensagem={erroAcesso} onRetry={loadData} />;
 
   const itemComments = itemSelecionado 
     ? avaliacoes.filter(av => av.item_id === itemSelecionado.id)
@@ -207,7 +224,7 @@ export default function IrmaoAcervo() {
             <Card 
               key={item.id} 
               className="hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => setItemSelecionado(item)}
+              onClick={() => podeLerObra(irmao, item) && setItemSelecionado(item)}
             >
               <CardContent className="p-4">
                 <div className="flex gap-4">
