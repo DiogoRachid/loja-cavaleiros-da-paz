@@ -8,7 +8,8 @@ async function carregarLote(campo, ids) {
   for (let offset = 0; ; offset += AVALIACOES_POR_PAGINA) {
     const pagina = await db.Avaliacao.filter(
       { [campo]: { $in: ids } },
-      "-data_avaliacao,-id", AVALIACOES_POR_PAGINA, offset,
+      // ID único mantém a paginação estável, inclusive no endpoint sem suporte a ordenação composta.
+      "-id", AVALIACOES_POR_PAGINA, offset,
     );
     avaliacoes.push(...pagina);
     if (pagina.length < AVALIACOES_POR_PAGINA) return avaliacoes;
