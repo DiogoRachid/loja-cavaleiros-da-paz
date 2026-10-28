@@ -38,7 +38,6 @@ import {
 import ItemForm from "@/components/biblioteca/ItemForm";
 import ItemDetails from "@/components/biblioteca/ItemDetails";
 import ScanCapa from "@/components/biblioteca/ScanCapa";
-import { notificarWhatsApp } from "@/lib/whatsapp";
 import ShareModal from "@/components/biblioteca/ShareModal";
 import DuplicatasModal from "@/components/biblioteca/DuplicatasModal";
 
@@ -83,12 +82,6 @@ export default function BibAcervo() {
       // Gerar código QR único
       const codigoQR = `LCP25-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
       await db.Item.create({ ...itemData, codigo_qr: codigoQR });
-      notificarWhatsApp({
-        tipo: itemData.tipo || "Item",
-        nome: itemData.nome,
-        grau: itemData.grau_minimo || "Aprendiz",
-        autor: itemData.autor,
-      });
     }
     await loadItens();
     setFormOpen(false);

@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { armazenamentoEvolution, validarUrlEvolution } from '../../shared/evolution.ts';
 import { listar } from '../../shared/supabase.ts';
+import enviarMensagemEvolution from '../../shared/enviarMensagemEvolution.ts';
 
 export default async function(req) {
   try {
@@ -31,14 +32,13 @@ export default async function(req) {
     const text = `*Feliz aniversário!*\n\nHoje a Loja Cavaleiros da Paz nº25 celebra o aniversário de:\n\n${nomes}\n\nDesejamos saúde, paz, felicidade e muitas realizações. Que o Grande Arquiteto do Universo ilumine seus caminhos.\n\nRecebam nosso fraternal abraço!\n*Loja Cavaleiros da Paz nº25*`;
     let response;
     try {
-      response = await fetch(`${url}/message/sendText/${encodeURIComponent(config.instancia)}`, { method: 'POST', redirect: 'error', headers: { 'Content-Type': 'application/json', apikey: config.chave_api }, body: JSON.stringify({ number: config.destino, text }), signal: AbortSignal.timeout(20000) });
+      response = await enviarMensagemEvolution(config, text);
     } catch {
       await storage.registrar(dia, { ...registro, status: 'resultado_incerto', atualizado_em: new Date().toISOString() });
       return Response.json({ error: 'Não foi possível confirmar o envio. A reserva foi mantida para evitar duplicidade; confira a instância Evolution antes de reenviar.' }, { status: 502 });
     }
-    const resposta = await response.json().catch(() => ({}));
-    const confirmado = response.ok && Boolean(resposta.key?.id);
-    await storage.registrar(dia, { ...registro, status: confirmado ? 'enviado' : response.ok ? 'resultado_incerto' : 'falhou', http_status: response.status, atualizado_em: new Date().toISOString(), ...(confirmado ? { mensagem_id: resposta.key.id } : {}) });
+    const confirmado = response.confirmado;
+    await storage.registrar(dia, { ...registro, status: confirmado ? 'enviado' : response.aceito ? 'resultado_incerto' : 'falhou', http_status: response.http_status, atualizado_em: new Date().toISOString(), ...(confirmado ? { mensagem_id: response.mensagem_id } : {}) });
     if (!confirmado) return Response.json({ error: 'A Evolution não confirmou o envio. Verifique a conexão, a chave, a instância e o destinatário. A reserva impede repetição automática no mesmo dia.' }, { status: 502 });
     return Response.json({ status: 'enviado', data: dia, quantidade: pessoas.length });
   } catch {

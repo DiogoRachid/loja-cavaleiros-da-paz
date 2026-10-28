@@ -43,7 +43,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import AcervoDigitalForm from "@/components/biblioteca/AcervoDigitalForm";
-import { notificarWhatsApp } from "@/lib/whatsapp";
 import ShareModal from "@/components/biblioteca/ShareModal";
 import UploadLote from "@/components/biblioteca/UploadLote";
 import DuplicatasModal from "@/components/biblioteca/DuplicatasModal";
@@ -83,12 +82,6 @@ export default function BibAcervoDigital() {
       await db.AcervoDigital.update(editando.id, data);
     } else {
       await db.AcervoDigital.create(data);
-      notificarWhatsApp({
-        tipo: data.tipo || "Documento",
-        nome: data.titulo,
-        grau: data.grau_minimo || "Aprendiz",
-        autor: data.autor,
-      });
     }
     setFormOpen(false);
     setEditando(null);
@@ -107,14 +100,7 @@ export default function BibAcervoDigital() {
    const handleToggleDisponibilidade = async (doc) => {
      const novoStatus = !doc.disponivel;
      await db.AcervoDigital.update(doc.id, { disponivel: novoStatus });
-     if (novoStatus) {
-       notificarWhatsApp({
-         tipo: doc.tipo || "Documento",
-         nome: doc.titulo,
-         grau: doc.grau_minimo || "Aprendiz",
-         autor: doc.autor,
-       });
-     }
+
      loadDocumentos();
    };
 
