@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { armazenamentoEvolution, validarUrlEvolution } from '../../shared/evolution.ts';
-import enviarMensagemEvolution from '../../shared/enviarMensagemEvolution.ts';
+import enviarMensagemEvolution, { verificarConexaoEvolution } from '../../shared/enviarMensagemEvolution.ts';
 import { podeDivulgarBiblioteca, mensagemDivulgacao } from '../../shared/divulgacaoBiblioteca.ts';
 import { obter } from '../../shared/supabase.ts';
 
@@ -29,6 +29,7 @@ export default async function(req) {
     if (!/^\d+(?:-\d+)?@g\.us$/.test(config.destino)) {
       return Response.json({ error: 'Informe o ID do grupo da Loja terminado em @g.us nas configurações do WhatsApp. A divulgação não é enviada a números individuais.' }, { status: 409 });
     }
+    if (body.diagnosticar === true) return Response.json(await verificarConexaoEvolution(config));
     const text = mensagemDivulgacao(obra, tipoAcervo);
     if (body.simular === true) return Response.json({ simulacao: true, mensagem: text });
     let resultado;
@@ -42,7 +43,9 @@ export default async function(req) {
         ? 'A Evolution recusou a autenticação. Confira a chave da API nas configurações.'
         : resultado.http_status === 404
           ? 'A Evolution não encontrou a instância. Confira a URL e o nome da instância.'
-          : 'A Evolution não confirmou o envio. Confira a conexão e o ID do grupo antes de tentar novamente.';
+          : resultado.http_status >= 300 && resultado.http_status < 400
+            ? 'A URL da Evolution redireciona para outro endereço. Configure a URL HTTPS final da API antes de enviar.'
+            : 'A Evolution não confirmou o envio. Confira a conexão e o ID do grupo antes de tentar novamente.';
       return Response.json({ error: mensagem }, { status: 502 });
     }
     return Response.json({ success: true, mensagem_id: resultado.mensagem_id });
