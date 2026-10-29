@@ -2,6 +2,7 @@ import { createContext, useContext, useRef, useState, useEffect } from "react";
 import { getPlayerConfig, subscribePlayerConfig, fadeGains } from "@/lib/playerConfig";
 import { useSilenceTrim } from "@/lib/useSilenceTrim";
 import { getCachedSilence } from "@/lib/silenceDetect";
+import useSessionAudioPreload from "@/lib/useSessionAudioPreload";
 
 const FADE_TICK_MS = 50;      // resolução do fade
 const PRELOAD_LEAD_MS = 8000; // antecedência do pré-carregamento da próxima faixa
@@ -9,7 +10,8 @@ const PRELOAD_LEAD_MS = 8000; // antecedência do pré-carregamento da próxima 
 const Mp3PlaybackContext = createContext(null);
 export const useMp3Playback = () => useContext(Mp3PlaybackContext);
 
-export function Mp3PlaybackProvider({ children }) {
+export function Mp3PlaybackProvider({ children, etapas = [] }) {
+  const { take: takeSessionAudio, progress: preloadProgress } = useSessionAudioPreload(etapas);
   const audioRef = useRef(null);        // player A: faixa atual
   const oldAudioRef = useRef(null);     // player que está saindo (fade-out)
   const preloadRef = useRef(null);      // { url, audio } player B pré-carregado
@@ -134,9 +136,8 @@ export function Mp3PlaybackProvider({ children }) {
     if (!nx?.track?.file_url) return;
     if (preloadRef.current?.url === nx.track.file_url) return;
     clearPreload();
-    const a = new Audio();
+    const a = takeSessionAudio(nx.track.file_url) || new Audio(nx.track.file_url);
     a.preload = "auto";
-    a.src = nx.track.file_url;
     a.volume = 0;
     a.load();
     preloadRef.current = { url: nx.track.file_url, audio: a };
@@ -149,7 +150,7 @@ export function Mp3PlaybackProvider({ children }) {
       return a;
     }
     clearPreload();
-    const a = new Audio(url);
+    const a = takeSessionAudio(url) || new Audio(url);
     a.preload = "auto";
     return a;
   };
@@ -426,6 +427,7 @@ export function Mp3PlaybackProvider({ children }) {
   const setNextEtapaResolver = () => {};
 
   const value = {
+    preloadProgress,
     config,
     volume,
     setVolume,

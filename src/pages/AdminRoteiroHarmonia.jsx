@@ -10,6 +10,7 @@ import RoteiroEtapa from "@/components/harmonia/RoteiroEtapa";
 import TrackSearchModal from "@/components/harmonia/TrackSearchModal";
 import { Mp3PlaybackProvider } from "@/components/harmonia/Mp3PlaybackContext";
 import EtapaChain from "@/components/harmonia/EtapaChain";
+import SessionAudioPreloadStatus from "@/components/harmonia/SessionAudioPreloadStatus";
 import { carregarMaisTocadasPorEtapa } from "@/lib/musicasMaisTocadas";
 
 const ETAPAS_PADRAO = [
@@ -291,7 +292,7 @@ export default function AdminRoteiroHarmonia() {
   const etapaAtiva = searchModalEtapa ? etapas.find((e) => e.id === searchModalEtapa) : null;
 
   return (
-    <Mp3PlaybackProvider>
+    <Mp3PlaybackProvider key={sessaoId} etapas={etapas}>
     <EtapaChain etapas={etapas} />
     <div className="space-y-6">
       {/* Header */}
@@ -327,6 +328,7 @@ export default function AdminRoteiroHarmonia() {
         </div>
       </div>
 
+      <SessionAudioPreloadStatus />
       <Card>
         <CardContent className="p-2 sm:p-4">
           <div className="space-y-2">
