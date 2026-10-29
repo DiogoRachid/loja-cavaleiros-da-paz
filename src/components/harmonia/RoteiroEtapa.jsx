@@ -1,30 +1,21 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Music, Trash2, ChevronRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import PastaSelector from "./PastaSelector";
-import EtapaCronometro from "./EtapaCronometro";
 import { useMp3Playback } from "./Mp3PlaybackContext";
 import TrackRow from "./TrackRow";
 
-export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRemoveTrack, onMoveTrack, onRemove, onChangePlaylist, onChangeObservacao, onStopTimer }) {
+export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRemoveTrack, onMoveTrack, onRemove, onChangePlaylist, onChangeObservacao }) {
   const [editing, setEditing] = useState(false);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(etapa.nome);
-  const [startSignal, setStartSignal] = useState(0);
-  const [stopSignal, setStopSignal] = useState(0);
   const playback = useMp3Playback();
-  const wasPlayingRef = useRef(false);
 
   const num = String(index + 1).padStart(2, "0");
   const tracks = etapa.tracks || [];
   const playableTracks = tracks.filter((t) => t.file_url);
   const isEtapaPlaying = playback?.activeQueueOwner === etapa.id;
-
-  useEffect(() => {
-    if (wasPlayingRef.current && !isEtapaPlaying) setStopSignal((s) => s + 1);
-    wasPlayingRef.current = isEtapaPlaying;
-  }, [isEtapaPlaying]);
 
   // Abre automaticamente a etapa que está tocando
   useEffect(() => {
@@ -35,7 +26,6 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
     const playableIndex = playableTracks.findIndex((track) => track.id === tracks[trackIndex]?.id);
     if (playableIndex === -1) return;
     playback?.playEtapa(etapa.id, playableTracks, playableIndex);
-    setStartSignal((s) => s + 1);
   };
 
   const handleSaveName = () => {
@@ -112,14 +102,6 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
             value={etapa.observacao || ""}
             onChange={(e) => onChangeObservacao?.(etapa.id, e.target.value)}
             className="text-xs min-h-[56px]"
-          />
-
-          <EtapaCronometro
-            etapaNome={etapa.nome}
-            onStop={(registro) => onStopTimer(etapa.nome, registro)}
-            startSignal={startSignal}
-            stopSignal={stopSignal}
-            isPaused={isEtapaPlaying && !!playback?.isPaused}
           />
 
           {tracks.length === 0 ? (

@@ -214,17 +214,6 @@ export default function AdminRoteiroHarmonia() {
     }
   };
 
-  const handleStopTimer = async (etapaNome, registro) => {
-    await db.TempoEtapa.create({
-      sessao_id: sessaoId,
-      sessao_data: sessao?.data || "",
-      sessao_tipo: sessao?.tipo || "",
-      grau: sessao?.grau || roteiro?.grau || "",
-      etapa_nome: etapaNome,
-      ...registro,
-    });
-  };
-
   const handleChangeObservacao = (id, observacao) => {
     setEtapas((prev) => prev.map((e) => (e.id === id ? { ...e, observacao } : e)));
   };
@@ -344,7 +333,6 @@ export default function AdminRoteiroHarmonia() {
                 onRemove={handleRemoveEtapa}
                 onChangePlaylist={handleChangePlaylist}
                 onChangeObservacao={handleChangeObservacao}
-                onStopTimer={handleStopTimer}
               />
             ))}
 
