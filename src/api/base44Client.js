@@ -7,6 +7,8 @@ const { appId, serverUrl, token, functionsVersion } = appParams;
 export const base44 = createClient({
   appId,
   serverUrl,
+  // O login é servido pelo Base44; o frontend hospedado no VPS não tem /login.
+  appBaseUrl: 'https://loja-cavaleiros-da-paz.base44.app',
   token,
   functionsVersion,
   requiresAuth: false
