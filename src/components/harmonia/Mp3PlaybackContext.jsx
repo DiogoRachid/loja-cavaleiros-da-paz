@@ -1,6 +1,7 @@
 import { createContext, useContext, useRef, useState, useEffect } from "react";
 import { getPlayerConfig, subscribePlayerConfig, fadeGains } from "@/lib/playerConfig";
 import { useSilenceTrim } from "@/lib/useSilenceTrim";
+import { getCachedSilence } from "@/lib/silenceDetect";
 
 const FADE_TICK_MS = 50;      // resolução do fade
 const PRELOAD_LEAD_MS = 8000; // antecedência do pré-carregamento da próxima faixa
@@ -28,6 +29,7 @@ export function Mp3PlaybackProvider({ children }) {
   const [currentTrackId, setCurrentTrackId] = useState(null);
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPaused, setIsPaused] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState(null);
@@ -105,6 +107,7 @@ export function Mp3PlaybackProvider({ children }) {
     setActiveQueueOwner(null);
     setCurrentTrackId(null);
     setCurrentTrack(null);
+    setIsLoading(false);
     setIsPaused(true);
     setPosition(0);
     setDuration(0);
@@ -173,6 +176,25 @@ export function Mp3PlaybackProvider({ children }) {
     }, 30);
   };
 
+  const startPlayback = (audio, onPlaying) => {
+    setIsLoading(true);
+    setError(null);
+    // play() permanece no clique, sem aguardar seleção, análise ou renderização.
+    audio.play().then(() => {
+      if (audioRef.current !== audio) return;
+      setIsLoading(false);
+      setIsPaused(false);
+      onPlaying?.();
+    }).catch((cause) => {
+      if (audioRef.current !== audio) return;
+      setIsLoading(false);
+      if (cause.name === "AbortError") return;
+      clearFade();
+      setIsPaused(true);
+      setError("Não foi possível reproduzir o áudio. Confira a conexão e tente novamente.");
+    });
+  };
+
   const playTrackAt = (index, { fade = true } = {}) => {
     const track = queueRef.current[index];
     if (!track) return;
@@ -192,8 +214,11 @@ export function Mp3PlaybackProvider({ children }) {
     clearFade();
     clearManualFade();
     discard(audioRef.current);
+    trimRef.current = getCachedSilence(track.file_url) || {
+      start: track.silence_start || 0, end: track.silence_end || 0,
+    };
     const a = takePreloaded(track.file_url);
-    a.currentTime = 0;
+    a.currentTime = trimRef.current.start;
     a.volume = volumeRef.current;
     audioRef.current = a;
     queueIndexRef.current = index;
@@ -204,13 +229,10 @@ export function Mp3PlaybackProvider({ children }) {
     setNearEnd(false);
     setError(null);
     attachEnded(a);
-    a.play()
-      .then(() => {
-        setIsPaused(false);
-        const cfg = cfgRef.current;
-        if (cfg.manualFadeEnabled) rampVolume(a, 0, volumeRef.current, cfg.manualFadeMs);
-      })
-      .catch(() => setError("Não foi possível reproduzir o áudio."));
+    startPlayback(a, () => {
+      const cfg = cfgRef.current;
+      if (cfg.manualFadeEnabled) rampVolume(a, 0, volumeRef.current, cfg.manualFadeMs);
+    });
   };
 
   const advance = () => {
@@ -233,8 +255,11 @@ export function Mp3PlaybackProvider({ children }) {
     oldAudioRef.current = old;
     old.onended = null;
 
+    trimRef.current = getCachedSilence(track.file_url) || {
+      start: track.silence_start || 0, end: track.silence_end || 0,
+    };
     const next = takePreloaded(track.file_url);
-    next.currentTime = 0;
+    next.currentTime = trimRef.current.start;
     next.volume = 0;
     audioRef.current = next;
     commit();
@@ -245,8 +270,8 @@ export function Mp3PlaybackProvider({ children }) {
     setNearEnd(false);
     setError(null);
     attachEnded(next);
-    next.play().catch(() => {});
-
+    startPlayback(next, () => {
+    // Só diminuir a música anterior quando a próxima realmente começar.
     const start = Date.now();
     fadeTimerRef.current = setInterval(() => {
       const r = Math.min(1, (Date.now() - start) / fadeMs);
@@ -263,6 +288,7 @@ export function Mp3PlaybackProvider({ children }) {
         next.volume = vol;
       }
     }, FADE_TICK_MS);
+    });
     return true;
   };
 
@@ -343,10 +369,11 @@ export function Mp3PlaybackProvider({ children }) {
     if (!a) return;
     const cfg = cfgRef.current;
     if (a.paused) {
-      a.play().catch(() => {});
-      setIsPaused(false);
-      if (cfg.manualFadeEnabled) rampVolume(a, 0, volumeRef.current, cfg.manualFadeMs);
-      else a.volume = volumeRef.current;
+      clearManualFade();
+      startPlayback(a, () => {
+        if (cfg.manualFadeEnabled) rampVolume(a, 0, volumeRef.current, cfg.manualFadeMs);
+        else a.volume = volumeRef.current;
+      });
     } else {
       clearFade();
       if (cfg.manualFadeEnabled) {
@@ -408,6 +435,7 @@ export function Mp3PlaybackProvider({ children }) {
     activeQueueOwner,
     currentTrackId,
     isPaused,
+    isLoading,
     position,
     duration,
     nearEnd,

@@ -127,7 +127,7 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
           ) : (
             <div className="space-y-1.5">
               {tracks.map((track, ti) => {
-                const isCurrent = playback?.currentTrackId === track.id;
+                const isCurrent = isEtapaPlaying && playback?.currentTrackId === track.id;
                 return (
                   <TrackRow
                     key={track.id || ti}
@@ -136,7 +136,11 @@ export default function RoteiroEtapa({ etapa, index, onRename, onAddTrack, onRem
                     total={tracks.length}
                     isCurrent={isCurrent}
                     isPlaying={isCurrent && !playback?.isPaused}
-                    onToggle={(t) => playback?.toggle(t)}
+                    onToggle={() => {
+                      if (isEtapaPlaying && isCurrent) playback?.togglePauseEtapa();
+                      else handleRepeatFrom(ti);
+                    }}
+                    loading={isEtapaPlaying && isCurrent && playback?.isLoading}
                     onMove={(trackId, dir) => onMoveTrack(etapa.id, trackId, dir)}
                     onRemove={(trackId) => onRemoveTrack(etapa.id, trackId)}
                     onRepeat={handleRepeatFrom}

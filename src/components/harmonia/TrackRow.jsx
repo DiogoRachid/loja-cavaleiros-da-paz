@@ -4,7 +4,7 @@ import InlinePlayerBar from "./InlinePlayerBar";
 import { useMp3Playback } from "./Mp3PlaybackContext";
 
 export default function TrackRow({
-  track, index, total, isCurrent, isPlaying,
+  track, index, total, isCurrent, isPlaying, loading,
   onToggle, onMove, onRemove, onRepeat, position, duration, onSeek,
 }) {
   const { volume, setVolume, repeatTrack, toggleRepeatTrack } = useMp3Playback();
@@ -12,6 +12,7 @@ export default function TrackRow({
   const player = track.file_url && (
     <InlinePlayerBar
       playing={isCurrent && isPlaying}
+      loading={loading}
       position={isCurrent ? position : 0}
       duration={isCurrent ? duration : 0}
       volume={volume}

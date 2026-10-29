@@ -1,4 +1,4 @@
-import { Play, Pause, Volume2, VolumeX, Repeat1 } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Repeat1, Loader2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
 const fmt = (ms) => {
@@ -11,7 +11,7 @@ const fmt = (ms) => {
 // Barra de player compacta (visual igual ao da Biblioteca de Músicas),
 // controlada pelo estado global de reprodução do roteiro.
 export default function InlinePlayerBar({
-  playing, position, duration, volume, onToggle, onSeek, onVolume,
+  playing, loading = false, position, duration, volume, onToggle, onSeek, onVolume,
   repeat, onToggleRepeat, className = "",
 }) {
   const muted = volume === 0;
@@ -19,11 +19,14 @@ export default function InlinePlayerBar({
   return (
     <div className={`flex items-center gap-2 bg-muted rounded-lg px-2 py-1.5 ${className}`}>
       <button
-        title="Tocar ou pausar"
-        onClick={onToggle}
+        type="button"
+        title={loading ? "Carregando áudio" : "Tocar ou pausar"}
+        disabled={loading}
+        aria-busy={loading}
+        onClick={(event) => { event.stopPropagation(); onToggle(); }}
         className="w-8 h-8 rounded-full border-2 border-lodge-gold text-warning hover:bg-lodge-gold hover:text-landing-deep flex items-center justify-center flex-shrink-0 transition-colors"
       >
-        {playing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
+        {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : playing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
       </button>
       <span className="text-[11px] text-foreground tabular-nums flex-shrink-0 w-9 text-right">{fmt(position)}</span>
       <Slider
