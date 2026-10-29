@@ -4,7 +4,7 @@ export default function PreviaCompartilhamento({ titulo, capa, tipo, autor, grau
   const digital = tipoAcervo === "digital";
   const grauObra = grau || "Aprendiz";
   const emoji = { Aprendiz: "🔵", Companheiro: "🟡", Mestre: "🔴" }[grauObra] || "";
-  const link = `https://loja-cavaleiros-da-paz.vercel.app/AcervoPublico?id=${encodeURIComponent(itemId)}&tipo=${tipoAcervo}`;
+  const link = `${window.location.origin}/AcervoPublico?id=${encodeURIComponent(itemId)}&tipo=${tipoAcervo}`;
   const mensagem = `${digital ? "📄 Novo documento disponível no acervo digital!" : "📚 Novo item disponível no acervo físico!"}\n\n` +
     (tipo ? `Tipo: ${tipo}\n` : "") + `Título: ${titulo || "—"}\n` +
     (autor ? `Autor: ${autor}\n` : "") + `Grau mínimo: ${emoji} ${grauObra}\n` +

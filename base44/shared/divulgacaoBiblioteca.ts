@@ -1,4 +1,5 @@
 import { listar } from './supabase.ts';
+import { APP_URL_PADRAO } from './storage.ts';
 
 export async function podeDivulgarBiblioteca(user) {
   if (user.role === 'admin') return true;
@@ -18,7 +19,7 @@ export function mensagemDivulgacao(obra, tipoAcervo) {
   const digital = tipoAcervo === 'digital';
   const grau = obra.grau_minimo || 'Aprendiz';
   const emoji = { Aprendiz: '🔵', Companheiro: '🟡', Mestre: '🔴' }[grau] || '';
-  const link = `https://loja-cavaleiros-da-paz.vercel.app/AcervoPublico?id=${encodeURIComponent(obra.id)}&tipo=${tipoAcervo}`;
+  const link = `${APP_URL_PADRAO}/AcervoPublico?id=${encodeURIComponent(obra.id)}&tipo=${tipoAcervo}`;
   const titulo = digital ? obra.titulo : obra.nome;
   return `${digital ? '📄 Novo documento disponível no acervo digital!' : '📚 Novo item disponível no acervo físico!'}\n\n` +
     (obra.tipo ? `Tipo: ${obra.tipo}\n` : '') + `Título: ${titulo || '—'}\n` +

@@ -1,5 +1,9 @@
-const DOMINIO_ARQUIVOS = "https://loja-cavaleiros-da-paz.vercel.app";
-const DOMINIO_ANTIGO = "https://loja-cavaleiros-da-paz.base44.app";
+const DOMINIO_ARQUIVOS = window.location.origin;
+const DOMINIOS_ARQUIVOS = [
+  DOMINIO_ARQUIVOS,
+  "https://loja-cavaleiros-da-paz.vercel.app",
+  "https://loja-cavaleiros-da-paz.base44.app",
+];
 const ROTA_ARQUIVO = "/functions/arquivo";
 
 export function mascararLinkArquivo(valor) {
@@ -10,7 +14,7 @@ export function mascararLinkArquivo(valor) {
   let caminho;
   if (storage) {
     caminho = decodeURIComponent(storage[1]);
-  } else if ([DOMINIO_ARQUIVOS, DOMINIO_ANTIGO].includes(url.origin) && url.pathname === ROTA_ARQUIVO) {
+  } else if (DOMINIOS_ARQUIVOS.includes(url.origin) && url.pathname === ROTA_ARQUIVO) {
     caminho = url.searchParams.get("f");
   } else {
     return valor;

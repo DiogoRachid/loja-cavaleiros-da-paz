@@ -75,9 +75,12 @@ export async function migrarArquivo(origemUrl: string, caminho: string) {
   };
 }
 
-// Domínio público (Vercel) usado nos links mascarados; o Vercel repassa /functions/arquivo ao app.
-export const APP_URL_PADRAO = "https://loja-cavaleiros-da-paz.vercel.app";
-const ORIGEM_ANTIGA = "https://loja-cavaleiros-da-paz.base44.app";
+// Domínio público do tenant; o Nginx repassa /functions/arquivo ao app.
+export const APP_URL_PADRAO = "https://cpaz25.maconaria.dpdns.org";
+const ORIGENS_ANTIGAS = [
+  "https://loja-cavaleiros-da-paz.base44.app",
+  "https://loja-cavaleiros-da-paz.vercel.app",
+];
 const ROTA_ARQUIVO = "/functions/arquivo?f=";
 
 // Origem do app usada nos links mascarados.
@@ -98,10 +101,13 @@ export function ehLinkMascarado(valor: string) {
 export function mascararLinks(dados: unknown, supabaseUrl: string, appUrl: string) {
   if (dados == null) return dados;
   const prefixo = supabaseUrl.replace(/\/$/, "") + "/storage/v1/object/public/" + BUCKET + "/";
-  const antigo = ORIGEM_ANTIGA + ROTA_ARQUIVO;
+  const antigos = ORIGENS_ANTIGAS.map(origem => origem + ROTA_ARQUIVO);
   const texto = JSON.stringify(dados);
-  if (!texto.includes(prefixo) && !texto.includes(antigo)) return dados;
-  return JSON.parse(texto.split(prefixo).join(appUrl + ROTA_ARQUIVO).split(antigo).join(appUrl + ROTA_ARQUIVO));
+  if (!texto.includes(prefixo) && !antigos.some(antigo => texto.includes(antigo))) return dados;
+  const atualizado = [prefixo, ...antigos].reduce(
+    (valor, origem) => valor.split(origem).join(appUrl + ROTA_ARQUIVO), texto,
+  );
+  return JSON.parse(atualizado);
 }
 
 // Nome de arquivo seguro para o Storage.
